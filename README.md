@@ -1,2 +1,3 @@
 # commons-connect
-A distributed academic social network using the ActivityPub using WordPress and Laravel
+
+A distributed academic social network using the ActivityPub protocal and the WordPress and Laravel frameworks.
