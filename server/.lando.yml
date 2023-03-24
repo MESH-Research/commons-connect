@@ -1,0 +1,8 @@
+name: commonsconnect-server
+recipe: laravel
+config:
+  webroot: public
+  php: 8.2
+  xdebug: debug
+  config:
+    php: config/lando/php.ini
