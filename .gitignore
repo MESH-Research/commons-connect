@@ -1,5 +1,2 @@
 .DS_Store
 *.code-workspace
-*.lock
-.vscode
-.editorconfig
