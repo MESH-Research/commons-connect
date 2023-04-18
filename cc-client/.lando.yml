@@ -1,0 +1,37 @@
+name: commons-connect-client
+recipe: lemp
+services:
+  appserver:
+    app_mount: false
+    config:
+      php: .lando/php.ini
+    build_as_root:
+      - cd /commons-connect-client/.lando/ && ./setup-wordpress-files.sh && ./install-wp-cli.sh
+      - cd /commons-connect-client/ && composer install
+      - apt-get update && apt-get install subversion -y
+    run:
+      - /commons-connect-client/.lando/install-wordpress.sh
+      - /commons-connect-client/bin/install-wp-tests.sh lemp lemp lemp database:3306
+    overrides:
+      volumes:
+        - .:/commons-connect-client/
+      environment:
+        WP_CLI_CONFIG_PATH: /wordpress/wp-cli.yml
+  appserver_nginx:
+    build_as_root:
+      - /commons-connect-client/.lando/setup-wordpress-files.sh
+config:
+  php: '8.2'
+  database: mariadb
+  config:  
+    vhosts: .lando/nginx.conf
+tooling:
+  wp:
+    service: appserver
+    description: Runs WP-CLI commands
+    cmd: wp
+  phpunit:
+    service: appserver
+    description: Runs local tests
+    dir: /commons-connect-client
+    cmd: phpunit

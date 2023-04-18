@@ -1,0 +1,18 @@
+{
+    "name": "mesh-research/cc-client",
+    "description": "WordPress plugin for connecting to CommonsConnect server and the Knowledge Commons network.",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mike Thicke",
+            "email": "thickemi@msu.edu"
+        }
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "^9"
+    },
+    "scripts": {
+        "phpunit": "phpunit"
+    }
+}
