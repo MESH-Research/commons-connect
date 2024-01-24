@@ -21,8 +21,9 @@ services:
     build_as_root:
       - /commons-connect-client/.lando/setup-wordpress-files.sh
 config:
-  php: '8.2'
+  php: 8.2
   database: mariadb
+  xdebug: debug
   config:  
     vhosts: .lando/nginx.conf
 tooling:

@@ -1,9 +1,3 @@
-/**
- * React hook that is used to mark the block wrapper element.
- * It provides all the necessary props like the class name.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
- */
 import { useBlockProps } from '@wordpress/block-editor';
 
 /**
@@ -15,10 +9,14 @@ import { useBlockProps } from '@wordpress/block-editor';
  *
  * @return {WPElement} Element to render.
  */
-export default function save() {
-	return (
-		<p { ...useBlockProps.save() }>
-			{ 'Cc Client – hello from the saved content!' }
-		</p>
+export default function save( { attributes } : any ) {
+	
+	return ( 
+	<div 
+			{ ...useBlockProps.save() } 
+			data-attributes = { JSON.stringify( attributes ) }
+		>
+			Hello from the saved content!
+	</div>
 	);
 }

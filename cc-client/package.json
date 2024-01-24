@@ -1,20 +1,26 @@
 {
 	"name": "cc-client",
 	"version": "0.1.0",
-	"description": "Example block scaffolded with Create Block tool.",
-	"author": "The WordPress Contributors",
-	"license": "GPL-2.0-or-later",
-	"main": "build/index.js",
+	"description": "Commons Connect client plugin.",
+	"author": "MESH Research",
+	"license": "MIT",
 	"scripts": {
-		"build": "wp-scripts build",
+		"build": "wp-scripts build --webpack-src-dir=src/blocks",
+		"build:admin": "wp-scripts build src/admin/admin.ts",
 		"format": "wp-scripts format",
 		"lint:css": "wp-scripts lint-style",
 		"lint:js": "wp-scripts lint-js",
 		"packages-update": "wp-scripts packages-update",
 		"plugin-zip": "wp-scripts plugin-zip",
-		"start": "wp-scripts start"
+		"start": "wp-scripts start --webpack-src-dir=src/blocks"
 	},
 	"devDependencies": {
-		"@wordpress/scripts": "^26.2.0"
+		"@types/wordpress__block-editor": "^11.5.1",
+		"@wordpress/scripts": "^26.9.0"
+	},
+	"dependencies": {
+		"@wordpress/api-fetch": "^6.35.0",
+		"@wordpress/components": "^25.4.0",
+		"@wordpress/i18n": "^4.38.0"
 	}
 }

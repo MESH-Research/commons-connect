@@ -27,6 +27,7 @@ import metadata from './block.json';
  * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/
  */
 registerBlockType( metadata.name, {
+	apiVersion: 3,
 	/**
 	 * @see ./edit.js
 	 */
@@ -36,4 +37,4 @@ registerBlockType( metadata.name, {
 	 * @see ./save.js
 	 */
 	save,
-} );
+} as any );
