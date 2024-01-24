@@ -1,0 +1,22 @@
+name: commonsconnect-search
+recipe: laravel
+config:
+  webroot: public
+  php: 8.2
+  xdebug: debug
+  config:
+    php: config/lando/php.ini
+services:
+  opensearch:
+    type: compose
+    app_mount: disabled
+    moreHttpPorts:
+      - 9200
+      - 9600
+    services:
+      image: opensearchproject/opensearch:latest
+      ports:
+        - 9200:9200
+        - 9600:9600
+      volumes:
+        - opensearch-data:/usr/share/opensearch/data
