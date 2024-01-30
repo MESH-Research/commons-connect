@@ -1,0 +1,41 @@
+name: commonsconnect-search
+services:
+  go:
+    type: go:custom
+    app_mount: disabled
+    ssl: false
+    # for debugging (Note: the app will not run until you attach to the debugger):
+    # command: "dlv --listen=:2345 --headless --api-version=2 --accept-multiclient exec /app/main.go"
+    command: "go run /app/main.go"
+    overrides:
+      build: .
+      image: commonsconnect/search:latest
+    ports:
+      - 2345:2345
+  opensearch:
+    api: 3
+    type: lando
+    ssl: false
+    app_mount: disabled
+    moreHttpPorts:
+      - 9200
+      - 9600
+    services:
+      image: opensearchproject/opensearch:latest
+      # Lando overrides the container's entrypoint, so we need to run it manually.
+      command: "/usr/share/opensearch/opensearch-docker-entrypoint.sh opensearch"
+      ports:
+        - 9200:9200
+        - 9600:9600
+      volumes:
+        - opensearch-data:/usr/share/opensearch/data
+    overrides:
+      environment:
+        discovery.type: single-node
+        plugins.security.disabled: true
+proxy:
+  go:
+    - commons-search.lndo.site
+  #opensearch:
+  #  - opensearch.lndo.site:9200
+  #  - opensearch-perfmon.lndo.site:9600

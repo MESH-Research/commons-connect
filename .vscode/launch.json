@@ -5,6 +5,22 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"name": "Go: Debug in Docker",
+			"type": "go",
+			"request": "attach",
+			"mode": "remote",
+			"remotePath": "${workspaceFolder}",
+			"port": 2345,
+			"host": "http://commons-search.lndo.site"
+		},
+		{
+			"name": "Launch Package",
+			"type": "go",
+			"request": "launch",
+			"mode": "auto",
+			"program": "${workspaceFolder}/cc-search/main.go",
+		},
+		{
 			"name": "Server: listen for Xdebug",
 			"type": "php",
 			"request": "launch",

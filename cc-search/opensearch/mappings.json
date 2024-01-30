@@ -1,0 +1,56 @@
+{
+	"mappings" : {
+		"properties" : {
+			"title": { 
+				"type": "text",
+				"store": true,
+				"fields": {
+					"prefix": {
+						"type": "search_as_you_type"
+					}
+				}
+			},
+			"description": {
+				"type": "text",
+				"store": true
+			},
+			"owner_name": {
+				"type": "text"
+			},
+			"other_names": {
+				"type": "text"
+			},
+			"owner_username": {
+				"type": "keyword",
+				"index": false
+			},
+			"other_usernames": {
+				"type": "keyword",
+				"index": false
+			},
+			"primary_url": {
+				"type": "keyword",
+				"index": false
+			},
+			"other_urls": {
+				"type": "keyword",
+				"index": false
+			},
+			"content": {
+				"type": "text"
+			},
+			"publication_date": {
+				"type": "date"
+			},
+			"updated_date": {
+				"type": "date"
+			},
+			"type": {
+				"type": "keyword"
+			},
+			"network_node": {
+				"type": "keyword"
+			}
+		}
+	}
+}
