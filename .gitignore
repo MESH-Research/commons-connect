@@ -2,3 +2,5 @@
 *.code-workspace
 
 opensearch-data/
+
+config.json

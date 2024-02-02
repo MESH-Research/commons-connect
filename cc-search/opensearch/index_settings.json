@@ -42,13 +42,16 @@
 			"publication_date": {
 				"type": "date"
 			},
-			"updated_date": {
+			"modified_date": {
 				"type": "date"
 			},
-			"type": {
+			"content_type": {
 				"type": "keyword"
 			},
 			"network_node": {
+				"type": "keyword"
+			},
+			"language": {
 				"type": "keyword"
 			}
 		}

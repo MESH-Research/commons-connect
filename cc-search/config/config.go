@@ -6,15 +6,17 @@ import (
 
 var config *viper.Viper
 
-func Init() {
+func Init() error {
 	config = viper.New()
 	config.SetConfigName("config")
+	config.SetConfigType("json")
 	config.AddConfigPath("..")
+
+	config.SetEnvPrefix("cc")
 	config.AutomaticEnv()
+
 	err := config.ReadInConfig()
-	if err != nil {
-		panic(err)
-	}
+	return err
 }
 
 func GetConfig() *viper.Viper {
