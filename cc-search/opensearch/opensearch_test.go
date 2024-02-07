@@ -3,10 +3,7 @@ package opensearch
 import (
 	"encoding/json"
 	"log"
-	"reflect"
 	"testing"
-
-	opensearch "github.com/opensearch-project/opensearch-go/v2"
 
 	"github.com/MESH-Research/commons-connect/cc-search/config"
 	"github.com/MESH-Research/commons-connect/cc-search/types"
@@ -22,9 +19,10 @@ var testSettingsJSON = `{
 	"mappings": {
 		"properties": {
 			"title": { "type" : "text" },
-			"author": { "type" : "text" },
-			"year": { "type" : "integer" },
-			"username": { "type" : "keyword" }
+			"description": { "type" : "text" },
+			"owner_name": { "type" : "integer" },
+			"owner_username": { "type" : "keyword" },
+			"primary_url": { "type" : "text" }
 		}
 	}
 }`
@@ -36,25 +34,29 @@ var testDocumentJSON = `{
 	"username": "mthicke"
 }`
 
-func cleanSetup() *opensearch.Client {
-	client, err := getClientNoAuth("http://localhost:9200")
+func cleanSetup() types.Searcher {
+	client, err := GetClientNoAuth("http://localhost:9200")
 	if err != nil {
 		log.Fatalf("Error getting client: %v", err)
 	}
-	_ = DeleteIndex(client, "test")
-	return client
+	searcher := types.Searcher{
+		Client:    client,
+		IndexName: "test",
+	}
+	_ = DeleteIndex(&searcher)
+	return searcher
 }
 
-func freshIndex(client *opensearch.Client) string {
+func resetIndex(searcher *types.Searcher) {
 	testIndexSettings, err := parseIndexSettings([]byte(testSettingsJSON))
 	if err != nil {
 		log.Fatalf("Error parsing index settings: %v", err)
 	}
-	newIndexName, err := CreateIndex(client, "test", testIndexSettings)
+	searcher.IndexName = "test"
+	err = CreateIndex(searcher, testIndexSettings)
 	if err != nil {
 		log.Fatalf("Error creating index: %v", err)
 	}
-	return newIndexName
 }
 
 func TestGetIndexSettings(t *testing.T) {
@@ -68,60 +70,62 @@ func TestGetIndexSettings(t *testing.T) {
 }
 
 func TestDeleteIndex(t *testing.T) {
-	client := cleanSetup()
-	newIndexName := freshIndex(client)
-	err := DeleteIndex(client, newIndexName)
+	searcher := cleanSetup()
+	resetIndex(&searcher)
+	err := DeleteIndex(&searcher)
 	if err != nil {
 		t.Errorf("Expected no error when deleting existing index, got %v", err)
 	}
-	err = DeleteIndex(client, newIndexName)
+	searcher.IndexName = "nonexistent"
+	err = DeleteIndex(&searcher)
 	if err == nil {
 		t.Errorf("Expected error when deleting non-existing index, got nil")
 	}
 }
 
 func TestCreateIndex(t *testing.T) {
-	client := cleanSetup()
+	searcher := cleanSetup()
 	testIndexSettings, err := parseIndexSettings([]byte(testSettingsJSON))
 	if err != nil {
 		t.Errorf("Error parsing index settings: %v", err)
 	}
-	newIndexName, err := CreateIndex(client, "test", testIndexSettings)
+	err = CreateIndex(&searcher, testIndexSettings)
 	if err != nil {
 		t.Errorf("Error creating index: %v", err)
 	}
-	if newIndexName != "test" {
-		t.Errorf("Expected test, got %s", newIndexName)
+	if searcher.IndexName != "test" {
+		t.Errorf("Expected test, got %s", searcher.IndexName)
 	}
 }
 
 func TestIndexDocument(t *testing.T) {
-	client := cleanSetup()
-	testIndexName := freshIndex(client)
+	searcher := cleanSetup()
+	resetIndex(&searcher)
 	var testDocument types.Document
 	err := json.Unmarshal([]byte(testDocumentJSON), &testDocument)
 	if err != nil {
 		t.Errorf("Error unmarshalling JSON: %v", err)
 	}
-	docID, err := IndexDocument(client, testIndexName, testDocument)
+	doc, err := IndexDocument(searcher, testDocument)
 	if err != nil {
 		t.Errorf("Error indexing document: %v", err)
 	}
-	if reflect.TypeOf(docID).String() != "string" {
-		t.Errorf("Expected string, got %v", reflect.TypeOf(docID))
+	if doc == nil {
+		t.Errorf("Expected non-nil document, got nil")
+		return
 	}
-	if docID == "" {
-		t.Errorf("Expected non-empty string, got empty string")
+	if doc.ID == "" {
+		t.Errorf("Expected non-empty ID, got empty")
 	}
 }
 
 func TestGetAWSClient(t *testing.T) {
 	config.Init()
 	conf := config.GetConfig()
-	client, err := getClientUserPass(
-		conf.GetString("os_endpoint"),
-		conf.GetString("os_user"),
-		conf.GetString("os_pass"),
+	client, err := GetClientUserPass(
+		conf.SearchEndpoint,
+		conf.User,
+		conf.Password,
 	)
 	if err != nil {
 		t.Errorf("Error getting client: %v", err)
@@ -132,18 +136,18 @@ func TestGetAWSClient(t *testing.T) {
 }
 
 func TestBasicSearch(t *testing.T) {
-	client := cleanSetup()
-	testIndexName := freshIndex(client)
+	searcher := cleanSetup()
+	resetIndex(&searcher)
 	var testDocument types.Document
 	err := json.Unmarshal([]byte(testDocumentJSON), &testDocument)
 	if err != nil {
 		t.Errorf("Error unmarshalling JSON: %v", err)
 	}
-	_, err = IndexDocument(client, testIndexName, testDocument)
+	_, err = IndexDocument(searcher, testDocument)
 	if err != nil {
 		t.Errorf("Error indexing document: %v", err)
 	}
-	result, err := BasicSearch(client, testIndexName, "searching")
+	result, err := BasicSearch(searcher, "searching")
 	if err != nil {
 		t.Errorf("Error searching: %v", err)
 	}

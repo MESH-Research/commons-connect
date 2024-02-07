@@ -1,7 +1,7 @@
 package types
 
 type Document struct {
-	ID              string   `json:"_id"`
+	ID              string
 	Title           string   `json:"title"`
 	Description     string   `json:"description"`
 	OwnerName       string   `json:"owner_name"`
@@ -16,4 +16,10 @@ type Document struct {
 	Language        string   `json:"language"`
 	ContentType     string   `json:"content_type"`
 	NetworkNode     string   `json:"network_node"`
+}
+
+type FilteredDocument struct {
+	ID         string
+	Title      string `json:"title"`
+	PrimaryURL string `json:"primary_url"`
 }

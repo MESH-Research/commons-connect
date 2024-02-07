@@ -1,15 +1,14 @@
-package main
+package api
 
 import (
-	"github.com/MESH-Research/commons-connect/cc-search/api"
 	"github.com/MESH-Research/commons-connect/cc-search/config"
 	"github.com/MESH-Research/commons-connect/cc-search/opensearch"
+	"github.com/gin-gonic/gin"
 )
 
-func main() {
+func setupTestRouter() *gin.Engine {
 	conf := config.GetConfig()
+	conf.ClientMode = `noauth`
 	searcher := opensearch.GetSearcher(conf)
-	router := api.SetupRouter(searcher, conf)
-
-	router.Run(":80")
+	return SetupRouter(searcher, conf)
 }

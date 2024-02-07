@@ -4,6 +4,7 @@ go 1.21.4
 
 require (
 	github.com/gin-gonic/gin v1.9.1
+	github.com/go-playground/assert/v2 v2.2.0
 	github.com/opensearch-project/opensearch-go/v2 v2.3.0
 	github.com/spf13/viper v1.18.2
 )

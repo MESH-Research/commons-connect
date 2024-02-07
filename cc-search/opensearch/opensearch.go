@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	opensearch "github.com/opensearch-project/opensearch-go/v2"
+	osg "github.com/opensearch-project/opensearch-go/v2"
 	opensearchapi "github.com/opensearch-project/opensearch-go/v2/opensearchapi"
 
 	"github.com/MESH-Research/commons-connect/cc-search/types"
@@ -55,26 +55,37 @@ type indexDocumentResponse struct {
 	PrimaryTerm int64 `json:"_primary_term"`
 }
 
-func getIndexSettings() (osIndexSettings, error) {
-	data, err := os.ReadFile("index_settings.json")
+func GetSearcher(conf types.Config) types.Searcher {
+	client, err := GetClient(
+		conf.SearchEndpoint,
+		conf.User,
+		conf.Password,
+		conf.ClientMode,
+	)
 	if err != nil {
-		return osIndexSettings{}, err
+		panic(err)
 	}
-	settings, err := parseIndexSettings(data)
-	return settings, err
+	return types.Searcher{
+		IndexName: conf.IndexName,
+		Client:    client,
+	}
 }
 
-func parseIndexSettings(data []byte) (osIndexSettings, error) {
-	var settings osIndexSettings
-	err := json.Unmarshal(data, &settings)
-	if err != nil {
-		return osIndexSettings{}, err
+func GetClient(clientURL string, user string, pass string, clientMode string) (*osg.Client, error) {
+	if clientURL == `` {
+		return nil, errors.New(`clientURL is required`)
 	}
-	return settings, nil
+	if clientMode == `noauth` {
+		return GetClientNoAuth(clientURL)
+	}
+	if (user == ``) || (pass == ``) {
+		return nil, errors.New(`user and pass are required for basic auth mode`)
+	}
+	return GetClientUserPass(clientURL, user, pass)
 }
 
-func getClientNoAuth(clientURL string) (*opensearch.Client, error) {
-	client, err := opensearch.NewClient(opensearch.Config{
+func GetClientNoAuth(clientURL string) (*osg.Client, error) {
+	client, err := osg.NewClient(osg.Config{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
@@ -83,8 +94,8 @@ func getClientNoAuth(clientURL string) (*opensearch.Client, error) {
 	return client, err
 }
 
-func getClientUserPass(clientURL string, user string, pass string) (*opensearch.Client, error) {
-	client, err := opensearch.NewClient(opensearch.Config{
+func GetClientUserPass(clientURL string, user string, pass string) (*osg.Client, error) {
+	client, err := osg.NewClient(osg.Config{
 		Transport: &http.Transport{
 			MaxIdleConnsPerHost:   10,
 			ResponseHeaderTimeout: time.Second,
@@ -104,100 +115,108 @@ func getClientUserPass(clientURL string, user string, pass string) (*opensearch.
 // and returns the name of the index created.
 //
 // If the index already exists, an error is returned.
-func CreateIndex(client *opensearch.Client, indexName string, settings osIndexSettings) (string, error) {
+func CreateIndex(searcher *types.Searcher, settings osIndexSettings) error {
 	requestBody, err := json.Marshal(settings)
 	if err != nil {
-		return ``, err
+		return err
 	}
 	req := opensearchapi.IndicesCreateRequest{
-		Index: indexName,
+		Index: searcher.IndexName,
 		Body:  strings.NewReader(string(requestBody)),
 	}
-	response, err := req.Do(context.Background(), client)
+	response, err := req.Do(context.Background(), searcher.Client)
 	if err != nil {
-		return ``, err
+		return err
 	}
 	responseText, err := io.ReadAll(response.Body)
 	if err != nil {
-		return ``, err
+		return err
 	}
 	var result map[string]interface{}
 	err = json.Unmarshal(responseText, &result)
 	if err != nil {
-		return ``, err
+		return err
 	}
 	index, ok := result["index"]
 	if !ok {
 		log.Println(`No index in response: `, result)
-		return ``, errors.New(`no index in response: `)
+		return errors.New(`no index in response: `)
 	}
-	return index.(string), nil
+	searcher.IndexName = index.(string)
+	return nil
 }
 
-func DeleteIndex(client *opensearch.Client, indexName string) error {
+func DeleteIndex(searcher *types.Searcher) error {
 	req := opensearchapi.IndicesDeleteRequest{
-		Index: []string{indexName},
+		Index: []string{searcher.IndexName},
 	}
-	_, err := req.Do(context.Background(), client)
-	return err
+	response, err := req.Do(context.Background(), searcher.Client)
+	if err != nil {
+		return err
+	}
+	if response.StatusCode != 200 {
+		return fmt.Errorf(`non-200 status code: %v`, response.StatusCode)
+	}
+	searcher.IndexName = ``
+	return nil
 }
 
 // Indexes a new document and returns its ID. IDs have the form 'yQQEYY0B1VMrrWgmZN1j'.
 // This is not for updating existing documents.
-func IndexDocument(client *opensearch.Client, indexName string, document types.Document) (string, error) {
+func IndexDocument(searcher types.Searcher, document types.Document) (*types.Document, error) {
+	if document.ID != `` {
+		return nil, errors.New(`ID should not be provided for new documents`)
+	}
 	body, err := json.Marshal(document)
 	if err != nil {
-		return ``, errors.New(`error marshalling document: ` + err.Error())
+		return nil, errors.New(`error marshalling document: ` + err.Error())
 	}
 	req := opensearchapi.IndexRequest{
-		Index: indexName,
+		Index: searcher.IndexName,
 		Body:  strings.NewReader(string(body)),
 	}
-	response, err := req.Do(context.Background(), client)
+	response, err := req.Do(context.Background(), searcher.Client)
 	if err != nil {
-		return ``, errors.New(`error indexing document: ` + err.Error())
-	}
-	body, err = io.ReadAll(response.Body)
-	if err != nil {
-		return ``, errors.New(`error reading response body: ` + err.Error())
+		return nil, errors.New(`error indexing document: ` + err.Error())
 	}
 	var res indexDocumentResponse
-	err = json.Unmarshal(body, &res)
+	err = json.NewDecoder(response.Body).Decode(&res)
 	if err != nil {
-		return ``, errors.New(`error unmarshalling response: ` + err.Error())
+		return nil, errors.New(`error decoding response: ` + err.Error())
 	}
-	return res.ID, nil
+	document.ID = res.ID
+	return &document, nil
 }
 
-func UpdateDocument(client *opensearch.Client, indexName string, document types.Document, id string) error {
+func UpdateDocument(searcher types.Searcher, document types.Document) error {
 	body, err := json.Marshal(document)
 	if err != nil {
 		return errors.New(`error marshalling document: ` + err.Error())
 	}
 	req := opensearchapi.IndexRequest{
-		Index:      indexName,
+		Index:      searcher.IndexName,
 		Body:       strings.NewReader(string(body)),
-		DocumentID: id,
+		DocumentID: document.ID,
 	}
-	_, err = req.Do(context.Background(), client)
+	_, err = req.Do(context.Background(), searcher.Client)
 	return err
 }
 
-func DeleteDocument(client *opensearch.Client, indexName string, id string) error {
+func DeleteDocument(searcher types.Searcher, id string) error {
 	req := opensearchapi.DeleteRequest{
-		Index:      indexName,
+		Index:      searcher.IndexName,
 		DocumentID: id,
 	}
-	_, err := req.Do(context.Background(), client)
+	_, err := req.Do(context.Background(), searcher.Client)
 	return err
 }
 
-func RawSearch(client *opensearch.Client, indexName string, query string) (string, error) {
+func RawSearch(searcher types.Searcher, query string) (string, error) {
 	req := opensearchapi.SearchRequest{
-		Index: []string{indexName},
+		Index: []string{searcher.IndexName},
 		Body:  strings.NewReader(query),
 	}
-	response, err := req.Do(context.Background(), client)
+	response, err := req.Do(context.Background(), searcher.Client)
 	if err != nil {
 		return ``, err
 	}
@@ -208,7 +227,7 @@ func RawSearch(client *opensearch.Client, indexName string, query string) (strin
 	return string(body), nil
 }
 
-func BasicSearch(client *opensearch.Client, indexName string, query string) (*types.SearchResult, error) {
+func BasicSearch(searcher types.Searcher, query string) (*types.SearchResult, error) {
 	QueryJSON := fmt.Sprintf(`{
 		"query": {
 			"multi_match": {
@@ -218,10 +237,10 @@ func BasicSearch(client *opensearch.Client, indexName string, query string) (*ty
 	}`, query)
 
 	req := opensearchapi.SearchRequest{
-		Index: []string{indexName},
+		Index: []string{searcher.IndexName},
 		Body:  strings.NewReader(QueryJSON),
 	}
-	response, err := req.Do(context.Background(), client)
+	response, err := req.Do(context.Background(), searcher.Client)
 	if err != nil {
 		return nil, err
 	}
@@ -235,4 +254,22 @@ func BasicSearch(client *opensearch.Client, indexName string, query string) (*ty
 		return nil, err
 	}
 	return &searchResult, nil
+}
+
+func getIndexSettings() (osIndexSettings, error) {
+	data, err := os.ReadFile("index_settings.json")
+	if err != nil {
+		return osIndexSettings{}, err
+	}
+	settings, err := parseIndexSettings(data)
+	return settings, err
+}
+
+func parseIndexSettings(data []byte) (osIndexSettings, error) {
+	var settings osIndexSettings
+	err := json.Unmarshal(data, &settings)
+	if err != nil {
+		return osIndexSettings{}, err
+	}
+	return settings, nil
 }

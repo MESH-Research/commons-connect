@@ -18,8 +18,8 @@ func TestReadConfig(t *testing.T) {
 		t.Errorf("Error initializing config: %v", err)
 	}
 	config := GetConfig()
-	if config.GetString("os_user") == "" {
-		t.Error("Expected non-empty string for os_user, got empty string")
+	if config.User == "" {
+		t.Error("Expected non-empty string for User, got empty string")
 	}
 }
 
@@ -29,8 +29,13 @@ func TestEnvConfig(t *testing.T) {
 		t.Errorf("Error initializing config: %v", err)
 	}
 	config := GetConfig()
-	os.Setenv("CC_OS_USER", "test")
-	if config.GetString("os_user") != "test" {
-		t.Errorf("Expected test, got %s", config.GetString("os_user"))
+	if config.User == "test12345" {
+		t.Errorf("Expected something else, got %s", config.User)
+
+	}
+	os.Setenv("CC_OS_USER", "test12345")
+	config = GetConfig()
+	if config.User != "test12345" {
+		t.Errorf("Expected test12345, got %s", config.User)
 	}
 }
