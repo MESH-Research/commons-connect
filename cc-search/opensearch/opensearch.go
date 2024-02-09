@@ -7,10 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -19,27 +17,6 @@ import (
 
 	"github.com/MESH-Research/commons-connect/cc-search/types"
 )
-
-type osIndexSettings struct {
-	Settings *struct {
-		Index *struct {
-			NumberOfShards   int `json:"number_of_shards,omitempty"`
-			NumberOfReplicas int `json:"number_of_replicas,omitempty"`
-		} `json:"index,omitempty"`
-	} `json:"settings,omitempty"`
-	Mappings *struct {
-		Properties map[string]struct {
-			Type   string `json:"type,omitempty"`
-			Store  bool   `json:"store,omitempty"`
-			Index  bool   `json:"index,omitempty"`
-			Fields *struct {
-				Prefix *struct {
-					Type string `json:"type,omitempty"`
-				} `json:"prefix,omitempty"`
-			} `json:"fields,omitempty"`
-		} `json:"properties"`
-	} `json:"mappings,omitempty"`
-}
 
 type indexDocumentResponse struct {
 	Index   string `json:"_index"`
@@ -111,56 +88,6 @@ func GetClientUserPass(clientURL string, user string, pass string) (*osg.Client,
 	return client, err
 }
 
-// CreateIndex creates an index with the given name and settings
-// and returns the name of the index created.
-//
-// If the index already exists, an error is returned.
-func CreateIndex(searcher *types.Searcher, settings osIndexSettings) error {
-	requestBody, err := json.Marshal(settings)
-	if err != nil {
-		return err
-	}
-	req := opensearchapi.IndicesCreateRequest{
-		Index: searcher.IndexName,
-		Body:  strings.NewReader(string(requestBody)),
-	}
-	response, err := req.Do(context.Background(), searcher.Client)
-	if err != nil {
-		return err
-	}
-	responseText, err := io.ReadAll(response.Body)
-	if err != nil {
-		return err
-	}
-	var result map[string]interface{}
-	err = json.Unmarshal(responseText, &result)
-	if err != nil {
-		return err
-	}
-	index, ok := result["index"]
-	if !ok {
-		log.Println(`No index in response: `, result)
-		return errors.New(`no index in response: `)
-	}
-	searcher.IndexName = index.(string)
-	return nil
-}
-
-func DeleteIndex(searcher *types.Searcher) error {
-	req := opensearchapi.IndicesDeleteRequest{
-		Index: []string{searcher.IndexName},
-	}
-	response, err := req.Do(context.Background(), searcher.Client)
-	if err != nil {
-		return err
-	}
-	if response.StatusCode != 200 {
-		return fmt.Errorf(`non-200 status code: %v`, response.StatusCode)
-	}
-	searcher.IndexName = ``
-	return nil
-}
-
 // Indexes a new document and returns its ID. IDs have the form 'yQQEYY0B1VMrrWgmZN1j'.
 // This is not for updating existing documents.
 func IndexDocument(searcher types.Searcher, document types.Document) (*types.Document, error) {
@@ -179,6 +106,10 @@ func IndexDocument(searcher types.Searcher, document types.Document) (*types.Doc
 	if err != nil {
 		return nil, errors.New(`error indexing document: ` + err.Error())
 	}
+	if response.StatusCode != 201 {
+		bodyBytes, _ := io.ReadAll(response.Body)
+		return nil, errors.New(string(bodyBytes))
+	}
 	var res indexDocumentResponse
 	err = json.NewDecoder(response.Body).Decode(&res)
 	if err != nil {
@@ -188,17 +119,51 @@ func IndexDocument(searcher types.Searcher, document types.Document) (*types.Doc
 	return &document, nil
 }
 
+func GetDocument(searcher types.Searcher, id string) (*types.Document, error) {
+	req := opensearchapi.GetRequest{
+		Index:      searcher.IndexName,
+		DocumentID: id,
+	}
+	response, err := req.Do(context.Background(), searcher.Client)
+	if err != nil {
+		return nil, errors.New(`error getting document: ` + err.Error())
+	}
+	if response.StatusCode != 200 {
+		bodyBytes, _ := io.ReadAll(response.Body)
+		return nil, errors.New(string(bodyBytes))
+	}
+	var responseJSON struct {
+		ID     string         `json:"_id"`
+		Source types.Document `json:"_source"`
+	}
+	err = json.NewDecoder(response.Body).Decode(&responseJSON)
+	if err != nil {
+		return nil, errors.New(`error decoding response: ` + err.Error())
+	}
+	responseJSON.Source.ID = responseJSON.ID
+	return &responseJSON.Source, nil
+}
+
 func UpdateDocument(searcher types.Searcher, document types.Document) error {
-	body, err := json.Marshal(document)
+	id := document.ID
+	document.ID = ``
+	body := struct {
+		Doc types.Document `json:"doc"`
+	}{Doc: document}
+	reqBody, err := json.Marshal(body)
 	if err != nil {
 		return errors.New(`error marshalling document: ` + err.Error())
 	}
-	req := opensearchapi.IndexRequest{
+	req := opensearchapi.UpdateRequest{
 		Index:      searcher.IndexName,
-		Body:       strings.NewReader(string(body)),
-		DocumentID: document.ID,
+		Body:       strings.NewReader(string(reqBody)),
+		DocumentID: id,
 	}
-	_, err = req.Do(context.Background(), searcher.Client)
+	response, err := req.Do(context.Background(), searcher.Client)
+	if response.StatusCode != 200 {
+		bodyBytes, _ := io.ReadAll(response.Body)
+		return errors.New(string(bodyBytes))
+	}
 	return err
 }
 
@@ -254,22 +219,4 @@ func BasicSearch(searcher types.Searcher, query string) (*types.SearchResult, er
 		return nil, err
 	}
 	return &searchResult, nil
-}
-
-func getIndexSettings() (osIndexSettings, error) {
-	data, err := os.ReadFile("index_settings.json")
-	if err != nil {
-		return osIndexSettings{}, err
-	}
-	settings, err := parseIndexSettings(data)
-	return settings, err
-}
-
-func parseIndexSettings(data []byte) (osIndexSettings, error) {
-	var settings osIndexSettings
-	err := json.Unmarshal(data, &settings)
-	if err != nil {
-		return osIndexSettings{}, err
-	}
-	return settings, nil
 }

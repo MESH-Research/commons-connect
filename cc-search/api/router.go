@@ -19,9 +19,14 @@ func SetupRouter(searcher types.Searcher, conf types.Config) *gin.Engine {
 
 	v1 := router.Group("/v1")
 
-	v1.GET("/ping", validateToken, handlePing)
+	v1.GET("/ping", validateAPIToken, handlePing)
 
-	v1.POST("/documents", validateToken, handleNewDocument)
+	v1.GET("/index", validateAPIToken, handleGetIndex)
+	v1.POST("/index", validateAdminAPIToken, handleResetIndex)
+
+	v1.GET("/documents/:id", handleGetDocument)
+	v1.POST("/documents", validateAPIToken, handleNewDocument)
+	v1.PUT("/documents/:id", validateAdminAPIToken, handleUpdateDocument)
 
 	return router
 }

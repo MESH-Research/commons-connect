@@ -1,0 +1,27 @@
+{
+	"title": "On Open Scholarship",
+	"description": "An essay on the nature of open scholarship and the role of the library in supporting it.",
+	"owner_name": "Reginald Gibbons",
+	"other_names": [
+		"Edwina Gibbons",
+		"Obadiah Gibbons",
+		"Lila Gibbons"
+	],
+	"owner_username": "reginald",
+	"other_usernames": [
+		"edwina",
+		"obadiah",
+		"lila"
+	],
+	"primary_url": "http://works.kcommons.org/records/1234",
+	"other_urls": [
+		"http://works.hcommons.org/records/1234",
+		"http://works.mla.kcommons.org/records/1234",
+		"http://works.hastac.kcommons.org/records/1234"
+	],
+	"content": "This is the content of the essay. It is a long essay, and it is very interesting. It is also very well-written and well-argued and well-researched and well-documented and well-cited",
+	"publication_date": "2018-01-01",
+	"language": "en",
+	"content_type": "deposit",
+	"network_node": "works"
+}

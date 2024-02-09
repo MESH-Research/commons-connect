@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/MESH-Research/commons-connect/cc-search/types"
+	"github.com/go-playground/assert/v2"
 )
 
 func TestHandleNewDocument(t *testing.T) {
@@ -28,4 +29,6 @@ func TestHandleNewDocument(t *testing.T) {
 	req, _ := http.NewRequest("POST", "/v1/documents", body)
 	req.Header.Set("Authorization", "Bearer 12345")
 	router.ServeHTTP(w, req)
+
+	assert.Equal(t, 200, w.Code)
 }

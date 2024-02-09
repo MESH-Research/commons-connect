@@ -1,5 +1,9 @@
 ## REST Endpoints
 
+/index
+- GET /index - Get information about the index
+- POST /index - Reset the index
+
 /documents
 - GET /documents/{id} - Get document by id
 - GET /documents/{id}?fields=a,b,c - Return only fields a,b,c

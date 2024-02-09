@@ -9,7 +9,7 @@ import (
 func main() {
 	conf := config.GetConfig()
 	searcher := opensearch.GetSearcher(conf)
+	opensearch.MaybeCreateIndex(&searcher)
 	router := api.SetupRouter(searcher, conf)
-
 	router.Run(":80")
 }

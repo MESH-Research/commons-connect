@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"reflect"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -13,6 +15,26 @@ import (
 
 func handlePing(c *gin.Context) {
 	c.String(http.StatusOK, "pong")
+}
+
+func handleGetIndex(c *gin.Context) {
+	searcher := c.MustGet("searcher").(types.Searcher)
+	info, err := opensearch.GetIndexInfo(&searcher)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, info)
+}
+
+func handleResetIndex(c *gin.Context) {
+	searcher := c.MustGet("searcher").(types.Searcher)
+	err := opensearch.ResetIndex(&searcher)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Index reset"})
 }
 
 func handleNewDocument(c *gin.Context) {
@@ -37,23 +59,26 @@ func handleNewDocument(c *gin.Context) {
 		return
 	}
 	log.Println("Received document ID: ", indexedDocument.ID)
-	c.JSON(http.StatusOK, filterDocument(newDocument))
+	c.JSON(http.StatusOK, filterDocument(*indexedDocument, []string{"ID", "Title", "PrimaryURL"}))
 }
 
 func handleUpdateDocument(c *gin.Context) {
+	searcher := c.MustGet("searcher").(types.Searcher)
 	body := c.Request.Body
+	id := c.Param("id")
 	var updatedDocument types.Document
 	err := json.NewDecoder(body).Decode(&updatedDocument)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if updatedDocument.ID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is required"})
+	updatedDocument.ID = id
+	err = opensearch.UpdateDocument(searcher, updatedDocument)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	log.Println("Received document ID: ", updatedDocument.ID)
-	c.JSON(http.StatusOK, filterDocument(updatedDocument))
+	c.JSON(http.StatusOK, gin.H{"message": "Document updated"})
 }
 
 func handleGetDocument(c *gin.Context) {
@@ -62,22 +87,30 @@ func handleGetDocument(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is required"})
 		return
 	}
-	log.Println("Received document ID: ", id)
-	document := types.Document{
-		ID:         id,
-		Title:      "Test Document",
-		PrimaryURL: "https://example.com",
+	searcher := c.MustGet("searcher").(types.Searcher)
+	document, err := opensearch.GetDocument(searcher, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
-	c.JSON(http.StatusOK, filterDocument(document))
+	fieldsQuery := c.Query("fields")
+	fields := strings.Split(fieldsQuery, ",")
+	if len(fields) > 0 && fields[0] != "" {
+		document = filterDocument(*document, fields)
+	}
+	c.JSON(http.StatusOK, document)
 }
 
 // Helper function to filter out unnecessary fields from the document for
 // the response.
-func filterDocument(originalDocument types.Document) types.FilteredDocument {
-	filteredDocument := types.FilteredDocument{
-		ID:         originalDocument.ID,
-		Title:      originalDocument.Title,
-		PrimaryURL: originalDocument.PrimaryURL,
+func filterDocument(originalDocument types.Document, fields []string) *types.Document {
+	filteredDocument := types.Document{}
+	for _, field := range fields {
+		fieldValue := reflect.ValueOf(originalDocument).FieldByName(field)
+		if !fieldValue.IsValid() {
+			continue
+		}
+		reflect.ValueOf(&filteredDocument).Elem().FieldByName(field).Set(fieldValue)
 	}
-	return filteredDocument
+	return &filteredDocument
 }
