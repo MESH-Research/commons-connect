@@ -1,4 +1,4 @@
-package opensearch
+package search
 
 import (
 	"context"

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/MESH-Research/commons-connect/cc-search/opensearch"
+	"github.com/MESH-Research/commons-connect/cc-search/search"
 	"github.com/MESH-Research/commons-connect/cc-search/types"
 	"github.com/gin-gonic/gin"
 )
@@ -13,6 +13,6 @@ func setupTestRouter() *gin.Engine {
 		IndexName:      "test",
 		ClientMode:     "noauth",
 	}
-	searcher := opensearch.GetSearcher(conf)
+	searcher := search.GetSearcher(conf)
 	return SetupRouter(searcher, conf)
 }

@@ -20,6 +20,3 @@
 
 /typeahead
 - GET /typeahead?q={search text} - Typeahead search matching only title field
-
-/info
-- GET /info - Info about current state of search index

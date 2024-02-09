@@ -28,7 +28,7 @@ type Document struct {
 func (originalDocument *Document) Filter(fields []string) {
 	filteredDocument := Document{}
 	for _, field := range fields {
-		fieldValue := reflect.ValueOf(originalDocument).FieldByName(field)
+		fieldValue := reflect.ValueOf(*originalDocument).FieldByName(field)
 		if !fieldValue.IsValid() {
 			continue
 		}

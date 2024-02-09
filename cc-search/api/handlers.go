@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/MESH-Research/commons-connect/cc-search/opensearch"
+	"github.com/MESH-Research/commons-connect/cc-search/search"
 	"github.com/MESH-Research/commons-connect/cc-search/types"
 )
 
@@ -18,7 +18,7 @@ func handlePing(c *gin.Context) {
 
 func handleGetIndex(c *gin.Context) {
 	searcher := c.MustGet("searcher").(types.Searcher)
-	info, err := opensearch.GetIndexInfo(&searcher)
+	info, err := search.GetIndexInfo(&searcher)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -28,7 +28,7 @@ func handleGetIndex(c *gin.Context) {
 
 func handleResetIndex(c *gin.Context) {
 	searcher := c.MustGet("searcher").(types.Searcher)
-	err := opensearch.ResetIndex(&searcher)
+	err := search.ResetIndex(&searcher)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -49,7 +49,7 @@ func handleNewDocument(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "ID should not be provided for new documents"})
 		return
 	}
-	indexedDocument, err := opensearch.IndexDocument(
+	indexedDocument, err := search.IndexDocument(
 		searcher,
 		newDocument,
 	)
@@ -73,7 +73,7 @@ func handleUpdateDocument(c *gin.Context) {
 		return
 	}
 	updatedDocument.ID = id
-	err = opensearch.UpdateDocument(searcher, updatedDocument)
+	err = search.UpdateDocument(searcher, updatedDocument)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -88,7 +88,7 @@ func handleGetDocument(c *gin.Context) {
 		return
 	}
 	searcher := c.MustGet("searcher").(types.Searcher)
-	document, err := opensearch.GetDocument(searcher, id)
+	document, err := search.GetDocument(searcher, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -108,7 +108,7 @@ func handleDeleteDocument(c *gin.Context) {
 		return
 	}
 	searcher := c.MustGet("searcher").(types.Searcher)
-	err := opensearch.DeleteDocument(searcher, id)
+	err := search.DeleteDocument(searcher, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

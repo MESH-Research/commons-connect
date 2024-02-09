@@ -9,15 +9,15 @@ import (
 
 	"github.com/MESH-Research/commons-connect/cc-search/api"
 	"github.com/MESH-Research/commons-connect/cc-search/config"
-	"github.com/MESH-Research/commons-connect/cc-search/opensearch"
+	"github.com/MESH-Research/commons-connect/cc-search/search"
 	"github.com/MESH-Research/commons-connect/cc-search/types"
 	"github.com/gin-gonic/gin"
 )
 
 func setupTestRouter() *gin.Engine {
 	conf := config.GetConfig()
-	searcher := opensearch.GetSearcher(conf)
-	opensearch.MaybeCreateIndex(&searcher)
+	searcher := search.GetSearcher(conf)
+	search.MaybeCreateIndex(&searcher)
 	router := api.SetupRouter(searcher, conf)
 	return router
 }

@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/MESH-Research/commons-connect/cc-search/config"
-	"github.com/MESH-Research/commons-connect/cc-search/opensearch"
+	"github.com/MESH-Research/commons-connect/cc-search/search"
 	"github.com/MESH-Research/commons-connect/cc-search/types"
 	"github.com/go-playground/assert/v2"
 )
@@ -75,9 +75,9 @@ func TestNewDocument(t *testing.T) {
 
 func TestUpdateDocument(t *testing.T) {
 	conf := config.GetConfig()
-	searcher := opensearch.GetSearcher(conf)
+	searcher := search.GetSearcher(conf)
 	newDocument := getSingleTestDocument("single_test_doc.json")
-	indexedDocument, err := opensearch.IndexDocument(searcher, newDocument)
+	indexedDocument, err := search.IndexDocument(searcher, newDocument)
 	if err != nil {
 		t.Fatalf("Error indexing document: %v", err)
 	}
@@ -100,7 +100,7 @@ func TestUpdateDocument(t *testing.T) {
 
 	assert.Equal(t, 200, w.Code)
 
-	updatedDocument, err := opensearch.GetDocument(searcher, indexedDocument.ID)
+	updatedDocument, err := search.GetDocument(searcher, indexedDocument.ID)
 	if err != nil {
 		t.Fatalf("Error getting document: %v", err)
 	}
@@ -111,9 +111,9 @@ func TestUpdateDocument(t *testing.T) {
 
 func TestGetDocument(t *testing.T) {
 	conf := config.GetConfig()
-	searcher := opensearch.GetSearcher(conf)
+	searcher := search.GetSearcher(conf)
 	newDocument := getSingleTestDocument("single_test_doc.json")
-	indexedDocument, err := opensearch.IndexDocument(searcher, newDocument)
+	indexedDocument, err := search.IndexDocument(searcher, newDocument)
 	if err != nil {
 		t.Fatalf("Error indexing document: %v", err)
 	}
@@ -144,9 +144,9 @@ func TestGetDocument(t *testing.T) {
 
 func TestGetDocumentWithFilteredFields(t *testing.T) {
 	conf := config.GetConfig()
-	searcher := opensearch.GetSearcher(conf)
+	searcher := search.GetSearcher(conf)
 	newDocument := getSingleTestDocument("single_test_doc.json")
-	indexedDocument, err := opensearch.IndexDocument(searcher, newDocument)
+	indexedDocument, err := search.IndexDocument(searcher, newDocument)
 	if err != nil {
 		t.Fatalf("Error indexing document: %v", err)
 	}
@@ -177,9 +177,9 @@ func TestGetDocumentWithFilteredFields(t *testing.T) {
 
 func TestDeleteDocument(t *testing.T) {
 	conf := config.GetConfig()
-	searcher := opensearch.GetSearcher(conf)
+	searcher := search.GetSearcher(conf)
 	newDocument := getSingleTestDocument("single_test_doc.json")
-	indexedDocument, err := opensearch.IndexDocument(searcher, newDocument)
+	indexedDocument, err := search.IndexDocument(searcher, newDocument)
 	if err != nil {
 		t.Fatalf("Error indexing document: %v", err)
 	}

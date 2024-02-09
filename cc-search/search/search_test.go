@@ -1,4 +1,7 @@
-package opensearch
+package search
+
+// Note: these tests require the local opensearch instance to be running. So
+// run `lando start` before running these tests.
 
 import (
 	"encoding/json"
@@ -12,8 +15,8 @@ import (
 var testSettingsJSON = `{
 	"settings": {
 		"index": {
-			"number_of_shards": 1,
-			"number_of_replicas": 2
+			"number_of_shards": "1",
+			"number_of_replicas": "2"
 		}
 	},
 	"mappings": {
