@@ -100,3 +100,18 @@ func handleGetDocument(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, document)
 }
+
+func handleDeleteDocument(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID is required"})
+		return
+	}
+	searcher := c.MustGet("searcher").(types.Searcher)
+	err := opensearch.DeleteDocument(searcher, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Document deleted"})
+}

@@ -174,3 +174,20 @@ func TestGetDocumentWithFilteredFields(t *testing.T) {
 		t.Fatalf("Expected no content, got %s", doc.Content)
 	}
 }
+
+func TestDeleteDocument(t *testing.T) {
+	conf := config.GetConfig()
+	searcher := opensearch.GetSearcher(conf)
+	newDocument := getSingleTestDocument("single_test_doc.json")
+	indexedDocument, err := opensearch.IndexDocument(searcher, newDocument)
+	if err != nil {
+		t.Fatalf("Error indexing document: %v", err)
+	}
+
+	router := setupTestRouter()
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("DELETE", "/v1/documents/"+indexedDocument.ID, nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.APIKey))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+}

@@ -26,7 +26,8 @@ func SetupRouter(searcher types.Searcher, conf types.Config) *gin.Engine {
 
 	v1.GET("/documents/:id", handleGetDocument)
 	v1.POST("/documents", validateAPIToken, handleNewDocument)
-	v1.PUT("/documents/:id", validateAdminAPIToken, handleUpdateDocument)
+	v1.PUT("/documents/:id", validateAPIToken, handleUpdateDocument)
+	v1.DELETE("/documents/:id", validateAPIToken, handleDeleteDocument)
 
 	return router
 }
