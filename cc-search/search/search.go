@@ -106,6 +106,7 @@ func IndexDocument(searcher types.Searcher, document types.Document) (*types.Doc
 	if err != nil {
 		return nil, errors.New(`error indexing document: ` + err.Error())
 	}
+	defer response.Body.Close()
 	if response.StatusCode != 201 {
 		bodyBytes, _ := io.ReadAll(response.Body)
 		return nil, errors.New(string(bodyBytes))
@@ -128,6 +129,7 @@ func GetDocument(searcher types.Searcher, id string) (*types.Document, error) {
 	if err != nil {
 		return nil, errors.New(`error getting document: ` + err.Error())
 	}
+	defer response.Body.Close()
 	if response.StatusCode != 200 {
 		bodyBytes, _ := io.ReadAll(response.Body)
 		return nil, errors.New(string(bodyBytes))
@@ -160,6 +162,10 @@ func UpdateDocument(searcher types.Searcher, document types.Document) error {
 		DocumentID: id,
 	}
 	response, err := req.Do(context.Background(), searcher.Client)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
 	if response.StatusCode != 200 {
 		bodyBytes, _ := io.ReadAll(response.Body)
 		return errors.New(string(bodyBytes))
@@ -185,6 +191,7 @@ func RawSearch(searcher types.Searcher, query string) (string, error) {
 	if err != nil {
 		return ``, err
 	}
+	defer response.Body.Close()
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return ``, err
@@ -209,6 +216,7 @@ func BasicSearch(searcher types.Searcher, query string) (*types.SearchResult, er
 	if err != nil {
 		return nil, err
 	}
+	defer response.Body.Close()
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err

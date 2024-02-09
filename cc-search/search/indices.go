@@ -27,6 +27,7 @@ func MaybeCreateIndex(searcher *types.Searcher) error {
 	if err != nil {
 		return err
 	}
+	defer response.Body.Close()
 	if response.StatusCode == 200 {
 		return nil
 	}
@@ -50,6 +51,7 @@ func CreateIndex(searcher *types.Searcher, settings types.OSIndexSettings) error
 	if err != nil {
 		return err
 	}
+	defer response.Body.Close()
 	responseText, err := io.ReadAll(response.Body)
 	if err != nil {
 		return err
@@ -88,6 +90,7 @@ func DeleteIndex(searcher *types.Searcher) error {
 	if err != nil {
 		return err
 	}
+	defer response.Body.Close()
 	if response.StatusCode != 200 {
 		return fmt.Errorf(`non-200 status code: %v`, response.StatusCode)
 	}
@@ -103,6 +106,7 @@ func GetIndexInfo(searcher *types.Searcher) (types.OSIndexSettings, error) {
 		log.Println(`Error getting index settings: `, err)
 		return types.OSIndexSettings{}, err
 	}
+	defer response.Body.Close()
 	var indexSettings map[string]types.OSIndexSettings
 	err = json.NewDecoder(response.Body).Decode(&indexSettings)
 	if err != nil {
