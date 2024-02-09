@@ -115,3 +115,18 @@ func handleDeleteDocument(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Document deleted"})
 }
+
+func handleSearch(c *gin.Context) {
+	searcher := c.MustGet("searcher").(types.Searcher)
+	query := c.Query("q")
+	if query == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Query is required"})
+		return
+	}
+	result, err := search.BasicSearch(searcher, query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, result)
+}
