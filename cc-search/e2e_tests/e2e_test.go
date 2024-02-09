@@ -153,16 +153,13 @@ func TestGetDocumentWithFilteredFields(t *testing.T) {
 
 	router := setupTestRouter()
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/v1/documents/"+indexedDocument.ID+"?fields=ID,Title,Description", nil)
+	req, _ := http.NewRequest("GET", "/v1/documents/"+indexedDocument.ID+"?fields=title,description", nil)
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
 	var doc types.Document
 	err = json.NewDecoder(w.Body).Decode(&doc)
 	if err != nil {
 		t.Fatalf("Error decoding document: %v", err)
-	}
-	if doc.ID != indexedDocument.ID {
-		t.Fatalf("Expected document ID %s, got %s", indexedDocument.ID, doc.ID)
 	}
 	if doc.Title != indexedDocument.Title {
 		t.Fatalf("Expected document title %s, got %s", indexedDocument.Title, doc.Title)

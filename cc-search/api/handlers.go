@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"reflect"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -59,7 +58,8 @@ func handleNewDocument(c *gin.Context) {
 		return
 	}
 	log.Println("Received document ID: ", indexedDocument.ID)
-	c.JSON(http.StatusOK, filterDocument(*indexedDocument, []string{"ID", "Title", "PrimaryURL"}))
+	indexedDocument.Filter([]string{"ID", "Title", "PrimaryURL"})
+	c.JSON(http.StatusOK, indexedDocument)
 }
 
 func handleUpdateDocument(c *gin.Context) {
@@ -96,21 +96,7 @@ func handleGetDocument(c *gin.Context) {
 	fieldsQuery := c.Query("fields")
 	fields := strings.Split(fieldsQuery, ",")
 	if len(fields) > 0 && fields[0] != "" {
-		document = filterDocument(*document, fields)
+		document.FilterByJSON(fields)
 	}
 	c.JSON(http.StatusOK, document)
-}
-
-// Helper function to filter out unnecessary fields from the document for
-// the response.
-func filterDocument(originalDocument types.Document, fields []string) *types.Document {
-	filteredDocument := types.Document{}
-	for _, field := range fields {
-		fieldValue := reflect.ValueOf(originalDocument).FieldByName(field)
-		if !fieldValue.IsValid() {
-			continue
-		}
-		reflect.ValueOf(&filteredDocument).Elem().FieldByName(field).Set(fieldValue)
-	}
-	return &filteredDocument
 }
