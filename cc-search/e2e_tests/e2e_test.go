@@ -191,3 +191,37 @@ func TestDeleteDocument(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
 }
+
+func TestBulkIndexDocument(t *testing.T) {
+	conf := config.GetConfig()
+	router := setupTestRouter()
+	data := getTestFileReader("small_test_doc_collection.json")
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/v1/documents/bulk", data)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.APIKey))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+
+	var responseJSON []types.Document
+	err := json.NewDecoder(w.Body).Decode(&responseJSON)
+	if err != nil {
+		t.Fatalf("Error decoding response: %v", err)
+	}
+	if len(responseJSON) != 20 {
+		t.Fatalf("Expected 20 documents, got %d", len(responseJSON))
+	}
+	for _, doc := range responseJSON {
+		if doc.ID == `` {
+			t.Fatalf("Response did not contain an ID")
+		}
+		if doc.Title == `` {
+			t.Fatalf("Response did not contain a title")
+		}
+		if doc.PrimaryURL == `` {
+			t.Fatalf("Response did not contain a URL")
+		}
+		if doc.Content != `` {
+			t.Fatalf("Response contained content")
+		}
+	}
+}

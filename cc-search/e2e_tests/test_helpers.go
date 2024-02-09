@@ -32,6 +32,16 @@ func getSingleTestDocument(filename string) types.Document {
 	return doc
 }
 
+func getTestDocumentList(filename string) []types.Document {
+	data := getTestFileReader(filename)
+	var docs []types.Document
+	err := json.NewDecoder(data).Decode(&docs)
+	if err != nil {
+		panic(err)
+	}
+	return docs
+}
+
 func getTestFileReader(filename string) io.Reader {
 	_, thisFile, _, _ := runtime.Caller(0)
 	dir := path.Dir(thisFile)

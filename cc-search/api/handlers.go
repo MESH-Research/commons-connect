@@ -62,6 +62,35 @@ func handleNewDocument(c *gin.Context) {
 	c.JSON(http.StatusOK, indexedDocument)
 }
 
+func handleBulkNewDocuments(c *gin.Context) {
+	searcher := c.MustGet("searcher").(types.Searcher)
+	body := c.Request.Body
+	var newDocuments []types.Document
+	err := json.NewDecoder(body).Decode(&newDocuments)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	for _, document := range newDocuments {
+		if document.ID != "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "ID should not be provided for new documents"})
+			return
+		}
+	}
+	indexedDocuments, err := search.BulkIndexDocuments(
+		searcher,
+		newDocuments,
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	for i := range indexedDocuments {
+		indexedDocuments[i].Filter([]string{"ID", "Title", "PrimaryURL"})
+	}
+	c.JSON(http.StatusOK, indexedDocuments)
+}
+
 func handleUpdateDocument(c *gin.Context) {
 	searcher := c.MustGet("searcher").(types.Searcher)
 	body := c.Request.Body

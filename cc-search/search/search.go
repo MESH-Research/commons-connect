@@ -120,6 +120,80 @@ func IndexDocument(searcher types.Searcher, document types.Document) (*types.Doc
 	return &document, nil
 }
 
+func BulkIndexDocuments(searcher types.Searcher, documents []types.Document) ([]types.Document, error) {
+	bodyLines := []string{}
+	createLine := fmt.Sprintf(`{"create":{"_index":"%s"}}`, searcher.IndexName)
+	for _, document := range documents {
+		body, err := json.Marshal(document)
+		if err != nil {
+			return nil, errors.New(`error marshalling document: ` + err.Error())
+		}
+		bodyLines = append(bodyLines, createLine)
+		bodyLines = append(bodyLines, string(body))
+	}
+	body := strings.NewReader(strings.Join(bodyLines, "\n") + "\n")
+	req := opensearchapi.BulkRequest{
+		Body:    body,
+		Timeout: time.Second * 100,
+		//SourceIncludes: []string{`title`, `primary_url`},
+	}
+	response, err := req.Do(context.Background(), searcher.Client)
+	if err != nil {
+		return nil, errors.New(`error indexing documents: ` + err.Error())
+	}
+	defer response.Body.Close()
+	if response.StatusCode != 200 {
+		bodyBytes, _ := io.ReadAll(response.Body)
+		return nil, errors.New(string(bodyBytes))
+	}
+
+	var result struct {
+		Items []struct {
+			Create struct {
+				ID string `json:"_id"`
+			} `json:"create"`
+		} `json:"items"`
+	}
+	err = json.NewDecoder(response.Body).Decode(&result)
+	if err != nil {
+		return nil, errors.New(`error decoding response: ` + err.Error())
+	}
+	mgetLines := []string{}
+	for _, item := range result.Items {
+		mgetLines = append(mgetLines, `{"_id":"`+item.Create.ID+`"}`)
+	}
+	mgetBody := strings.NewReader(`{"docs":[` + strings.Join(mgetLines, ",") + `]}`)
+	mreq := opensearchapi.MgetRequest{
+		Index: searcher.IndexName,
+		Body:  mgetBody,
+	}
+	mresponse, err := mreq.Do(context.Background(), searcher.Client)
+	if err != nil {
+		return nil, errors.New(`error getting indexed documents: ` + err.Error())
+	}
+	defer mresponse.Body.Close()
+	if mresponse.StatusCode != 200 {
+		bodyBytes, _ := io.ReadAll(mresponse.Body)
+		return nil, errors.New(string(bodyBytes))
+	}
+	var mgetResult struct {
+		Docs []struct {
+			ID     string         `json:"_id"`
+			Source types.Document `json:"_source"`
+		} `json:"docs"`
+	}
+	err = json.NewDecoder(mresponse.Body).Decode(&mgetResult)
+	if err != nil {
+		return nil, errors.New(`error decoding response: ` + err.Error())
+	}
+	indexedDocuments := []types.Document{}
+	for _, doc := range mgetResult.Docs {
+		doc.Source.ID = doc.ID
+		indexedDocuments = append(indexedDocuments, doc.Source)
+	}
+	return indexedDocuments, nil
+}
+
 func GetDocument(searcher types.Searcher, id string) (*types.Document, error) {
 	req := opensearchapi.GetRequest{
 		Index:      searcher.IndexName,

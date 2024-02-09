@@ -7,9 +7,12 @@
 /documents
 - GET /documents/{id} - Get document by id
 - GET /documents/{id}?fields=a,b,c - Return only fields a,b,c
-- POST /documents - Index new document(s)
+- POST /documents - Index new document
 - PUT /documents/{id} - Update existing document
 - DELETE /documents/{id} - Delete existing document
+
+/bulk
+- POST /bulk/documents/ - Index new documents
 
 /search
 - GET /search?q={search text} - Basic search (searches all indexed fields)
