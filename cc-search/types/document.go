@@ -15,6 +15,7 @@ type Document struct {
 	OtherUsernames  []string `json:"other_usernames,omitempty"`
 	PrimaryURL      string   `json:"primary_url"`
 	OtherURLs       []string `json:"other_urls,omitempty"`
+	ThumbnailURL    string   `json:"thumbnail_url,omitempty"`
 	Content         string   `json:"content,omitempty"`
 	PublicationDate string   `json:"publication_date,omitempty"`
 	ModifiedDate    string   `json:"modified_date,omitempty"`

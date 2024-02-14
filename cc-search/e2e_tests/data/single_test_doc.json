@@ -19,6 +19,7 @@
 		"http://works.mla.kcommons.org/records/1234",
 		"http://works.hastac.kcommons.org/records/1234"
 	],
+	"thumbnail_url": "http://works.kcommons.org/records/1234/thumbnail.png",
 	"content": "This is the content of the essay. It is a long essay, and it is very interesting. It is also very well-written and well-argued and well-researched and well-documented and well-cited",
 	"publication_date": "2018-01-01",
 	"language": "en",

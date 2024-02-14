@@ -1,6 +1,8 @@
 package config
 
 import (
+	"reflect"
+
 	"github.com/spf13/viper"
 
 	"github.com/MESH-Research/commons-connect/cc-search/types"
@@ -20,6 +22,7 @@ func Init() error {
 	config.AutomaticEnv()
 
 	err := config.ReadInConfig()
+
 	return err
 }
 
@@ -27,10 +30,27 @@ func GetConfig() types.Config {
 	if config == nil {
 		Init()
 	}
+
 	var conf types.Config
-	err := config.Unmarshal(&conf)
-	if err != nil {
-		panic(err)
+
+	confType := reflect.TypeOf(conf)
+	confValue := reflect.ValueOf(&conf).Elem()
+
+	// I'm going through these contortions because it seems otherwise AutomaticEnv()
+	// doesn't work in the absense of a config file.
+	// See this issue and the linked discussion for possible reason why:
+	// https://github.com/spf13/viper/issues/1721
+	for i := 0; i < confType.NumField(); i++ {
+		field := confType.Field(i)
+		fieldValue := confValue.Field(i)
+
+		var value interface{}
+		if tag, ok := field.Tag.Lookup("mapstructure"); ok {
+			value = config.Get(tag)
+		}
+
+		fieldValue.Set(reflect.ValueOf(value))
 	}
+
 	return conf
 }

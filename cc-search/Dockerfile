@@ -7,4 +7,3 @@ COPY . .
 RUN go mod download
 # RUN go build -gcflags="all=-N -l" -o /app
 EXPOSE 2345 80
-

@@ -51,7 +51,7 @@ func cleanSetup() types.Searcher {
 }
 
 func resetIndex(searcher *types.Searcher) {
-	testIndexSettings, err := parseIndexSettings([]byte(testSettingsJSON))
+	testIndexSettings, err := getIndexSettings()
 	if err != nil {
 		log.Fatalf("Error parsing index settings: %v", err)
 	}
@@ -88,7 +88,7 @@ func TestDeleteIndex(t *testing.T) {
 
 func TestCreateIndex(t *testing.T) {
 	searcher := cleanSetup()
-	testIndexSettings, err := parseIndexSettings([]byte(testSettingsJSON))
+	testIndexSettings, err := getIndexSettings()
 	if err != nil {
 		t.Errorf("Error parsing index settings: %v", err)
 	}

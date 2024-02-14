@@ -5,6 +5,15 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"name": "Go: Test with envFile",
+			"type": "go",
+			"request": "launch",
+			"envFile": "${workspaceFolder}/cc-search/env",
+			"mode": "test",
+			"showLog": false,
+			"program": "${workspaceFolder}/${relativeFileDirname}"
+		},
+		{
 			"name": "Go: Debug in Docker",
 			"type": "go",
 			"request": "attach",

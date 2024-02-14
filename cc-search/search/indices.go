@@ -2,14 +2,12 @@ package search
 
 import (
 	"context"
+	_ "embed"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"log"
-	"os"
-	"path"
-	"runtime"
 	"strings"
 
 	"github.com/MESH-Research/commons-connect/cc-search/types"
@@ -117,20 +115,12 @@ func GetIndexInfo(searcher *types.Searcher) (types.OSIndexSettings, error) {
 	return indexSettings[searcher.IndexName], nil
 }
 
-func getIndexSettings() (types.OSIndexSettings, error) {
-	_, filename, _, _ := runtime.Caller(0)
-	dir := path.Dir(filename)
-	data, err := os.ReadFile(dir + "/index_settings.json")
-	if err != nil {
-		return types.OSIndexSettings{}, err
-	}
-	settings, err := parseIndexSettings(data)
-	return settings, err
-}
+//go:embed index_settings.json
+var indexSettings []byte
 
-func parseIndexSettings(data []byte) (types.OSIndexSettings, error) {
+func getIndexSettings() (types.OSIndexSettings, error) {
 	var settings types.OSIndexSettings
-	err := json.Unmarshal(data, &settings)
+	err := json.Unmarshal(indexSettings, &settings)
 	if err != nil {
 		return types.OSIndexSettings{}, err
 	}

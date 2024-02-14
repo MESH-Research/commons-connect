@@ -452,6 +452,7 @@
 			"http://example.com/street-photography-book",
 			"http://example.com/street-photography-tips"
 		],
+		"thumbnail_url": "http://works.kcommons.org/records/3434/thumbnail.png",
 		"content": "This book explores the techniques and storytelling aspects of street photography, providing insights into capturing the essence of urban life.",
 		"publication_date": "2022-12-31",
 		"language": "en",
@@ -476,6 +477,7 @@
 			"http://example.com/abstract-photography-book",
 			"http://example.com/abstract-photography-techniques"
 		],
+		"thumbnail_url": "http://works.kcommons.org/records/2222/thumbnail.png",
 		"content": "This book delves into the art of capturing abstract images, exploring composition, color, and texture to create visually compelling photographs.",
 		"publication_date": "2023-01-31",
 		"language": "en",
