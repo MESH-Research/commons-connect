@@ -102,3 +102,11 @@ A successful indexing will return with a 200 response code and a body like:
 	},
 ]
 ```
+
+Reading, updating, and deleting documents requires the `_id` field as returned by initial indexing. To update the "On Open Scholarship" document above, send a PUT request to `/documents/2E9SqY0Bdd2QL-HGeUuA` . The request body should have just the fields that require updating. Eg:
+
+```json
+{
+	"title": "On Open Scholarship Volume 1"
+}
+```
