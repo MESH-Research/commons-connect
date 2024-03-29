@@ -26,13 +26,14 @@ services:
       command: "/usr/share/opensearch/opensearch-docker-entrypoint.sh opensearch"
       ports:
         - 9200:9200
-        - 9600:9600
+        # - 9600:9600
       volumes:
         - opensearch-data:/usr/share/opensearch/data
     overrides:
       environment:
         discovery.type: single-node
         plugins.security.disabled: true
+        OPENSEARCH_INITIAL_ADMIN_PASSWORD: d-FpiYTYqZLMxakhr26puuMEtLk8.a
 proxy:
   go:
     - commons-search.lndo.site
