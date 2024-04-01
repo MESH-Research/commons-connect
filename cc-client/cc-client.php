@@ -21,6 +21,12 @@ define( 'CC_CLIENT_BASE_URL', plugin_dir_url( __FILE__ ) );
 const CC_CLIENT_REST_NAMESPACE = 'cc-client/v1';
 
 /**
+ * Feature Flags
+ */
+
+define( 'CCC_FEATURE_PROFILE_BLOCK', false );
+
+/**
  * Enqueue block editor frontend assets.
  */
 function frontend_enqueue() {

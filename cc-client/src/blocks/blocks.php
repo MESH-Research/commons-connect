@@ -7,5 +7,7 @@
 
 namespace MESHResearch\CCClient;
 
-require_once( plugin_dir_path( __FILE__ ) . 'profile/server.php' );
+if ( CCC_FEATURE_PROFILE_BLOCK ) {
+	require_once( plugin_dir_path( __FILE__ ) . 'profile/server.php' );
+}
 

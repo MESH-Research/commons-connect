@@ -8,7 +8,7 @@
 namespace MESHResearch\CCClient;
 
 function register_profile_block() {
-	$result = register_block_type(
+	register_block_type(
 		CC_CLIENT_BASE_DIR . '/build/profile',
 		[
 			'api_version'      => 3,
@@ -20,8 +20,8 @@ add_action( 'init', __NAMESPACE__ . '\register_profile_block' );
 
 function render_profile_block( $block_attributes, $content ) {
 	$options = get_option( 'cc_client_options' );
-
-	$username = $_GET['username'];
+		
+	$username = isset($_GET['username']) ? sanitize_text_field($_GET['username']) : '';
 
 	$attributes = array_merge ( 
 		$block_attributes,
