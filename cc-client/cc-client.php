@@ -29,16 +29,23 @@ define( 'CCC_FEATURE_PROFILE_BLOCK', false );
 /**
  * Enqueue block editor frontend assets.
  */
-function frontend_enqueue() {
-	$asset_file = include plugin_dir_path( __FILE__ ) . 'build/profile/front.asset.php';
+function enqueue_client_block_assets() {
+	$asset_file = include CC_CLIENT_BASE_DIR . 'build/profile/front.asset.php';
 	wp_enqueue_style(
 		'cc-client-profile',
 		CC_CLIENT_BASE_URL . 'build/profile/style-index.css',
 		[],
 		$asset_file['version']
 	);
+
+	// Search block style enqueue goes here.
+
+	if ( is_admin() ) {
+		
+		// Enqueue editor only assets here
+	}
 }
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\frontend_enqueue' );
+add_action( 'enqueue_block_assets', __NAMESPACE__ . '\enqueue_client_block_assets' );
 
 require_once( plugin_dir_path( __FILE__ ) . 'src/admin/admin-settings.php' );
 require_once( plugin_dir_path( __FILE__ ) . 'src/rest/rest.php' );
