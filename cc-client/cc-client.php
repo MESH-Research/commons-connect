@@ -31,6 +31,12 @@ define( 'CCC_FEATURE_PROFILE_BLOCK', false );
  */
 function frontend_enqueue() {
 	$asset_file = include plugin_dir_path( __FILE__ ) . 'build/profile/front.asset.php';
+	wp_enqueue_style(
+		'cc-client-profile',
+		CC_CLIENT_BASE_URL . 'build/profile/style-index.css',
+		[],
+		$asset_file['version']
+	);
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\frontend_enqueue' );
 
