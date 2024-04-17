@@ -22,6 +22,12 @@ func setupTestRouter() *gin.Engine {
 	return router
 }
 
+func resetIndex() {
+	conf := config.GetConfig()
+	searcher := search.GetSearcher(conf)
+	search.ResetIndex(&searcher)
+}
+
 func getSingleTestDocument(filename string) types.Document {
 	data := getTestFileReader(filename)
 	var doc types.Document

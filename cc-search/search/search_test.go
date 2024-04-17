@@ -158,3 +158,46 @@ func TestBasicSearch(t *testing.T) {
 		t.Errorf("Expected non-nil result, got nil")
 	}
 }
+
+func TestBuildQuery(t *testing.T) {
+	query := buildQuery(
+		types.SearchParams{
+			Query: "searching",
+		},
+	)
+	if query == "" {
+		t.Errorf("Expected non-empty query, got empty")
+	}
+
+	query = buildQuery(
+		types.SearchParams{
+			ExactMatch: map[string]string{
+				"author": "Mike Thicke",
+				"year":   "2014",
+			},
+		},
+	)
+	if query == "" {
+		t.Errorf("Expected non-empty query, got empty")
+	}
+	var unmarshalledQuery interface{}
+	err := json.Unmarshal([]byte(query), &unmarshalledQuery)
+	if err != nil {
+		t.Errorf("Error unmarshalling query: %v", err)
+	}
+
+	query = buildQuery(
+		types.SearchParams{
+			Query:         "searching",
+			SortField:     "modified_date",
+			SortDirection: "desc",
+		},
+	)
+	if query == "" {
+		t.Errorf("Expected non-empty query, got empty")
+	}
+	err = json.Unmarshal([]byte(query), &unmarshalledQuery)
+	if err != nil {
+		t.Errorf("Error unmarshalling query: %v", err)
+	}
+}

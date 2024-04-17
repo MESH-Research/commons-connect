@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -147,12 +148,45 @@ func handleDeleteDocument(c *gin.Context) {
 
 func handleSearch(c *gin.Context) {
 	searcher := c.MustGet("searcher").(types.Searcher)
-	query := c.Query("q")
-	if query == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Query is required"})
-		return
+	params := types.SearchParams{
+		ExactMatch: make(map[string]string),
 	}
-	result, err := search.BasicSearch(searcher, query)
+	queryVals := c.Request.URL.Query()
+	for key, val := range queryVals {
+		switch key {
+		case "q":
+			params.Query = val[0]
+		case "fields":
+			params.ReturnFields = strings.Split(val[0], ",")
+		case "search_fields":
+			params.SearchFields = strings.Split(val[0], ",")
+		case "start_date":
+			params.StartDate = val[0]
+		case "end_date":
+			params.EndDate = val[0]
+		case "sort_dir":
+			params.SortDirection = val[0]
+		case "sort_by":
+			params.SortField = val[0]
+		case "page":
+			page, err := strconv.Atoi(val[0])
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page value"})
+				return
+			}
+			params.Page = page
+		case "per_page":
+			perPage, err := strconv.Atoi(val[0])
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid per_page value"})
+				return
+			}
+			params.PerPage = perPage
+		default:
+			params.ExactMatch[key] = val[0]
+		}
+	}
+	result, err := search.Search(searcher, params)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/MESH-Research/commons-connect/cc-search/config"
 	"github.com/MESH-Research/commons-connect/cc-search/search"
@@ -222,6 +223,156 @@ func TestBulkIndexDocument(t *testing.T) {
 		}
 		if doc.Content != `` {
 			t.Fatalf("Response contained content")
+		}
+	}
+}
+
+func TestBasicSearch(t *testing.T) {
+	conf := config.GetConfig()
+	router := setupTestRouter()
+	resetIndex()
+	data := getTestFileReader("small_test_doc_collection.json")
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/v1/documents/bulk", data)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.APIKey))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+
+	req, _ = http.NewRequest("GET", "/v1/search?q=art", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	var results []types.Document
+	err := json.NewDecoder(w.Body).Decode(&results)
+	if err != nil {
+		t.Fatalf("Error decoding search results: %v", err)
+	}
+	if len(results) < 1 {
+		t.Fatalf("Expected at least one result, got %d", len(results))
+	}
+}
+
+func TestExactMatchSearch(t *testing.T) {
+	conf := config.GetConfig()
+	router := setupTestRouter()
+	resetIndex()
+	data := getTestFileReader("small_test_doc_collection.json")
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/v1/documents/bulk", data)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.APIKey))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	// Pause to allow indexing to complete
+	time.Sleep(2 * time.Second)
+	req, _ = http.NewRequest("GET", "/v1/search?owner_username=reginald", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	var results []types.Document
+	err := json.NewDecoder(w.Body).Decode(&results)
+	if err != nil {
+		t.Fatalf("Error decoding search results: %v", err)
+	}
+	if len(results) != 2 {
+		t.Fatalf("Expected 2 results, got %d", len(results))
+	}
+}
+
+func TestFilteredSearch(t *testing.T) {
+	conf := config.GetConfig()
+	router := setupTestRouter()
+	resetIndex()
+	data := getTestFileReader("small_test_doc_collection.json")
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/v1/documents/bulk", data)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.APIKey))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	// Pause to allow indexing to complete
+	time.Sleep(2 * time.Second)
+	req, _ = http.NewRequest("GET", "/v1/search?owner_username=reginald&fields=title,owner_username", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	var results []types.Document
+	err := json.NewDecoder(w.Body).Decode(&results)
+	if err != nil {
+		t.Fatalf("Error decoding search results: %v", err)
+	}
+	if len(results) != 2 {
+		t.Fatalf("Expected 2 results, got %d", len(results))
+	}
+	for _, doc := range results {
+		if doc.Title == `` {
+			t.Fatalf("Expected title, got empty string")
+		}
+		if doc.OwnerUsername == `` {
+			t.Fatalf("Expected owner username, got empty string")
+		}
+		if doc.PrimaryURL != `` {
+			t.Fatalf("Expected no URL, got %s", doc.PrimaryURL)
+		}
+	}
+}
+
+func TestSearchSortedByDate(t *testing.T) {
+	conf := config.GetConfig()
+	router := setupTestRouter()
+	resetIndex()
+	data := getTestFileReader("small_test_doc_collection.json")
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/v1/documents/bulk", data)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.APIKey))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	// Pause to allow indexing to complete
+	time.Sleep(2 * time.Second)
+	req, _ = http.NewRequest("GET", "/v1/search?q=art&sort_by=publication_date&sort_dir=desc", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	var results []types.Document
+	err := json.NewDecoder(w.Body).Decode(&results)
+	if err != nil {
+		t.Fatalf("Error decoding search results: %v", err)
+	}
+	if len(results) == 0 {
+		t.Fatalf("No results returned")
+	}
+	for i := 0; i < len(results)-1; i++ {
+		if results[i].PublicationDate < results[i+1].PublicationDate {
+			t.Fatalf("Results not sorted by date")
+		}
+	}
+}
+
+func TestSearchDateRange(t *testing.T) {
+	conf := config.GetConfig()
+	router := setupTestRouter()
+	resetIndex()
+	data := getTestFileReader("small_test_doc_collection.json")
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/v1/documents/bulk", data)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.APIKey))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	// Pause to allow indexing to complete
+	time.Sleep(2 * time.Second)
+	req, _ = http.NewRequest("GET", "/v1/search?q=art&start_date=2021-01-01&end_date=2021-12-31", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	var results []types.Document
+	err := json.NewDecoder(w.Body).Decode(&results)
+	if err != nil {
+		t.Fatalf("Error decoding search results: %v", err)
+	}
+	if len(results) == 0 {
+		t.Fatalf("No results returned")
+	}
+	for _, doc := range results {
+		if doc.PublicationDate < `2021-01-01` || doc.PublicationDate > `2021-01-31` {
+			t.Fatalf("Document outside of date range")
 		}
 	}
 }
