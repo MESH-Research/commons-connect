@@ -200,4 +200,20 @@ func TestBuildQuery(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error unmarshalling query: %v", err)
 	}
+
+	// Test date range
+	query = buildQuery(
+		types.SearchParams{
+			Query:     "searching",
+			StartDate: "2021-01-01",
+			EndDate:   "2021-12-31",
+		},
+	)
+	if query == "" {
+		t.Errorf("Expected non-empty query, got empty")
+	}
+	err = json.Unmarshal([]byte(query), &unmarshalledQuery)
+	if err != nil {
+		t.Errorf("Error unmarshalling query: %v", err)
+	}
 }

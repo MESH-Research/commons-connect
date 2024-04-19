@@ -193,3 +193,18 @@ func handleSearch(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, result)
 }
+
+func handleTypeAheadSearch(c *gin.Context) {
+	searcher := c.MustGet("searcher").(types.Searcher)
+	query := c.Query("q")
+	if query == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Query is required"})
+		return
+	}
+	result, err := search.TypeAheadSearch(searcher, query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, result)
+}

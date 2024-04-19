@@ -237,7 +237,8 @@ func TestBasicSearch(t *testing.T) {
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.APIKey))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
-
+	// Pause to allow indexing to complete
+	time.Sleep(2 * time.Second)
 	req, _ = http.NewRequest("GET", "/v1/search?q=art", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -358,7 +359,7 @@ func TestSearchDateRange(t *testing.T) {
 	assert.Equal(t, 200, w.Code)
 	// Pause to allow indexing to complete
 	time.Sleep(2 * time.Second)
-	req, _ = http.NewRequest("GET", "/v1/search?q=art&start_date=2021-01-01&end_date=2021-12-31", nil)
+	req, _ = http.NewRequest("GET", "/v1/search?q=art&start_date=2022-01-01&end_date=2022-05-31", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
@@ -371,8 +372,91 @@ func TestSearchDateRange(t *testing.T) {
 		t.Fatalf("No results returned")
 	}
 	for _, doc := range results {
-		if doc.PublicationDate < `2021-01-01` || doc.PublicationDate > `2021-01-31` {
+		if doc.PublicationDate < `2022-01-01` || doc.PublicationDate > `2022-05-31` {
 			t.Fatalf("Document outside of date range")
+		}
+	}
+}
+
+func TestSearchPagination(t *testing.T) {
+	conf := config.GetConfig()
+	router := setupTestRouter()
+	resetIndex()
+	data := getTestFileReader("small_test_doc_collection.json")
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/v1/documents/bulk", data)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.APIKey))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	// Pause to allow indexing to complete
+	time.Sleep(2 * time.Second)
+	req, _ = http.NewRequest("GET", "/v1/search?q=art", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	var results []types.Document
+	err := json.NewDecoder(w.Body).Decode(&results)
+	if err != nil {
+		t.Fatalf("Error decoding search results: %v", err)
+	}
+	totalResults := len(results)
+	remainingResults := totalResults
+	for i := 1; remainingResults < 0; i += 1 {
+		req, _ = http.NewRequest("GET", fmt.Sprintf("/v1/search?q=art&page=%d&per_page=5", i), nil)
+		w = httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+		assert.Equal(t, 200, w.Code)
+		var pageResults []types.Document
+		err = json.NewDecoder(w.Body).Decode(&pageResults)
+		if err != nil {
+			t.Fatalf("Error decoding search results: %v", err)
+		}
+		if remainingResults >= 5 {
+			if len(pageResults) != 5 {
+				t.Fatalf("Expected 5 results, got %d", len(pageResults))
+			}
+		} else {
+			if len(pageResults) != remainingResults {
+				t.Fatalf("Expected %d results, got %d", remainingResults, len(pageResults))
+			}
+		}
+		remainingResults -= len(pageResults)
+	}
+}
+
+func TestTypeAheadSearch(t *testing.T) {
+	conf := config.GetConfig()
+	router := setupTestRouter()
+	resetIndex()
+	data := getTestFileReader("small_test_doc_collection.json")
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/v1/documents/bulk", data)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.APIKey))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	// Pause to allow indexing to complete
+	time.Sleep(2 * time.Second)
+	req, _ = http.NewRequest("GET", "/v1/typeahead?q=on", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	var results []types.Document
+	err := json.NewDecoder(w.Body).Decode(&results)
+	if err != nil {
+		t.Fatalf("Error decoding search results: %v", err)
+	}
+	if len(results) == 0 {
+		t.Fatalf("No results returned")
+	}
+	for _, doc := range results {
+		if doc.Title == `` {
+			t.Fatalf("Expected title, got empty string")
+		}
+		if doc.PrimaryURL == `` {
+			t.Fatalf("Expected URL, got empty string")
+		}
+		if doc.Content != `` {
+			t.Fatalf("Expected no content, got %s", doc.Content)
 		}
 	}
 }

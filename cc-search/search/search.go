@@ -92,67 +92,121 @@ func Search(searcher types.Searcher, params types.SearchParams) ([]types.Documen
 	return docs, nil
 }
 
+func TypeAheadSearch(searcher types.Searcher, query string) ([]types.Document, error) {
+	queryJson := fmt.Sprintf(`{
+		"fields": ["title", "primary_url", "other_urls"],
+		"query": {
+			"multi_match": {
+				"query": "%s",
+				"type": "bool_prefix",
+				"fields": ["title"]
+			}
+		}
+	}`, query)
+	req := opensearchapi.SearchRequest{
+		Index: []string{searcher.IndexName},
+		Body:  strings.NewReader(queryJson),
+	}
+	response, err := req.Do(context.Background(), searcher.Client)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+	var searchResult types.SearchResult
+	err = json.Unmarshal(body, &searchResult)
+	if err != nil {
+		return nil, err
+	}
+	docs, err := searchResultToDocuments(&searchResult), nil
+	if err != nil {
+		return nil, err
+	}
+	return docs, nil
+}
+
 type queryData struct {
+	From   int               `json:"from,omitempty"`
+	Size   int               `json:"size,omitempty"`
 	Fields []string          `json:"fields,omitempty"`
 	Sort   map[string]string `json:"sort,omitempty"`
 	Query  struct {
-		MultiMatch *multiMatchQuery `json:"multi_match,omitempty"`
-		Bool       *boolQuery       `json:"bool,omitempty"`
-		Dates      *dateQuery       `json:"range,omitempty"`
+		Bool struct {
+			Must       []interface{} `json:"must,omitempty"`
+			DateFilter []interface{} `json:"filter,omitempty"`
+		} `json:"bool,omitempty"`
 	} `json:"query"`
 }
 
 type multiMatchQuery struct {
-	Query  string   `json:"query,omitempty"`
-	Fields []string `json:"fields,omitempty"`
-}
-
-type boolQuery struct {
-	Must []struct {
-		Term map[string]struct {
-			Value string `json:"value,omitempty"`
-		} `json:"term,omitempty"`
-	} `json:"must,omitempty"`
+	MultiMatch struct {
+		Query  string   `json:"query,omitempty"`
+		Fields []string `json:"fields,omitempty"`
+	} `json:"multi_match,omitempty"`
 }
 
 type dateQuery struct {
-	TimeStamp struct {
-		GTE string `json:"gte,omitempty"`
-		LTE string `json:"lte,omitempty"`
-	} `json:"timestamp,omitempty"`
+	Range struct {
+		PublicationDate struct {
+			GTE string `json:"gte,omitempty"`
+			LTE string `json:"lte,omitempty"`
+		} `json:"publication_date,omitempty"`
+	} `json:"range"`
 }
 
 func buildQuery(params types.SearchParams) string {
 	queryData := queryData{}
+	if params.PerPage > 0 {
+		queryData.Size = params.PerPage
+	} else {
+		queryData.Size = 20
+	}
+	if params.Page > 0 {
+		queryData.From = (params.Page - 1) * queryData.Size
+	}
 	queryData.Fields = params.ReturnFields
 	if params.Query != "" {
-		queryData.Query.MultiMatch = &multiMatchQuery{
-			Query:  params.Query,
-			Fields: params.SearchFields,
-		}
+		baseQuery := multiMatchQuery{}
+		baseQuery.MultiMatch.Query = params.Query
+		queryData.Query.Bool.Must = append(
+			queryData.Query.Bool.Must,
+			baseQuery,
+		)
 	}
 	if len(params.ExactMatch) > 0 {
-		queryData.Query.Bool = &boolQuery{}
 		for field, value := range params.ExactMatch {
-			queryData.Query.Bool.Must = append(queryData.Query.Bool.Must, struct {
-				Term map[string]struct {
-					Value string `json:"value,omitempty"`
-				} `json:"term,omitempty"`
-			}{
-				Term: map[string]struct {
-					Value string `json:"value,omitempty"`
+			queryData.Query.Bool.Must = append(
+				queryData.Query.Bool.Must,
+				struct {
+					Term map[string]struct {
+						Value string `json:"value,omitempty"`
+					} `json:"term,omitempty"`
 				}{
-					field: {
-						Value: value,
+					Term: map[string]struct {
+						Value string `json:"value,omitempty"`
+					}{
+						field: {
+							Value: value,
+						},
 					},
-				},
-			})
+				})
 		}
 	}
 	if params.StartDate != "" || params.EndDate != "" {
-		queryData.Query.Dates = &dateQuery{}
-		queryData.Query.Dates.TimeStamp.GTE = params.StartDate
-		queryData.Query.Dates.TimeStamp.LTE = params.EndDate
+		dateQuery := dateQuery{}
+		if params.StartDate != "" {
+			dateQuery.Range.PublicationDate.GTE = params.StartDate
+		}
+		if params.EndDate != "" {
+			dateQuery.Range.PublicationDate.LTE = params.EndDate
+		}
+		queryData.Query.Bool.DateFilter = append(
+			queryData.Query.Bool.DateFilter,
+			dateQuery,
+		)
 	}
 	if params.SortField != "" {
 		queryData.Sort = make(map[string]string)
