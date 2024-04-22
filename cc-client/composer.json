@@ -14,5 +14,8 @@
     },
     "scripts": {
         "phpunit": "phpunit"
+    },
+    "require": {
+        "guzzlehttp/guzzle": "^7.0"
     }
 }

@@ -12,6 +12,8 @@ services:
     run:
       - /commons-connect-client/.lando/install-wordpress.sh
       - /commons-connect-client/bin/install-wp-tests.sh lemp lemp lemp database:3306
+    command:
+      - npm run start
     overrides:
       volumes:
         - .:/commons-connect-client/
@@ -35,4 +37,4 @@ tooling:
     service: appserver
     description: Runs local tests
     dir: /commons-connect-client
-    cmd: phpunit
+    cmd: vendor/bin/phpunit

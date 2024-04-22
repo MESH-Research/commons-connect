@@ -47,6 +47,11 @@ function enqueue_client_block_assets() {
 }
 add_action( 'enqueue_block_assets', __NAMESPACE__ . '\enqueue_client_block_assets' );
 
-require_once( plugin_dir_path( __FILE__ ) . 'src/admin/admin-settings.php' );
-require_once( plugin_dir_path( __FILE__ ) . 'src/rest/rest.php' );
-require_once( plugin_dir_path( __FILE__ ) . 'src/blocks/blocks.php' );
+/**
+ * Composer autoload.
+ */
+require_once( CC_CLIENT_BASE_DIR . 'vendor/autoload.php' );
+
+require_once( CC_CLIENT_BASE_DIR . 'src/admin/admin-settings.php' );
+require_once( CC_CLIENT_BASE_DIR . 'src/rest/rest.php' );
+require_once( CC_CLIENT_BASE_DIR . 'src/blocks/blocks.php' );
