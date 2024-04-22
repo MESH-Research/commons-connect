@@ -16,11 +16,11 @@
 	},
 	"devDependencies": {
 		"@types/wordpress__block-editor": "^11.5.1",
-		"@wordpress/scripts": "^26.9.0"
+		"@wordpress/scripts": "^27.7.0"
 	},
 	"dependencies": {
-		"@wordpress/api-fetch": "^6.35.0",
-		"@wordpress/components": "^25.4.0",
-		"@wordpress/i18n": "^4.38.0"
+		"@wordpress/api-fetch": "^6.53.0",
+		"@wordpress/components": "^27.4.0",
+		"@wordpress/i18n": "^4.56.0"
 	}
 }
