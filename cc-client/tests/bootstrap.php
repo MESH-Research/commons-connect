@@ -7,7 +7,9 @@
 
 require 'vendor/autoload.php';
 
+xdebug_break();
 $_tests_dir = getenv( 'WP_TESTS_DIR' );
+echo "WP_TESTS_DIR: {$_tests_dir}" . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 if ( ! $_tests_dir ) {
 	$_tests_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
@@ -31,7 +33,7 @@ require_once "{$_tests_dir}/includes/functions.php";
  * Manually load the plugin being tested.
  */
 function _manually_load_plugin() {
-	require dirname( dirname( __FILE__ ) ) . '/commons-connect-client.php';
+	require dirname( dirname( __FILE__ ) ) . '/cc-client.php';
 }
 
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
