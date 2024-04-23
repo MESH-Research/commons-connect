@@ -10,7 +10,7 @@
 			"request": "launch",
 			"port": 9003,
 			"pathMappings": {
-				"/commons-connect-client/" : "${workspaceFolder}/",
+				"/app/" : "${workspaceFolder}/",
 				"/wordpress/wp-content/plugins/commons-connect-client/": "${workspaceFolder}/",
 				"/wordpress/": "${workspaceFolder}/.lando/wordpress/",
 			}

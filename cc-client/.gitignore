@@ -31,6 +31,8 @@ vendor/
 # WordPress for debugging
 .lando/wordpress/
 
+.phpunit.result.cache
+
 !.vscode/launch.json
 !.editorconfig
 

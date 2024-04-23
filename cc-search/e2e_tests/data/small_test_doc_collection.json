@@ -125,12 +125,12 @@
 	{
 		"title": "The Art of Cooking",
 		"description": "A book on the art of cooking and preparing delicious meals.",
-		"owner_name": "Maria Rodriguez",
+		"owner_name": "Reginald Gibbons",
 		"other_names": [
 			"Carlos Rodriguez",
 			"Sofia Rodriguez"
 		],
-		"owner_username": "mrodriguez",
+		"owner_username": "reginald",
 		"other_usernames": [
 			"crodriguez",
 			"srodriguez"

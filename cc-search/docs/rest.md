@@ -18,6 +18,9 @@
 - GET /search?fields=a,b,c - Return only fields a,b,c
 - GET /search?search_fields=a,b,c - Search only fields a,b,c
 - GET /search?page=0&per_page=10 - Return 10 results per page, and show page 0 of results
+- GET /search?start_date=2018-01-01&end_date=2018-12-31 - Search only documents published between 2018-01-01 and 2018-12-31
+- GET /search?sort_dir={asc|desc} - Sort results in ascending|descending order
+- GET /search?sort_by=a - Sort results by field a
 
 /typeahead
 - GET /typeahead?q={search text} - Typeahead search matching only title field
@@ -55,6 +58,7 @@ To index a document, POST to /documents with a request body of the form:
 	"thumbnail_url": "http://works.kcommons.org/records/1234/thumbnail.png",
 	"content": "This is the content of the essay. It is a long essay, and it is very interesting. It is also very well-written and well-argued and well-researched and well-documented and well-cited",
 	"publication_date": "2018-01-01",
+	"modified_date": "2018-01-02",
 	"language": "en",
 	"content_type": "deposit",
 	"network_node": "works"

@@ -13,7 +13,7 @@ type Document struct {
 	OtherNames      []string `json:"other_names,omitempty"`
 	OwnerUsername   string   `json:"owner_username,omitempty"`
 	OtherUsernames  []string `json:"other_usernames,omitempty"`
-	PrimaryURL      string   `json:"primary_url"`
+	PrimaryURL      string   `json:"primary_url,omitempty"`
 	OtherURLs       []string `json:"other_urls,omitempty"`
 	ThumbnailURL    string   `json:"thumbnail_url,omitempty"`
 	Content         string   `json:"content,omitempty"`

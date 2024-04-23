@@ -2,24 +2,26 @@ name: commons-connect-client
 recipe: lemp
 services:
   appserver:
-    app_mount: false
     config:
       php: .lando/php.ini
     build_as_root:
-      - cd /commons-connect-client/.lando/ && ./setup-wordpress-files.sh && ./install-wp-cli.sh
-      - cd /commons-connect-client/ && composer install
+      - cd /app/.lando/ && ./setup-wordpress-files.sh && ./install-wp-cli.sh
+      - cd /app/ && composer update
       - apt-get update && apt-get install subversion -y
     run:
-      - /commons-connect-client/.lando/install-wordpress.sh
-      - /commons-connect-client/bin/install-wp-tests.sh lemp lemp lemp database:3306
+      - /app/.lando/install-wordpress.sh
+      - /app/bin/install-wp-tests.sh lemp lemp lemp database:3306
+    command:
+      - npm run start
     overrides:
       volumes:
-        - .:/commons-connect-client/
+        - .lando/wordpress:/wordpress
       environment:
         WP_CLI_CONFIG_PATH: /wordpress/wp-cli.yml
   appserver_nginx:
-    build_as_root:
-      - /commons-connect-client/.lando/setup-wordpress-files.sh
+    overrides:
+      volumes:
+        - .lando/wordpress:/wordpress
 config:
   php: 8.2
   database: mariadb
@@ -34,5 +36,10 @@ tooling:
   phpunit:
     service: appserver
     description: Runs local tests
-    dir: /commons-connect-client
-    cmd: phpunit
+    dir: /app
+    cmd: vendor/bin/phpunit /app/tests
+  phpunit-debug:
+    service: appserver
+    description: Runs local tests with xdebug
+    dir: /app
+    cmd: XDEBUG_CONFIG="start_with_request=yes" vendor/bin/phpunit /app/tests
