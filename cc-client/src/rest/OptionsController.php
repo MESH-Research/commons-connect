@@ -102,6 +102,15 @@ class OptionsController extends WP_REST_Controller {
 					'type'        => 'string',
 					'format'      => 'uri',
 				],
+				'cc_search_endpoint' => [
+					'description' => esc_html__( 'Search endpoint on the Commons Connect server.', 'cc-client' ),
+					'type'        => 'string',
+					'format'      => 'uri',
+				],
+				'cc_search_key' => [
+					'description' => esc_html__( 'API key for the Commons Connect search endpoint.', 'cc-client' ),
+					'type'        => 'string',
+				],
 			]
 		];
 

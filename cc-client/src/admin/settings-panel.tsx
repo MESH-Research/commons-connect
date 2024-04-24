@@ -12,15 +12,21 @@ import {
 
 type SiteOptions = {
 	cc_server_url: string;
+	cc_search_endpoint: string;
+	cc_search_key: string;
 };
 
 export const SettingsPanel = () => {
 	const [ siteOptions, updateSiteOptions ] = useState( {
 		cc_server_url: '',
+		cc_search_endpoint: '',
+		cc_search_key: '',
 	} );
 
     const {
         cc_server_url,
+		cc_search_endpoint,
+		cc_search_key,
     } = siteOptions as SiteOptions;
 
 	useEffect( () => {
@@ -46,15 +52,33 @@ export const SettingsPanel = () => {
 	
 	return (
 		<div>
-			<h1>Settings Panel</h1>
+			<h1>CommonsConnect Settings</h1>
 			<div id="settings-form">
-				<label>CommonsConnect Server URL:</label>
-				<input 
-					type = "text"
-					value = { cc_server_url }
-					name = "cc_server_url"
-					onChange = { ( event ) => { updateSiteOptions( { ...siteOptions, 'cc_server_url': event.target.value } ) } }
-				/>
+
+					<label>CommonsConnect server URL:</label>
+					<input 
+						type = "text"
+						value = { cc_server_url }
+						name = "cc_server_url"
+						onChange = { ( event ) => { updateSiteOptions( { ...siteOptions, 'cc_server_url': event.target.value } ) } }
+					/>
+
+					<label>CommonsConnect search endpoint:</label>
+					<input
+						type = "text"
+						value = { cc_search_endpoint }
+						name = "cc_search_endpoint"
+						onChange = { ( event ) => { updateSiteOptions( { ...siteOptions, 'cc_search_endpoint': event.target.value } ) } }
+					/>
+
+					<label>CommonsConnect server API key:</label>
+					<input
+						type = "text"
+						value = { cc_search_key}
+						name = "cc_search_key"
+						onChange = { ( event ) => { updateSiteOptions( { ...siteOptions, 'cc_search_key': event.target.value } ) } }
+					/>
+	
 			</div>
 				<Button
 					variant = "primary"

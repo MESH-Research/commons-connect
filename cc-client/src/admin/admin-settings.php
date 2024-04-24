@@ -53,11 +53,12 @@ function admin_assets_enqueue( string $hook_suffix ) {
 		$asset_file['dependencies'],
 		$asset_file['version']
 	);
-/*
+
 	wp_enqueue_style(
-		'wordpress-components-styles',
-		includes_url( '/css/dist/components/style.min.css' )
+		'cc-client-admin',
+		CC_CLIENT_BASE_URL . 'build/admin/admin.css',
+		[ 'wp-components' ],
+		$asset_file['version']
 	);
-*/
 }
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\admin_assets_enqueue', 10, 1 );
