@@ -36,6 +36,124 @@ function CustomDateRange({ dateRangeValue }) {
 		)
 	);
 }
+function Paginator() {
+	let [pageData, setPageData] = useState({
+		currentPage: 1,
+		totalPages: 17,
+		perPage: 5,
+	});
+	let exceedsMaxDisplay = pageData.totalPages > 7;
+	let slots = [];
+	function makeSlot(data) {
+		data.clickable != undefined ? data.clickable : true;
+		return data;
+	}
+	function setSlots(data) {
+		slots = data.map((slot) => {
+			return makeSlot(slot);
+		});
+		console.log(slots);
+	}
+	if (exceedsMaxDisplay) {
+		if (pageData.currentPage <= 4) {
+			setSlots([
+				{ label: 1, value: 1 },
+				{ label: 2, value: 2 },
+				{ label: 3, value: 3 },
+				{ label: 4, value: 4 },
+				{ label: 5, value: 5 },
+				{ label: "...", value: null, clickable: false },
+				{ label: pageData.totalPages, value: pageData.totalPages },
+			]);
+		} else if (
+			pageData.currentPage > 4 &&
+			pageData.currentPage < pageData.totalPages - 4
+		) {
+			setSlots([
+				{ label: 1, value: 1 },
+				{ label: "...", value: null, clickable: false },
+				{ label: pageData.currentPage - 1, value: pageData.currentPage - 1 },
+				{ label: pageData.currentPage, value: pageData.currentPage },
+				{ label: pageData.currentPage + 1, value: pageData.currentPage + 1 },
+				{ label: "...", value: null, clickable: false },
+				{ label: pageData.totalPages, value: pageData.totalPages },
+			]);
+		} else if (
+			pageData.currentPage > 4 &&
+			pageData.currentPage >= pageData.totalPages - 4
+		) {
+			setSlots([
+				{ label: 1, value: 1 },
+				{ label: "...", value: null, clickable: false },
+				{ label: pageData.totalPages - 4, value: pageData.totalPages - 4 },
+				{ label: pageData.totalPages - 3, value: pageData.totalPages - 3 },
+				{ label: pageData.totalPages - 2, value: pageData.totalPages - 2 },
+				{ label: pageData.totalPages - 1, value: pageData.totalPages - 1 },
+				{ label: pageData.totalPages, value: pageData.totalPages },
+			]);
+		}
+	} else {
+		slots = [];
+		for (let i = 1; i <= pageData.totalPages; i++) {
+			slots.push(
+				makeSlot({
+					label: i,
+					value: i,
+				}),
+			);
+		}
+	}
+	const slotMarkup = slots.map((slot) => {
+		if (slot.clickable === false) {
+			return <span className="ccs-page-link">{slot.label}</span>;
+		}
+		return (
+			<a
+				href="#"
+				onClick={(e) => setPage(e, slot.value)}
+				style={pageData.currentPage == slot.value ? { fontWeight: "bold" } : {}}
+				className="ccs-page-link"
+				aria-current={pageData.currentPage == slot.value ? true : null}
+				aria-label={"Page " + slot.value}
+			>
+				{slot.label}
+			</a>
+		);
+	});
+	function setPage(e, page) {
+		e.preventDefault();
+		setPageData({ ...pageData, currentPage: page });
+	}
+	function decrementPage() {
+		if (pageData.currentPage > 1) {
+			setPageData({ ...pageData, currentPage: (pageData.currentPage -= 1) });
+		}
+	}
+	function incrementPage() {
+		if (pageData.currentPage != pageData.totalPages) {
+			setPageData({ ...pageData, currentPage: (pageData.currentPage += 1) });
+		}
+	}
+	return (
+		<footer>
+			<nav
+				aria-label="Select a page of search results"
+				className="ccs-footer-nav"
+			>
+				<button onClick={decrementPage} disabled={pageData.currentPage === 1}>
+					Previous
+				</button>
+				{slotMarkup}
+				<button
+					onClick={incrementPage}
+					disabled={pageData.currentPage === pageData.totalPages}
+				>
+					Next
+				</button>
+			</nav>
+		</footer>
+	);
+}
 function generateSampleJson(options) {
 	const record = {
 		title: "",
@@ -132,9 +250,11 @@ function getDateLabel(publication_date, modified_date) {
 		).toDateString();
 	}
 	if (modified_date) {
-		date = "Updated: " + new Date(
-			Date.parse(modified_date + "T00:00:00.000-05:00"),
-		).toDateString();
+		date =
+			"Updated: " +
+			new Date(
+				Date.parse(modified_date + "T00:00:00.000-05:00"),
+			).toDateString();
 	}
 	return date;
 }
@@ -244,13 +364,7 @@ function CCSearch() {
 					return <SearchResult index={i} data={result} />;
 				})}
 			</article>
-			<footer className="ccs-footer">
-				<span>Previous</span>
-				<span>1</span>
-				<a href="#">2</a>
-				<a href="#">3</a>
-				<a href="#">Next</a>
-			</footer>
+			<Paginator />
 		</main>
 	);
 }
