@@ -154,5 +154,5 @@ These fields apply both to indexing and searching documents:
 - `modified_date` (string) - The date the document was last modified, in the format `YYYY-MM-DD`
 - `language` (string) - The language of the document following the ISO 639-1 standard
 - `content_type` (string) - The type of content. Possible values are `deposit`, `post`, `profile`, `group`, `site`, and `discussion`
-- `network_node` (string) - The network node of the document (`hc`, `mla`, `hastac`, `up`, `arlisna`, `msu`, `sah`, `stemedplus` )
+- `network_node` (string) - The network node of the document (`works`, `hc`, `mla`, `hastac`, `up`, `arlisna`, `msu`, `sah`, `stemedplus` )
 	
