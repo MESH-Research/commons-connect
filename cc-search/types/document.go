@@ -9,10 +9,8 @@ type Document struct {
 	ID              string   `json:"_id,omitempty"`
 	Title           string   `json:"title"`
 	Description     string   `json:"description,omitempty"`
-	OwnerName       string   `json:"owner_name,omitempty"`
-	OtherNames      []string `json:"other_names,omitempty"`
-	OwnerUsername   string   `json:"owner_username,omitempty"`
-	OtherUsernames  []string `json:"other_usernames,omitempty"`
+	Owner           User     `json:"owner,omitempty"`
+	Contributors    []User   `json:"contributors,omitempty"`
 	PrimaryURL      string   `json:"primary_url,omitempty"`
 	OtherURLs       []string `json:"other_urls,omitempty"`
 	ThumbnailURL    string   `json:"thumbnail_url,omitempty"`

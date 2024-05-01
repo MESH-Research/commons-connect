@@ -12,24 +12,6 @@ import (
 	"github.com/MESH-Research/commons-connect/cc-search/types"
 )
 
-var testSettingsJSON = `{
-	"settings": {
-		"index": {
-			"number_of_shards": "1",
-			"number_of_replicas": "2"
-		}
-	},
-	"mappings": {
-		"properties": {
-			"title": { "type" : "text" },
-			"description": { "type" : "text" },
-			"owner_name": { "type" : "integer" },
-			"owner_username": { "type" : "keyword" },
-			"primary_url": { "type" : "text" }
-		}
-	}
-}`
-
 var testDocumentJSON = `{
 	"title": "Searching Openly",
 	"author": "Mike Thicke",
@@ -51,24 +33,9 @@ func cleanSetup() types.Searcher {
 }
 
 func resetIndex(searcher *types.Searcher) {
-	testIndexSettings, err := getIndexSettings()
-	if err != nil {
-		log.Fatalf("Error parsing index settings: %v", err)
-	}
-	searcher.IndexName = "test"
-	err = CreateIndex(searcher, testIndexSettings)
+	err := CreateIndex(searcher)
 	if err != nil {
 		log.Fatalf("Error creating index: %v", err)
-	}
-}
-
-func TestGetIndexSettings(t *testing.T) {
-	settings, err := getIndexSettings()
-	if err != nil {
-		t.Errorf("Error getting index settings: %v", err)
-	}
-	if settings.Mappings.Properties["title"].Type != "text" {
-		t.Errorf("Expected text, got %s", settings.Mappings.Properties["title"].Type)
 	}
 }
 
@@ -88,11 +55,7 @@ func TestDeleteIndex(t *testing.T) {
 
 func TestCreateIndex(t *testing.T) {
 	searcher := cleanSetup()
-	testIndexSettings, err := getIndexSettings()
-	if err != nil {
-		t.Errorf("Error parsing index settings: %v", err)
-	}
-	err = CreateIndex(&searcher, testIndexSettings)
+	err := CreateIndex(&searcher)
 	if err != nil {
 		t.Errorf("Error creating index: %v", err)
 	}

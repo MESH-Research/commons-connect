@@ -17,6 +17,7 @@
 - GET /search?a=x - Field a matches x exactly
 - GET /search?fields=a,b,c - Return only fields a,b,c
 - GET /search?search_fields=a,b,c - Search only fields a,b,c
+- GET /search?username=x - Search only documents with x as a contributor
 - GET /search?page=0&per_page=10 - Return 10 results per page, and show page 0 of results
 - GET /search?start_date=2018-01-01&end_date=2018-12-31 - Search only documents published between 2018-01-01 and 2018-12-31
 - GET /search?sort_dir={asc|desc} - Sort results in ascending|descending order
@@ -37,17 +38,34 @@ To index a document, POST to /documents with a request body of the form:
 {
 	"title": "On Open Scholarship",
 	"description": "An essay on the nature of open scholarship and the role of the library in supporting it.",
-	"owner_name": "Reginald Gibbons",
-	"other_names": [
-		"Edwina Gibbons",
-		"Obadiah Gibbons",
-		"Lila Gibbons"
-	],
-	"owner_username": "reginald",
-	"other_usernames": [
-		"edwina",
-		"obadiah",
-		"lila"
+	"owner": {
+		"name": "Reginald Gibbons",
+		"username": "reginald",
+		"url": "http://profiles.kcommons.org/reginald"
+	},
+	"contributors": [
+		{
+			"name": "Reginald Gibbons",
+			"username": "reginald",
+			"url": "http://profiles.kcommons.org/reginald",
+			"role": "first author",
+			"network_node": "mla"
+		},
+		{
+			"name": "Edwina Gibbons",
+			"username": "edwina",
+			"url": "http://profiles.kcommons.org/edwina",
+			"role": "author",
+			"network_node": "hc"
+		},
+		{
+			"name": "Obadiah Gibbons",
+			"username": "obadiah"
+		},
+		{
+			"name": "Lila Gibbons",
+			"username": "lila"
+		}
 	],
 	"primary_url": "http://works.kcommons.org/records/1234",
 	"other_urls": [
@@ -114,3 +132,27 @@ Reading, updating, and deleting documents requires the `_id` field as returned b
 	"title": "On Open Scholarship Volume 1"
 }
 ```
+
+## Document Fields
+
+These fields apply both to indexing and searching documents:
+
+- `title` (string) - The title of the document (required)
+- `description` (string) - A short description of the document
+- `owner` (object) - The owner of the document (required)
+	- `name` (string) - The name of the owner (required)
+	- `username` (string) - The username of the owner (required)
+	- `url` (string) - A URL to the owner's profile
+	- `network_node` (string) - The network node of the owner (`hc`, `mla`, `hastac`, `up`, `arlisna`, `msu`, `sah`, `stemedplus` )
+	- `role` (string) - The role of the owner in relation to the underlying work (eg, "first author", "author", "editor")
+- `contributors` (array) - An array of contributors to the document. Each contributor is an object with the same fields as owner. **Note**: If the owner is also a contributor, they should be listed twice. To be searchable with the `username` parameter, the user must be a contributor.
+- `primary_url` (string) - The primary URL of the document (required)
+- `other_urls` (array) - An array of other URLs associated with the document. This is primarily used for underlying works that are accessible from multiple network nodes.
+- `thumbnail_url` (string) - A URL to a thumbnail image of the document
+- `content` (string) - The full content of the document
+- `publication_date` (string) - The publication date of the document, in the format `YYYY-MM-DD`
+- `modified_date` (string) - The date the document was last modified, in the format `YYYY-MM-DD`
+- `language` (string) - The language of the document following the ISO 639-1 standard
+- `content_type` (string) - The type of content. Possible values are `deposit`, `post`, `profile`, `group`, `site`, and `discussion`
+- `network_node` (string) - The network node of the document (`hc`, `mla`, `hastac`, `up`, `arlisna`, `msu`, `sah`, `stemedplus` )
+	

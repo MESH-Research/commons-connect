@@ -1,17 +1,34 @@
 {
 	"title": "On Open Scholarship",
 	"description": "An essay on the nature of open scholarship and the role of the library in supporting it.",
-	"owner_name": "Reginald Gibbons",
-	"other_names": [
-		"Edwina Gibbons",
-		"Obadiah Gibbons",
-		"Lila Gibbons"
-	],
-	"owner_username": "reginald",
-	"other_usernames": [
-		"edwina",
-		"obadiah",
-		"lila"
+	"owner": {
+		"name": "Reginald Gibbons",
+		"username": "reginald",
+		"url": "http://profiles.kcommons.org/reginald"
+	},
+	"contributors": [
+		{
+			"name": "Reginald Gibbons",
+			"username": "reginald",
+			"url": "http://profiles.kcommons.org/reginald",
+			"role": "first author",
+			"network_node": "mla"
+		},
+		{
+			"name": "Edwina Gibbons",
+			"username": "edwina",
+			"url": "http://profiles.kcommons.org/edwina",
+			"role": "author",
+			"network_node": "hc"
+		},
+		{
+			"name": "Obadiah Gibbons",
+			"username": "obadiah"
+		},
+		{
+			"name": "Lila Gibbons",
+			"username": "lila"
+		}
 	],
 	"primary_url": "http://works.kcommons.org/records/1234",
 	"other_urls": [
@@ -22,6 +39,7 @@
 	"thumbnail_url": "http://works.kcommons.org/records/1234/thumbnail.png",
 	"content": "This is the content of the essay. It is a long essay, and it is very interesting. It is also very well-written and well-argued and well-researched and well-documented and well-cited",
 	"publication_date": "2018-01-01",
+	"modified_date": "2018-01-02",
 	"language": "en",
 	"content_type": "deposit",
 	"network_node": "works"

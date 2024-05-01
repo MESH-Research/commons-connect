@@ -1,6 +1,7 @@
 package search
 
 import (
+	"bytes"
 	"context"
 	_ "embed"
 	"encoding/json"
@@ -8,13 +9,19 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"strings"
 
 	"github.com/MESH-Research/commons-connect/cc-search/types"
 	opensearchapi "github.com/opensearch-project/opensearch-go/v2/opensearchapi"
 )
 
+//go:embed index_settings.json
+var indexSettings []byte
+
 func MaybeCreateIndex(searcher *types.Searcher) error {
+	return MaybeCreateCustomIndex(searcher, indexSettings)
+}
+
+func MaybeCreateCustomIndex(searcher *types.Searcher, settingsJSON []byte) error {
 	if searcher.IndexName == `` {
 		return errors.New(`index name is required`)
 	}
@@ -29,21 +36,17 @@ func MaybeCreateIndex(searcher *types.Searcher) error {
 	if response.StatusCode == 200 {
 		return nil
 	}
-	settings, err := getIndexSettings()
-	if err != nil {
-		return err
-	}
-	return CreateIndex(searcher, settings)
+	return CreateCustomIndex(searcher, settingsJSON)
 }
 
-func CreateIndex(searcher *types.Searcher, settings types.OSIndexSettings) error {
-	requestBody, err := json.Marshal(settings)
-	if err != nil {
-		return err
-	}
+func CreateIndex(searcher *types.Searcher) error {
+	return CreateCustomIndex(searcher, indexSettings)
+}
+
+func CreateCustomIndex(searcher *types.Searcher, settingsJSON []byte) error {
 	req := opensearchapi.IndicesCreateRequest{
 		Index: searcher.IndexName,
-		Body:  strings.NewReader(string(requestBody)),
+		Body:  bytes.NewReader(settingsJSON),
 	}
 	response, err := req.Do(context.Background(), searcher.Client)
 	if err != nil {
@@ -69,15 +72,15 @@ func CreateIndex(searcher *types.Searcher, settings types.OSIndexSettings) error
 }
 
 func ResetIndex(searcher *types.Searcher) error {
+	return ResetCustomIndex(searcher, indexSettings)
+}
+
+func ResetCustomIndex(searcher *types.Searcher, settingsJSON []byte) error {
 	err := DeleteIndex(searcher)
 	if err != nil {
 		return err
 	}
-	settings, err := getIndexSettings()
-	if err != nil {
-		return err
-	}
-	return CreateIndex(searcher, settings)
+	return CreateCustomIndex(searcher, settingsJSON)
 }
 
 func DeleteIndex(searcher *types.Searcher) error {
@@ -89,40 +92,27 @@ func DeleteIndex(searcher *types.Searcher) error {
 		return err
 	}
 	defer response.Body.Close()
-	if response.StatusCode != 200 {
-		return fmt.Errorf(`non-200 status code: %v`, response.StatusCode)
+	if response.StatusCode != 200 && response.StatusCode != 404 {
+		return fmt.Errorf(`non-200, non-404 status code: %v`, response.StatusCode)
 	}
 	return nil
 }
 
-func GetIndexInfo(searcher *types.Searcher) (types.OSIndexSettings, error) {
+func GetIndexInfo(searcher *types.Searcher) (map[string]interface{}, error) {
 	req := opensearchapi.IndicesGetRequest{
 		Index: []string{searcher.IndexName},
 	}
 	response, err := req.Do(context.Background(), searcher.Client)
 	if err != nil {
 		log.Println(`Error getting index settings: `, err)
-		return types.OSIndexSettings{}, err
+		return nil, err
 	}
 	defer response.Body.Close()
-	var indexSettings map[string]types.OSIndexSettings
+	var indexSettings map[string]interface{}
 	err = json.NewDecoder(response.Body).Decode(&indexSettings)
 	if err != nil {
 		log.Println(`Error decoding index settings: `, err.Error())
-		return types.OSIndexSettings{}, err
+		return nil, err
 	}
-
-	return indexSettings[searcher.IndexName], nil
-}
-
-//go:embed index_settings.json
-var indexSettings []byte
-
-func getIndexSettings() (types.OSIndexSettings, error) {
-	var settings types.OSIndexSettings
-	err := json.Unmarshal(indexSettings, &settings)
-	if err != nil {
-		return types.OSIndexSettings{}, err
-	}
-	return settings, nil
+	return indexSettings, nil
 }

@@ -14,19 +14,49 @@
 				"type": "text",
 				"store": true
 			},
-			"owner_name": {
-				"type": "text"
+			"owner": {
+				"properties": {
+					"name": {
+						"type": "text"
+					},
+					"username": {
+						"type": "keyword"
+					},
+					"url": {
+						"type": "keyword",
+						"index": false
+					},
+					"role": {
+						"type": "keyword",
+						"index": false
+					},
+					"network_node": {
+						"type": "keyword",
+						"index": false
+					}
+				}
 			},
-			"other_names": {
-				"type": "text"
-			},
-			"owner_username": {
-				"type": "keyword",
-				"index": false
-			},
-			"other_usernames": {
-				"type": "keyword",
-				"index": false
+			"contributors": {
+				"properties": {
+					"name": {
+						"type": "text"
+					},
+					"username": {
+						"type": "keyword"
+					},
+					"url": {
+						"type": "keyword",
+						"index": false
+					},
+					"role": {
+						"type": "keyword",
+						"index": false
+					},
+					"network_node": {
+						"type": "keyword",
+						"index": false
+					}
+				}
 			},
 			"primary_url": {
 				"type": "keyword",

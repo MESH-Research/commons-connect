@@ -10,10 +10,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/MESH-Research/commons-connect/cc-search/config"
 	"github.com/MESH-Research/commons-connect/cc-search/search"
 	"github.com/MESH-Research/commons-connect/cc-search/types"
-	"github.com/go-playground/assert/v2"
 )
 
 func TestPing(t *testing.T) {
@@ -37,11 +38,17 @@ func TestGetIndex(t *testing.T) {
 	req.Header.Set("Authorization", token)
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
-	var info types.OSIndexSettings
-	err := json.Unmarshal(w.Body.Bytes(), &info)
+	var responseIndex map[string]interface{}
+	responseBody, err := io.ReadAll(w.Body)
 	if err != nil {
-		t.Fatalf("Error decoding index info: %v", err)
+		t.Fatalf("Error reading response body: %v", err)
 	}
+	err = json.Unmarshal(responseBody, &responseIndex)
+	if err != nil {
+		t.Fatalf("Error decoding response: %v", err)
+	}
+	assert.Contains(t, responseIndex, "dev-search")
+	assert.NotContains(t, responseIndex, "foo")
 }
 
 func TestResetIndex(t *testing.T) {
@@ -59,19 +66,42 @@ func TestNewDocument(t *testing.T) {
 	conf := config.GetConfig()
 	router := setupTestRouter()
 	data := getTestFileReader("single_test_doc.json")
+	indexedDocument := getSingleTestDocument("single_test_doc.json")
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/v1/documents", data)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.APIKey))
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
-	var responseJSON map[string]interface{}
-	err := json.NewDecoder(w.Body).Decode(&responseJSON)
+	var responseDoc types.Document
+	err := json.NewDecoder(w.Body).Decode(&responseDoc)
 	if err != nil {
 		t.Fatalf("Error decoding response: %v", err)
 	}
-	if responseJSON["ID"] == `` {
+	if responseDoc.ID == `` {
 		t.Fatalf("Response did not contain an ID")
 	}
+	req, _ = http.NewRequest("GET", "/v1/documents/"+responseDoc.ID, nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	var retrievedDoc types.Document
+	err = json.NewDecoder(w.Body).Decode(&retrievedDoc)
+	if err != nil {
+		t.Fatalf("Error decoding document: %v", err)
+	}
+	if retrievedDoc.ID != responseDoc.ID {
+		t.Fatalf("Expected document ID %s, got %s", responseDoc.ID, retrievedDoc.ID)
+	}
+	if retrievedDoc.PrimaryURL != indexedDocument.PrimaryURL {
+		t.Fatalf("Expected document URL %s, got %s", indexedDocument.PrimaryURL, retrievedDoc.PrimaryURL)
+	}
+	if retrievedDoc.Owner.Username != indexedDocument.Owner.Username {
+		t.Fatalf("Expected document owner %s, got %s", indexedDocument.Owner.Username, retrievedDoc.Owner.Username)
+	}
+	if retrievedDoc.Owner.URL != indexedDocument.Owner.URL {
+		t.Fatalf("Expected document owner URL %s, got %s", indexedDocument.Owner.URL, retrievedDoc.Owner.URL)
+	}
+	assert.Equal(t, len(indexedDocument.Contributors), len(retrievedDoc.Contributors))
 }
 
 func TestUpdateDocument(t *testing.T) {
@@ -118,7 +148,6 @@ func TestGetDocument(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error indexing document: %v", err)
 	}
-
 	router := setupTestRouter()
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest("GET", "/v1/documents/"+indexedDocument.ID, nil)
@@ -140,6 +169,15 @@ func TestGetDocument(t *testing.T) {
 	}
 	if doc.Title != indexedDocument.Title {
 		t.Fatalf("Expected document title %s, got %s", indexedDocument.Title, doc.Title)
+	}
+	if doc.Owner.Username != indexedDocument.Owner.Username {
+		t.Fatalf("Expected document owner %s, got %s", indexedDocument.Owner.Username, doc.Owner.Username)
+	}
+	if doc.Owner.URL != indexedDocument.Owner.URL {
+		t.Fatalf("Expected document owner URL %s, got %s", indexedDocument.Owner.URL, doc.Owner.URL)
+	}
+	if doc.Contributors[0].Username != indexedDocument.Contributors[0].Username {
+		t.Fatalf("Expected document other user %s, got %s", indexedDocument.Contributors[0].Username, doc.Contributors[0].Username)
 	}
 }
 
@@ -238,7 +276,7 @@ func TestBasicSearch(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
 	// Pause to allow indexing to complete
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 	req, _ = http.NewRequest("GET", "/v1/search?q=art", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -264,8 +302,8 @@ func TestExactMatchSearch(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
 	// Pause to allow indexing to complete
-	time.Sleep(2 * time.Second)
-	req, _ = http.NewRequest("GET", "/v1/search?owner_username=reginald", nil)
+	time.Sleep(1 * time.Second)
+	req, _ = http.NewRequest("GET", "/v1/search?owner.username=reginald", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
@@ -290,8 +328,8 @@ func TestFilteredSearch(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
 	// Pause to allow indexing to complete
-	time.Sleep(2 * time.Second)
-	req, _ = http.NewRequest("GET", "/v1/search?owner_username=reginald&fields=title,owner_username", nil)
+	time.Sleep(1 * time.Second)
+	req, _ = http.NewRequest("GET", "/v1/search?owner.username=reginald&fields=title,owner", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
@@ -307,7 +345,7 @@ func TestFilteredSearch(t *testing.T) {
 		if doc.Title == `` {
 			t.Fatalf("Expected title, got empty string")
 		}
-		if doc.OwnerUsername == `` {
+		if doc.Owner.Username == `` {
 			t.Fatalf("Expected owner username, got empty string")
 		}
 		if doc.PrimaryURL != `` {
@@ -327,7 +365,7 @@ func TestSearchSortedByDate(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
 	// Pause to allow indexing to complete
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 	req, _ = http.NewRequest("GET", "/v1/search?q=art&sort_by=publication_date&sort_dir=desc", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -358,7 +396,7 @@ func TestSearchDateRange(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
 	// Pause to allow indexing to complete
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 	req, _ = http.NewRequest("GET", "/v1/search?q=art&start_date=2022-01-01&end_date=2022-05-31", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -389,7 +427,7 @@ func TestSearchPagination(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
 	// Pause to allow indexing to complete
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 	req, _ = http.NewRequest("GET", "/v1/search?q=art", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -435,7 +473,7 @@ func TestTypeAheadSearch(t *testing.T) {
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
 	// Pause to allow indexing to complete
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
 	req, _ = http.NewRequest("GET", "/v1/typeahead?q=on", nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -457,6 +495,37 @@ func TestTypeAheadSearch(t *testing.T) {
 		}
 		if doc.Content != `` {
 			t.Fatalf("Expected no content, got %s", doc.Content)
+		}
+	}
+}
+
+func TestUsernameSearch(t *testing.T) {
+	conf := config.GetConfig()
+	router := setupTestRouter()
+	resetIndex()
+	data := getTestFileReader("small_test_doc_collection.json")
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/v1/documents/bulk", data)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.APIKey))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	// Pause to allow indexing to complete
+	time.Sleep(1 * time.Second)
+	req, _ = http.NewRequest("GET", "/v1/search?username=reginald", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	var results []types.Document
+	err := json.NewDecoder(w.Body).Decode(&results)
+	if err != nil {
+		t.Fatalf("Error decoding search results: %v", err)
+	}
+	if len(results) == 0 {
+		t.Fatalf("No results returned")
+	}
+	for _, doc := range results {
+		if doc.Owner.Username != `reginald` {
+			t.Fatalf("Expected owner username reginald, got %s", doc.Owner.Username)
 		}
 	}
 }
