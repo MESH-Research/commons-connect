@@ -114,7 +114,7 @@ function Paginator() {
 				style={pageData.currentPage == slot.value ? { fontWeight: "bold" } : {}}
 				className="ccs-page-link"
 				aria-current={pageData.currentPage == slot.value ? true : null}
-				aria-label={"Page " + slot.value}
+				aria-label={"Page " + slot.value + " of " + pageData.totalPages}
 			>
 				{slot.label}
 			</a>
