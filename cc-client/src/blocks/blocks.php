@@ -12,6 +12,6 @@ if ( CCC_FEATURE_PROFILE_BLOCK ) {
 }
 
 function register_search_page_block() {
-	register_block_type(CC_CLIENT_BASE_DIR . '/build/search-page');
+	register_block_type(CC_CLIENT_BASE_DIR . '/build/search');
 }
 add_action( 'init', __NAMESPACE__ . '\register_search_page_block' );

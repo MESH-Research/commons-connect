@@ -21,5 +21,5 @@
  */
  
 /* eslint-disable no-console */
-console.log("Hello World! (from create-block-search block)");
+console.log("Hello World! (from create-block-search-page block)");
 /* eslint-enable no-console */
