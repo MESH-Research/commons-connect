@@ -2,17 +2,34 @@
 	{
 		"title": "On Open Scholarship",
 		"description": "An essay on the nature of open scholarship and the role of the library in supporting it.",
-		"owner_name": "Reginald Gibbons",
-		"other_names": [
-			"Edwina Gibbons",
-			"Obadiah Gibbons",
-			"Lila Gibbons"
-		],
-		"owner_username": "reginald",
-		"other_usernames": [
-			"edwina",
-			"obadiah",
-			"lila"
+		"owner": {
+			"name": "Reginald Gibbons",
+			"username": "reginald",
+			"url": "http://profiles.kcommons.org/reginald"
+		},
+		"contributors": [
+			{
+				"name": "Reginald Gibbons",
+				"username": "reginald",
+				"url": "http://profiles.kcommons.org/reginald",
+				"role": "first author",
+				"network_node": "mla"
+			},
+			{
+				"name": "Edwina Gibbons",
+				"username": "edwina",
+				"url": "http://profiles.kcommons.org/edwina",
+				"role": "author",
+				"network_node": "hc"
+			},
+			{
+				"name": "Obadiah Gibbons",
+				"username": "obadiah"
+			},
+			{
+				"name": "Lila Gibbons",
+				"username": "lila"
+			}
 		],
 		"primary_url": "http://works.kcommons.org/records/1234",
 		"other_urls": [
@@ -20,8 +37,10 @@
 			"http://works.mla.kcommons.org/records/1234",
 			"http://works.hastac.kcommons.org/records/1234"
 		],
+		"thumbnail_url": "http://works.kcommons.org/records/1234/thumbnail.png",
 		"content": "This is the content of the essay. It is a long essay, and it is very interesting. It is also very well-written and well-argued and well-researched and well-documented and well-cited",
 		"publication_date": "2018-01-01",
+		"modified_date": "2018-01-02",
 		"language": "en",
 		"content_type": "deposit",
 		"network_node": "works"
@@ -29,15 +48,23 @@
 	{
 		"title": "The Art of Programming",
 		"description": "A book on the art of programming and software development.",
-		"owner_name": "John Smith",
-		"other_names": [
-			"Jane Smith",
-			"Michael Smith"
-		],
-		"owner_username": "johnsmith",
-		"other_usernames": [
-			"janesmith",
-			"michaelsmith"
+		"owner": {
+			"name": "John Smith",
+			"username": "johnsmith"
+		},
+		"contributors": [
+			{
+				"name": "John Smith",
+				"username": "johnsmith"
+			},
+			{
+				"name": "Jane Smith",
+				"username":"janesmith"
+			},
+			{
+				"name": "Michael Smith",
+				"username":"michaelsmith"
+			}
 		],
 		"primary_url": "http://example.com/programming",
 		"other_urls": [
@@ -53,15 +80,23 @@
 	{
 		"title": "Introduction to Machine Learning",
 		"description": "A comprehensive guide to machine learning algorithms and techniques.",
-		"owner_name": "Emily Johnson",
-		"other_names": [
-			"David Johnson",
-			"Sophia Johnson"
-		],
-		"owner_username": "emilyj",
-		"other_usernames": [
-			"davidj",
-			"sophiaj"
+		"owner": {
+			"name": "Emily Johnson",
+			"username": "emilyj"
+		},
+		"contributors": [
+			{
+				"name": "Emily Johnson",
+				"username": "emilyj"
+			},
+			{
+				"name": "David Johnson",
+				"username":"davidj"
+			},
+			{
+				"name": "Sophia Johnson",
+				"username":"sophiaj"
+			}
 		],
 		"primary_url": "http://example.com/machine-learning",
 		"other_urls": [
@@ -77,15 +112,15 @@
 	{
 		"title": "The Art of Photography",
 		"description": "A book on the art of photography and capturing stunning images.",
-		"owner_name": "Sarah Thompson",
-		"other_names": [
-			"Daniel Thompson",
-			"Olivia Thompson"
-		],
-		"owner_username": "sthompson",
-		"other_usernames": [
-			"dthompson",
-			"othompson"
+		"owner": {
+			"name": "Sarah Thompson",
+			"username": "sthompson"
+		},
+		"contributors": [
+			{
+				"name": "Sarah Thompson",
+				"username": "sthompson"
+			}
 		],
 		"primary_url": "http://example.com/photography",
 		"other_urls": [
@@ -101,15 +136,19 @@
 	{
 		"title": "The Science of Climate Change",
 		"description": "A comprehensive guide to the science of climate change and its impact on the environment.",
-		"owner_name": "Michael Brown",
-		"other_names": [
-			"Emma Brown",
-			"Jacob Brown"
-		],
-		"owner_username": "michaelb",
-		"other_usernames": [
-			"emmab",
-			"jacobb"
+		"owner": {
+			"name": "Michael Brown",
+			"username": "michaelb"
+		},
+		"contributors": [
+			{
+				"name": "Emma Brown",
+				"username":"emmab"
+			},
+			{
+				"name": "Jacob Brown",
+				"username":"jacobb"
+			}
 		],
 		"primary_url": "http://example.com/climate-change",
 		"other_urls": [
@@ -125,15 +164,19 @@
 	{
 		"title": "The Art of Cooking",
 		"description": "A book on the art of cooking and preparing delicious meals.",
-		"owner_name": "Reginald Gibbons",
-		"other_names": [
-			"Carlos Rodriguez",
-			"Sofia Rodriguez"
-		],
-		"owner_username": "reginald",
-		"other_usernames": [
-			"crodriguez",
-			"srodriguez"
+		"owner": {
+			"name": "Reginald Gibbons",
+			"username": "reginald"
+		},
+		"contributors": [
+			{
+				"name": "Carlos Rodriguez",
+				"username":"crodriguez"
+			},
+			{
+				"name": "Sofia Rodriguez",
+				"username":"srodriguez"
+			}
 		],
 		"primary_url": "http://example.com/cooking",
 		"other_urls": [
@@ -149,15 +192,19 @@
 	{
 		"title": "The Art of Music",
 		"description": "A book on the art of music and creating beautiful melodies.",
-		"owner_name": "James Wilson",
-		"other_names": [
-			"Emma Wilson",
-			"Oliver Wilson"
-		],
-		"owner_username": "jwilson",
-		"other_usernames": [
-			"ewilson",
-			"owilson"
+		"owner": {
+			"name": "James Wilson",
+			"username": "jwilson"
+		},
+		"contributors": [
+			{
+				"name": "Emma Wilson",
+				"username":"ewilson"
+			},
+			{
+				"name": "Oliver Wilson",
+				"username":"owilson"
+			}
 		],
 		"primary_url": "http://example.com/music",
 		"other_urls": [
@@ -173,15 +220,19 @@
 	{
 		"title": "The Art of Painting",
 		"description": "A book on the art of painting and creating stunning artworks.",
-		"owner_name": "Sophie Clark",
-		"other_names": [
-			"Daniel Clark",
-			"Olivia Clark"
-		],
-		"owner_username": "sclark",
-		"other_usernames": [
-			"dclark",
-			"oclark"
+		"owner": {
+			"name": "Sophie Clark",
+			"username": "sclark"
+		},
+		"contributors": [
+			{
+				"name": "Daniel Clark",
+				"username":"dclark"
+			},
+			{
+				"name": "Olivia Clark",
+				"username":"oclark"
+			}
 		],
 		"primary_url": "http://example.com/painting",
 		"other_urls": [
@@ -197,15 +248,19 @@
 	{
 		"title": "La Ciencia del Cambio Climático",
 		"description": "Una guía completa sobre la ciencia del cambio climático y su impacto en el medio ambiente.",
-		"owner_name": "María López",
-		"other_names": [
-			"Carlos López",
-			"Sofía López"
-		],
-		"owner_username": "mlopez",
-		"other_usernames": [
-			"clopez",
-			"slopez"
+		"owner": {
+			"name": "María López",
+			"username": "mlopez"
+		},
+		"contributors": [
+			{
+				"name": "Carlos López",
+				"username":"clopez"
+			},
+			{
+				"name": "Sofía López",
+				"username":"slopez"
+			}
 		],
 		"primary_url": "http://example.com/cambio-climatico",
 		"other_urls": [
@@ -221,15 +276,19 @@
 	{
 		"title": "A Arte da Culinária",
 		"description": "Um livro sobre a arte da culinária e preparação de refeições deliciosas.",
-		"owner_name": "João Silva",
-		"other_names": [
-			"Ana Silva",
-			"Pedro Silva"
-		],
-		"owner_username": "jsilva",
-		"other_usernames": [
-			"asilva",
-			"psilva"
+		"owner": {
+			"name": "João Silva",
+			"username": "jsilva"
+		},
+		"contributors": [
+			{
+				"name": "Ana Silva",
+				"username":"asilva"
+			},
+			{
+				"name": "Pedro Silva",
+				"username":"psilva"
+			}
 		],
 		"primary_url": "http://example.com/culinaria",
 		"other_urls": [
@@ -245,15 +304,19 @@
 	{
 		"title": "L'Art de la Musique",
 		"description": "Un livre sur l'art de la musique et la création de belles mélodies.",
-		"owner_name": "Élise Martin",
-		"other_names": [
-			"Lucas Martin",
-			"Camille Martin"
-		],
-		"owner_username": "emartin",
-		"other_usernames": [
-			"lmartin",
-			"cmartin"
+		"owner": {
+			"name": "Élise Martin",
+			"username": "emartin"
+		},
+		"contributors": [
+			{
+				"name": "Lucas Martin",
+				"username":"lmartin"
+			},
+			{
+				"name": "Camille Martin",
+				"username":"cmartin"
+			}
 		],
 		"primary_url": "http://example.com/musique",
 		"other_urls": [
@@ -269,15 +332,19 @@
 	{
 		"title": "中国历史概览",
 		"description": "一本关于中国历史的概览书籍，介绍了中国的历史事件和文化。",
-		"owner_name": "张伟",
-		"other_names": [
-			"李明",
-			"王丽"
-		],
-		"owner_username": "zhangwei",
-		"other_usernames": [
-			"liming",
-			"wangli"
+		"owner": {
+			"name": "张伟",
+			"username": "zhangwei"
+		},
+		"contributors": [
+			{
+				"name": "李明",
+				"username":"liming"
+			},
+			{
+				"name": "王丽",
+				"username":"wangli"
+			}
 		],
 		"primary_url": "http://example.com/history",
 		"other_urls": [
@@ -293,15 +360,19 @@
 	{
 		"title": "中國藝術欣賞",
 		"description": "一本关于中国艺术欣赏的书籍，介绍了中国传统艺术和现代艺术。",
-		"owner_name": "王小红",
-		"other_names": [
-			"李大明",
-			"张美丽"
-		],
-		"owner_username": "wangxiaohong",
-		"other_usernames": [
-			"lidaming",
-			"zhangmeili"
+		"owner": {
+			"name": "王小红",
+			"username": "wangxiaohong"
+		},
+		"contributors": [
+			{
+				"name": "李大明",
+				"username":"lidaming"
+			},
+			{
+				"name": "张美丽",
+				"username":"zhangmeili"
+			}
 		],
 		"primary_url": "http://example.com/art",
 		"other_urls": [
@@ -317,15 +388,19 @@
 	{
 		"title": "日本の歴史概要",
 		"description": "日本の歴史についての概要書で、日本の歴史的な出来事や文化を紹介しています。",
-		"owner_name": "田中太郎",
-		"other_names": [
-			"山田花子",
-			"鈴木一郎"
-		],
-		"owner_username": "tanakataro",
-		"other_usernames": [
-			"yamadahanako",
-			"suzukiichiro"
+		"owner": {
+			"name": "田中太郎",
+			"username": "tanakataro"
+		},
+		"contributors": [
+			{
+				"name": "山田花子",
+				"username":"yamadahanako"
+			},
+			{
+				"name": "鈴木一郎",
+				"username":"suzukiichiro"
+			}
 		],
 		"primary_url": "http://example.com/history",
 		"other_urls": [
@@ -341,15 +416,19 @@
 	{
 		"title": "فن الطهي العربي",
 		"description": "كتاب يتحدث عن فن الطهي العربي وتقديم الأطباق الشهية.",
-		"owner_name": "فاطمة خالد",
-		"other_names": [
-			"أحمد محمد",
-			"سارة علي"
-		],
-		"owner_username": "fatimakh",
-		"other_usernames": [
-			"ahmedm",
-			"saraa"
+		"owner": {
+			"name": "فاطمة خالد",
+			"username": "fatimakh"
+		},
+		"contributors": [
+			{
+				"name": "أحمد محمد",
+				"username":"ahmedm"
+			},
+			{
+				"name": "سارة علي",
+				"username":"saraa"
+			}
 		],
 		"primary_url": "http://example.com/cooking",
 		"other_urls": [
@@ -365,15 +444,19 @@
 	{
 		"title": "الشعر العربي الكلاسيكي",
 		"description": "كتاب يتحدث عن الشعر العربي الكلاسيكي وأهم شعراءه.",
-		"owner_name": "محمد عبدالله",
-		"other_names": [
-			"أميرة أحمد",
-			"علي حسن"
-		],
-		"owner_username": "mohameda",
-		"other_usernames": [
-			"amiraah",
-			"alih"
+		"owner": {
+			"name": "محمد عبدالله",
+			"username": "mohameda"
+		},
+		"contributors": [
+			{
+				"name": "أميرة أحمد",
+				"username":"amiraah"
+			},
+			{
+				"name": "علي حسن",
+				"username":"alih"
+			}
 		],
 		"primary_url": "http://example.com/poetry",
 		"other_urls": [
@@ -389,15 +472,19 @@
 	{
 		"title": "The Art of Landscape Photography",
 		"description": "A book about the art of landscape photography, showcasing breathtaking natural landscapes.",
-		"owner_name": "John Smith",
-		"other_names": [
-			"Samantha Roberts",
-			"David Thompson"
-		],
-		"owner_username": "johnsmith",
-		"other_usernames": [
-			"samanthar",
-			"davidth"
+		"owner": {
+			"name": "John Smith",
+			"username": "johnsmith"
+		},
+		"contributors": [
+			{
+				"name": "Samantha Roberts",
+				"username":"samanthar"
+			},
+			{
+				"name": "David Thompson",
+				"username":"davidth"
+			}
 		],
 		"primary_url": "http://example.com/landscape-photography",
 		"other_urls": [
@@ -413,15 +500,19 @@
 	{
 		"title": "The Art of Portrait Photography",
 		"description": "A book about the art of portrait photography, capturing the essence and personality of individuals.",
-		"owner_name": "John Smith",
-		"other_names": [
-			"Olivia Wilson",
-			"Daniel Brown"
-		],
-		"owner_username": "johnsmith",
-		"other_usernames": [
-			"oliviaw",
-			"danielb"
+		"owner": {
+			"name": "John Smith",
+			"username": "johnsmith"
+		},
+		"contributors": [
+			{
+				"name": "Olivia Wilson",
+				"username":"oliviaw"
+			},
+			{
+				"name": "Daniel Brown",
+				"username":"danielb"
+			}
 		],
 		"primary_url": "http://example.com/portrait-photography",
 		"other_urls": [
@@ -437,15 +528,19 @@
 	{
 		"title": "The Art of Street Photography",
 		"description": "A book about the art of street photography, capturing candid moments in urban environments.",
-		"owner_name": "John Smith",
-		"other_names": [
-			"Emma Thompson",
-			"James Anderson"
-		],
-		"owner_username": "johnsmith",
-		"other_usernames": [
-			"emmat",
-			"jamesa"
+		"owner": {
+			"name": "John Smith",
+			"username": "johnsmith"
+		},
+		"contributors": [
+			{
+				"name": "Emma Thompson",
+				"username":"emmat"
+			},
+			{
+				"name": "James Anderson",
+				"username":"jamesa"
+			}
 		],
 		"primary_url": "http://example.com/street-photography",
 		"other_urls": [
@@ -462,15 +557,19 @@
 	{
 		"title": "The Art of Abstract Photography",
 		"description": "A book about the art of abstract photography, capturing unique and unconventional perspectives.",
-		"owner_name": "John Smith",
-		"other_names": [
-			"Michael Johnson",
-			"Sophia Wilson"
-		],
-		"owner_username": "johnsmith",
-		"other_usernames": [
-			"michaelj",
-			"sophiaw"
+		"owner": {
+			"name": "John Smith",
+			"username": "johnsmith"
+		},
+		"contributors": [
+			{
+				"name": "Michael Johnson",
+				"username":"michaelj"
+			},
+			{
+				"name": "Sophia Wilson",
+				"username":"sophiaw"
+			}
 		],
 		"primary_url": "http://example.com/abstract-photography",
 		"other_urls": [

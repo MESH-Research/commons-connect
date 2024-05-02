@@ -80,10 +80,7 @@ func Search(searcher types.Searcher, params types.SearchParams) ([]types.Documen
 	if err != nil {
 		return nil, err
 	}
-	docs, err := searchResultToDocuments(&searchResult), nil
-	if err != nil {
-		return nil, err
-	}
+	docs := searchResultToDocuments(&searchResult)
 	if len(params.ReturnFields) > 0 {
 		for i := range docs {
 			docs[i].FilterByJSON(params.ReturnFields)
@@ -121,9 +118,9 @@ func TypeAheadSearch(searcher types.Searcher, query string) ([]types.Document, e
 	if err != nil {
 		return nil, err
 	}
-	docs, err := searchResultToDocuments(&searchResult), nil
-	if err != nil {
-		return nil, err
+	docs := searchResultToDocuments(&searchResult)
+	for i := range docs {
+		docs[i].FilterByJSON([]string{"title", "primary_url", "other_urls"})
 	}
 	return docs, nil
 }

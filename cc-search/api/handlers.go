@@ -182,6 +182,8 @@ func handleSearch(c *gin.Context) {
 				return
 			}
 			params.PerPage = perPage
+		case "username":
+			params.ExactMatch["contributors.username"] = val[0]
 		default:
 			params.ExactMatch[key] = val[0]
 		}
