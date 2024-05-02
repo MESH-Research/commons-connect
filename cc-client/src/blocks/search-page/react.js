@@ -154,68 +154,80 @@ function Paginator() {
 		</footer>
 	);
 }
-function generateSampleJson(options) {
-	const record = {
-		title: "",
-		description: "",
-		owner_name: "",
-		other_names: [],
-		owner_username: "",
-		other_usernames: [],
-		primary_url: "",
-		other_urls: [],
-		thumbnail_url: "",
-		content: "",
-		publication_date: "",
-		modified_date: "",
-		language: "",
-		content_type: "",
-		network_node: "",
-	};
-	return { ...record, ...options };
-}
 const sampleResults = [
-	generateSampleJson({
+	{
 		title: "Result 1",
 		description:
 			"Cheesecake lemon drops tart macaroon jujubes pie. Bear claw tart lollipop oat cake marshmallow jujubes chocolate bar carrot cake. Candy  canes gummies dragée jelly beans chocolate cake...",
-		owner_name: "Administrator",
+		owner: {
+			name: "Administrator",
+			username: "reginald",
+			url: "http://profiles.kcommons.org/reginald",
+		},
 		thumbnail_url: "https://placehold.co/200x75/000000/FFF",
 		publication_date: "2023-11-21",
 		language: "en",
 		content_type: "site",
-	}),
-	generateSampleJson({
+	},
+	{
 		title: "Result 2",
 		description:
 			"Cheesecake lemon drops tart macaroon jujubes pie. Bear claw tart lollipop oat cake marshmallow jujubes chocolate bar carrot cake. Candy  canes gummies dragée jelly beans chocolate cake...",
 		language: "en",
 		content_type: "group",
-	}),
-	generateSampleJson({
+	},
+	{
 		title: "Result 3",
 		description:
 			"Cheesecake lemon drops tart macaroon jujubes pie. Bear claw tart lollipop oat cake marshmallow jujubes chocolate bar carrot cake. Candy  canes gummies dragée jelly beans chocolate cake...",
 		language: "en",
 		content_type: "profile",
-	}),
-	generateSampleJson({
+	},
+	{
 		title: "Deposit 1",
 		description:
 			"Cheesecake lemon drops tart macaroon jujubes pie. Bear claw tart lollipop oat cake marshmallow jujubes chocolate bar carrot cake. Candy  canes gummies dragée jelly beans chocolate cake...",
-		owner_name: "Author",
+		owner: {
+			name: "Author",
+			url: "",
+		},
 		publication_date: "2023-11-21",
 		language: "en",
 		content_type: "deposit",
-	}),
-	generateSampleJson({
+	},
+	{
 		title: "On Open Scholarship",
 		description:
 			"An essay on the nature of open scholarship and the role of the library in supporting it.",
-		owner_name: "Reginald Gibbons",
-		other_names: ["Edwina Gibbons", "Obadiah Gibbons", "Lila Gibbons"],
-		owner_username: "reginald",
-		other_usernames: ["edwina", "obadiah", "lila"],
+		owner: {
+			name: "Reginald Gibbons",
+			username: "reginald",
+			url: "http://profiles.kcommons.org/reginald",
+		},
+		contributors: [
+			{
+				name: "Reginald Gibbons",
+				username: "reginald",
+				url: "http://profiles.kcommons.org/reginald",
+				role: "first author",
+				network_node: "mla",
+			},
+			{
+				name: "Edwina Gibbons",
+				username: "edwina",
+				url: "http://profiles.kcommons.org/edwina",
+				role: "author",
+				network_node: "hc",
+			},
+			{
+				name: "Obadiah Gibbons",
+				username: "obadiah",
+			},
+			{
+				name: "Lila Gibbons",
+				username: "lila",
+			},
+		],
 		primary_url: "http://works.kcommons.org/records/1234",
 		other_urls: [
 			"http://works.hcommons.org/records/1234",
@@ -230,9 +242,34 @@ const sampleResults = [
 		language: "en",
 		content_type: "deposit",
 		network_node: "works",
-	}),
+	},
 ];
 const resultsData = sampleResults;
+function generateSampleJson(options) {
+	const record = {
+		title: "",
+		description: "",
+		owner: {
+			name: "",
+		},
+		contributors: [],
+		primary_url: "#",
+		other_urls: [],
+		thumbnail_url: "",
+		content: "",
+		publication_date: "",
+		modified_date: "",
+		language: "",
+		content_type: "",
+		network_node: "",
+	};
+	return { ...record, ...options };
+}
+function pushResults() {
+	sampleResults.forEach((result) => {
+		resultsData.push(generateSampleJson(result));
+	});
+}
 function getContentTypeLabel(type) {
 	const labels = {
 		profile: "Profile",
@@ -258,6 +295,23 @@ function getDateLabel(publication_date, modified_date) {
 	}
 	return date;
 }
+function renderContributor(data) {
+	if (Object.hasOwn(data, "owner")) {
+		if (Object.hasOwn(data.owner, "url") && Object.hasOwn(data.owner, "name")) {
+			return (
+				<a href={data.owner.url} className="ccs-result-person">
+					{data.owner.name}
+				</a>
+			);
+		}
+		if (Object.hasOwn(data.owner, "name")) {
+			return <span className="ccs-result-person">{data.owner.name}</span>;
+		}
+		return null;
+	} else {
+		return null;
+	}
+}
 function SearchResult({ data, index }) {
 	const dateLabel = getDateLabel(data.publication_date, data.modified_date);
 	return (
@@ -269,11 +323,7 @@ function SearchResult({ data, index }) {
 				<a href={data.primary_url} className="ccs-result-title">
 					{data.title}
 				</a>
-				{data.owner_name && (
-					<a href="#" className="ccs-result-person">
-						{data.owner_name}
-					</a>
-				)}
+				{renderContributor(data)}
 				{dateLabel && <span className="ccs-date">{dateLabel}</span>}
 			</header>
 			<div className="ccs-result-description">
