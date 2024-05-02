@@ -156,3 +156,36 @@ These fields apply both to indexing and searching documents:
 - `content_type` (string) - The type of content. Possible values are `deposit`, `post`, `profile`, `group`, `site`, and `discussion`
 - `network_node` (string) - The network node of the document (`works`, `hc`, `mla`, `hastac`, `up`, `arlisna`, `msu`, `sah`, `stemedplus` )
 	
+
+## Search Response
+
+Search responses are formatted like so:
+
+```json
+{
+	"total": 2,
+	"page": 1,
+	"per_page": 20,
+	"request_id": "2GE9SqY0Bdd2QL-HGeUuA",
+	"hits": [
+		{
+			"_id": "2E9SqY0Bdd2QL-HGeUuA",
+			"title": "On Open Scholarship",
+			"primary_url": "http://works.kcommons.org/records/1234",
+			...
+		},
+		{
+			"_id": "234jdfg3w4rerf23dsf",
+			"title": "The Art of Programming",
+			"primary_url": "http://example.com/machine-learning",
+			...
+		}
+	]
+}
+```
+
+- `total` (int) - The total number of results
+- `page` (int) - The current page of results, indexed from 1
+- `per_page` (int) - The number of results per page
+- `hits` (array) - An array of search results
+- `request_id` (string) - A unique identifier for the search request
