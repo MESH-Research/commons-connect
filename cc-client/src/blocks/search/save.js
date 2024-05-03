@@ -4,7 +4,31 @@
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
  */
-import { useBlockProps } from '@wordpress/block-editor';
+import { useBlockProps } from "@wordpress/block-editor";
+
+import { useState } from "react";
+
+const CustomDateRange = () => {
+	const [ className, setClassName ] = useState( '' );
+	const handleChange = (event) => {
+		setClassName(event.target.value);
+		console.log(event.target.value);
+	  };
+	return (
+		<div className="ccs-row ccs-date-ranges">
+			<label>
+				<span>End Date</span>
+				<br />
+				<input
+					type="text"
+					name="customEndDate"
+					value={ className }
+					onChange={ ( v ) => handleChange( v )}
+				/>
+			</label>
+		</div>
+	);
+}
 
 /**
  * The save function defines the way in which the different attributes should
@@ -17,8 +41,6 @@ import { useBlockProps } from '@wordpress/block-editor';
  */
 export default function save() {
 	return (
-		<p { ...useBlockProps.save() }>
-			{ 'Search Page – hello from the saved content!' }
-		</p>
+		<CustomDateRange {...useBlockProps.save()} />
 	);
 }

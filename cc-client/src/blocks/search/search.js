@@ -1,5 +1,4 @@
-const { useState, useEffect } = React;
-const rootElement = document.getElementById("root");
+import { useState } from "react";
 function useFormInput(initialValue) {
 	const [value, setValue] = useState(initialValue);
 	function handleChange(e) {
@@ -52,7 +51,6 @@ function Paginator() {
 		slots = data.map((slot) => {
 			return makeSlot(slot);
 		});
-		console.log(slots);
 	}
 	if (exceedsMaxDisplay) {
 		if (pageData.currentPage <= 4) {
@@ -339,7 +337,7 @@ function SearchResult({ data, index }) {
 		</section>
 	);
 }
-function CCSearch() {
+export default function CCSearch() {
 	const searchType = useFormInput("all");
 	const sortBy = useFormInput("relevance");
 	const dateRange = useFormInput("anytime");
@@ -418,5 +416,3 @@ function CCSearch() {
 		</main>
 	);
 }
-const app = <CCSearch />;
-ReactDOM.render(app, rootElement);
