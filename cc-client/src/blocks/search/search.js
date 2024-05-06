@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState } from "@wordpress/element";
+
 function useFormInput(initialValue) {
 	const [value, setValue] = useState(initialValue);
 	function handleChange(e) {
