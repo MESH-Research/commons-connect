@@ -39,7 +39,7 @@ function CustomDateRange({ dateRangeValue }) {
 function Paginator() {
 	let [pageData, setPageData] = useState({
 		currentPage: 1,
-		totalPages: 17,
+		totalPages: 9,
 		perPage: 5,
 	});
 	let exceedsMaxDisplay = pageData.totalPages > 7;
@@ -139,13 +139,24 @@ function Paginator() {
 				aria-label="Select a page of search results"
 				className="ccs-footer-nav"
 			>
-				<button onClick={decrementPage} disabled={pageData.currentPage === 1}>
+				<button
+					onClick={decrementPage}
+					disabled={pageData.currentPage === 1}
+					aria-label={
+						pageData.currentPage !== 1 ?
+						"Previous Page " + (pageData.currentPage - 1) : null
+					}
+				>
 					Previous
 				</button>
 				{slotMarkup}
 				<button
 					onClick={incrementPage}
 					disabled={pageData.currentPage === pageData.totalPages}
+					aria-label={
+						pageData.currentPage !== pageData.totalPages ?
+						"Next Page " + (pageData.currentPage + 1) : null
+					}
 				>
 					Next
 				</button>
