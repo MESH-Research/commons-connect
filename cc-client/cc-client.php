@@ -38,7 +38,7 @@ function enqueue_client_block_assets() {
 		$asset_file['version']
 	);
 
-	$asset_file = include CC_CLIENT_BASE_DIR . 'build/search/front.asset.php';
+	$asset_file = include CC_CLIENT_BASE_DIR . 'build/search/view.asset.php';
 	wp_enqueue_style(
 		'cc-client-search',
 		CC_CLIENT_BASE_URL . 'build/search/style-view.css',
