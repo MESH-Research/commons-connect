@@ -143,8 +143,9 @@ function Paginator() {
 					onClick={decrementPage}
 					disabled={pageData.currentPage === 1}
 					aria-label={
-						pageData.currentPage !== 1 ?
-						"Previous Page " + (pageData.currentPage - 1) : null
+						pageData.currentPage !== 1
+							? "Previous Page " + (pageData.currentPage - 1)
+							: null
 					}
 				>
 					Previous
@@ -154,8 +155,9 @@ function Paginator() {
 					onClick={incrementPage}
 					disabled={pageData.currentPage === pageData.totalPages}
 					aria-label={
-						pageData.currentPage !== pageData.totalPages ?
-						"Next Page " + (pageData.currentPage + 1) : null
+						pageData.currentPage !== pageData.totalPages
+							? "Next Page " + (pageData.currentPage + 1)
+							: null
 					}
 				>
 					Next
@@ -254,7 +256,7 @@ const sampleResults = [
 		network_node: "works",
 	},
 ];
-const resultsData = sampleResults;
+const resultsData = [];
 function generateSampleJson(options) {
 	const record = {
 		title: "",
@@ -280,6 +282,7 @@ function pushResults() {
 		resultsData.push(generateSampleJson(result));
 	});
 }
+// pushResults();
 function getContentTypeLabel(type) {
 	const labels = {
 		profile: "Profile",
@@ -346,6 +349,13 @@ function SearchResult({ data, index }) {
 				)}
 				<p>{data.description}</p>
 			</div>
+		</section>
+	);
+}
+function NoData() {
+	return (
+		<section>
+			<p>No results found.</p>
 		</section>
 	);
 }
@@ -420,11 +430,15 @@ export default function CCSearch() {
 				</aside>
 			</article>
 			<article>
-				{resultsData.map(function (result, i) {
-					return <SearchResult index={i} data={result} />;
-				})}
+				{resultsData.length > 0 ? (
+					resultsData.map(function (result, i) {
+						return <SearchResult index={i} data={result} />;
+					})
+				) : (
+					<NoData />
+				)}
 			</article>
-			<Paginator />
+			{resultsData.length > 0 ? <Paginator /> : null}
 		</main>
 	);
 }
