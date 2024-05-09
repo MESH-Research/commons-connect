@@ -102,12 +102,13 @@ function Paginator() {
 			);
 		}
 	}
-	const slotMarkup = slots.map((slot) => {
+	const slotMarkup = slots.map((slot, index) => {
 		if (slot.clickable === false) {
-			return <span className="ccs-page-link">{slot.label}</span>;
+			return <span key={index} className="ccs-page-link">{slot.label}</span>;
 		}
 		return (
 			<a
+				key={index}
 				href="#"
 				onClick={(e) => setPage(e, slot.value)}
 				style={pageData.currentPage == slot.value ? { fontWeight: "bold" } : {}}
@@ -282,7 +283,7 @@ function pushResults() {
 		resultsData.push(generateSampleJson(result));
 	});
 }
-// pushResults();
+pushResults();
 function getContentTypeLabel(type) {
 	const labels = {
 		profile: "Profile",
@@ -325,7 +326,7 @@ function renderContributor(data) {
 		return null;
 	}
 }
-function SearchResult({ data, index }) {
+function SearchResult({ index, data }) {
 	const dateLabel = getDateLabel(data.publication_date, data.modified_date);
 	return (
 		<section className="ccs-result" key={index}>
@@ -359,7 +360,19 @@ function NoData() {
 		</section>
 	);
 }
+function SearchResultSection(searchTerm) {
+	if (resultsData.length === 0 && searchTerm.value !== "") {
+		return <NoData />;
+	} else if (resultsData.length > 0 && searchTerm.value !== "") {
+		return resultsData.map(function (result, i) {
+			return <SearchResult index={i} data={result} />;
+		});
+	} else {
+		return null;
+	}
+}
 export default function CCSearch() {
+	const searchTerm = useFormInput("");
 	const searchType = useFormInput("all");
 	const sortBy = useFormInput("relevance");
 	const dateRange = useFormInput("anytime");
@@ -372,7 +385,7 @@ export default function CCSearch() {
 							<label>
 								<span className="ccs-label">Search</span>
 								<br />
-								<input type="search" name="ccSearch" />
+								<input type="search" name="ccSearch" {...searchTerm} />
 								<button aria-label="Search">🔍</button>
 							</label>
 						</div>
@@ -425,20 +438,14 @@ export default function CCSearch() {
 					</form>
 				</search>
 				<aside className="ccs-aside">
-					<p>Want to search deposits/works more specifically?</p>
-					<a href="#">Advanced Search</a>
+					<p>Want a more refined search for deposits/works?</p>
+					<a href="#">KC Works</a>
 				</aside>
 			</article>
 			<article>
-				{resultsData.length > 0 ? (
-					resultsData.map(function (result, i) {
-						return <SearchResult index={i} data={result} />;
-					})
-				) : (
-					<NoData />
-				)}
+				<SearchResultSection searchTerm={searchTerm} />
+				{resultsData.length > 0 && searchTerm.value != "" && <Paginator />}
 			</article>
-			{resultsData.length > 0 ? <Paginator /> : null}
 		</main>
 	);
 }
