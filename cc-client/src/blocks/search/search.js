@@ -371,8 +371,12 @@ function SearchResultSection(searchTerm) {
 		return null;
 	}
 }
+function getSearchTermFromUrl() {
+	const urlParams = new URLSearchParams(window.location.search);
+	return urlParams.get("search") ?? "";
+}
 export default function CCSearch() {
-	const searchTerm = useFormInput("");
+	const searchTerm = useFormInput(getSearchTermFromUrl());
 	const searchType = useFormInput("all");
 	const sortBy = useFormInput("relevance");
 	const dateRange = useFormInput("anytime");
