@@ -326,10 +326,10 @@ function renderContributor(data) {
 		return null;
 	}
 }
-function SearchResult({ index, data }) {
+function SearchResult({ data }) {
 	const dateLabel = getDateLabel(data.publication_date, data.modified_date);
 	return (
-		<section className="ccs-result" key={index}>
+		<section className="ccs-result">
 			<header className="ccs-row ccs-result-header">
 				<span className="ccs-tag">
 					{getContentTypeLabel(data.content_type)}
@@ -365,7 +365,7 @@ function SearchResultSection(searchTerm) {
 		return <NoData />;
 	} else if (resultsData.length > 0 && searchTerm.value !== "") {
 		return resultsData.map(function (result, i) {
-			return <SearchResult index={i} data={result} />;
+			return <SearchResult key={i} data={result} />;
 		});
 	} else {
 		return null;
