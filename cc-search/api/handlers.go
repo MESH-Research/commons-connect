@@ -59,7 +59,7 @@ func handleNewDocument(c *gin.Context) {
 		return
 	}
 	log.Println("Received document ID: ", indexedDocument.ID)
-	indexedDocument.Filter([]string{"ID", "Title", "PrimaryURL"})
+	indexedDocument.Filter([]string{"InternalID", "ID", "Title", "PrimaryURL"})
 	c.JSON(http.StatusOK, indexedDocument)
 }
 
@@ -87,7 +87,7 @@ func handleBulkNewDocuments(c *gin.Context) {
 		return
 	}
 	for i := range indexedDocuments {
-		indexedDocuments[i].Filter([]string{"ID", "Title", "PrimaryURL"})
+		indexedDocuments[i].Filter([]string{"InternalID", "ID", "Title", "PrimaryURL"})
 	}
 	c.JSON(http.StatusOK, indexedDocuments)
 }

@@ -11,4 +11,5 @@ type SearchParams struct {
 	SortField     string
 	Page          int
 	PerPage       int
+	RequestID     string
 }

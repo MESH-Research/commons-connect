@@ -80,6 +80,9 @@ func TestNewDocument(t *testing.T) {
 	if responseDoc.ID == `` {
 		t.Fatalf("Response did not contain an ID")
 	}
+	if responseDoc.InternalID == `` {
+		t.Fatalf("Response did not contain an internal ID")
+	}
 	req, _ = http.NewRequest("GET", "/v1/documents/"+responseDoc.ID, nil)
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
@@ -100,6 +103,9 @@ func TestNewDocument(t *testing.T) {
 	}
 	if retrievedDoc.Owner.URL != indexedDocument.Owner.URL {
 		t.Fatalf("Expected document owner URL %s, got %s", indexedDocument.Owner.URL, retrievedDoc.Owner.URL)
+	}
+	if retrievedDoc.InternalID != responseDoc.InternalID {
+		t.Fatalf("Expected internal ID %s, got %s", responseDoc.InternalID, retrievedDoc.InternalID)
 	}
 	assert.Equal(t, len(indexedDocument.Contributors), len(retrievedDoc.Contributors))
 }
@@ -137,6 +143,9 @@ func TestUpdateDocument(t *testing.T) {
 	}
 	if updatedDocument.Title != indexedDocument.Title {
 		t.Fatalf("Expected title %s, got %s", indexedDocument.Title, updatedDocument.Title)
+	}
+	if updatedDocument.InternalID != indexedDocument.InternalID {
+		t.Fatalf("Expected internal ID %s, got %s", indexedDocument.InternalID, updatedDocument.InternalID)
 	}
 }
 
@@ -262,6 +271,9 @@ func TestBulkIndexDocument(t *testing.T) {
 		if doc.Content != `` {
 			t.Fatalf("Response contained content")
 		}
+		if doc.InternalID == `` {
+			t.Fatalf("Response did not contain an internal ID")
+		}
 	}
 }
 
@@ -281,13 +293,13 @@ func TestBasicSearch(t *testing.T) {
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
-	var results []types.Document
-	err := json.NewDecoder(w.Body).Decode(&results)
+	var response types.SearchResponse
+	err := json.NewDecoder(w.Body).Decode(&response)
 	if err != nil {
-		t.Fatalf("Error decoding search results: %v", err)
+		t.Fatalf("Error decoding search response: %v", err)
 	}
-	if len(results) < 1 {
-		t.Fatalf("Expected at least one result, got %d", len(results))
+	if len(response.Hits) < 1 {
+		t.Fatalf("Expected at least one result, got %d", len(response.Hits))
 	}
 }
 
@@ -307,13 +319,13 @@ func TestExactMatchSearch(t *testing.T) {
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
-	var results []types.Document
-	err := json.NewDecoder(w.Body).Decode(&results)
+	var response types.SearchResponse
+	err := json.NewDecoder(w.Body).Decode(&response)
 	if err != nil {
-		t.Fatalf("Error decoding search results: %v", err)
+		t.Fatalf("Error decoding search response: %v", err)
 	}
-	if len(results) != 2 {
-		t.Fatalf("Expected 2 results, got %d", len(results))
+	if len(response.Hits) != 2 {
+		t.Fatalf("Expected 2 results, got %d", len(response.Hits))
 	}
 }
 
@@ -333,15 +345,15 @@ func TestFilteredSearch(t *testing.T) {
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
-	var results []types.Document
-	err := json.NewDecoder(w.Body).Decode(&results)
+	var response types.SearchResponse
+	err := json.NewDecoder(w.Body).Decode(&response)
 	if err != nil {
-		t.Fatalf("Error decoding search results: %v", err)
+		t.Fatalf("Error decoding search response: %v", err)
 	}
-	if len(results) != 2 {
-		t.Fatalf("Expected 2 results, got %d", len(results))
+	if len(response.Hits) != 2 {
+		t.Fatalf("Expected 2 results, got %d", len(response.Hits))
 	}
-	for _, doc := range results {
+	for _, doc := range response.Hits {
 		if doc.Title == `` {
 			t.Fatalf("Expected title, got empty string")
 		}
@@ -370,16 +382,16 @@ func TestSearchSortedByDate(t *testing.T) {
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
-	var results []types.Document
-	err := json.NewDecoder(w.Body).Decode(&results)
+	var response types.SearchResponse
+	err := json.NewDecoder(w.Body).Decode(&response)
 	if err != nil {
-		t.Fatalf("Error decoding search results: %v", err)
+		t.Fatalf("Error decoding search response: %v", err)
 	}
-	if len(results) == 0 {
+	if len(response.Hits) == 0 {
 		t.Fatalf("No results returned")
 	}
-	for i := 0; i < len(results)-1; i++ {
-		if results[i].PublicationDate < results[i+1].PublicationDate {
+	for i := 0; i < len(response.Hits)-1; i++ {
+		if response.Hits[i].PublicationDate < response.Hits[i+1].PublicationDate {
 			t.Fatalf("Results not sorted by date")
 		}
 	}
@@ -401,15 +413,15 @@ func TestSearchDateRange(t *testing.T) {
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
-	var results []types.Document
-	err := json.NewDecoder(w.Body).Decode(&results)
+	var response types.SearchResponse
+	err := json.NewDecoder(w.Body).Decode(&response)
 	if err != nil {
-		t.Fatalf("Error decoding search results: %v", err)
+		t.Fatalf("Error decoding search response: %v", err)
 	}
-	if len(results) == 0 {
+	if len(response.Hits) == 0 {
 		t.Fatalf("No results returned")
 	}
-	for _, doc := range results {
+	for _, doc := range response.Hits {
 		if doc.PublicationDate < `2022-01-01` || doc.PublicationDate > `2022-05-31` {
 			t.Fatalf("Document outside of date range")
 		}
@@ -432,33 +444,33 @@ func TestSearchPagination(t *testing.T) {
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
-	var results []types.Document
-	err := json.NewDecoder(w.Body).Decode(&results)
+	var response types.SearchResponse
+	err := json.NewDecoder(w.Body).Decode(&response)
 	if err != nil {
-		t.Fatalf("Error decoding search results: %v", err)
+		t.Fatalf("Error decoding search response: %v", err)
 	}
-	totalResults := len(results)
+	totalResults := len(response.Hits)
 	remainingResults := totalResults
 	for i := 1; remainingResults < 0; i += 1 {
 		req, _ = http.NewRequest("GET", fmt.Sprintf("/v1/search?q=art&page=%d&per_page=5", i), nil)
 		w = httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 		assert.Equal(t, 200, w.Code)
-		var pageResults []types.Document
-		err = json.NewDecoder(w.Body).Decode(&pageResults)
+		var pageResponse types.SearchResponse
+		err = json.NewDecoder(w.Body).Decode(&pageResponse)
 		if err != nil {
 			t.Fatalf("Error decoding search results: %v", err)
 		}
 		if remainingResults >= 5 {
-			if len(pageResults) != 5 {
-				t.Fatalf("Expected 5 results, got %d", len(pageResults))
+			if len(pageResponse.Hits) != 5 {
+				t.Fatalf("Expected 5 results, got %d", len(pageResponse.Hits))
 			}
 		} else {
-			if len(pageResults) != remainingResults {
-				t.Fatalf("Expected %d results, got %d", remainingResults, len(pageResults))
+			if len(pageResponse.Hits) != remainingResults {
+				t.Fatalf("Expected %d results, got %d", remainingResults, len(pageResponse.Hits))
 			}
 		}
-		remainingResults -= len(pageResults)
+		remainingResults -= len(pageResponse.Hits)
 	}
 }
 
@@ -515,15 +527,15 @@ func TestUsernameSearch(t *testing.T) {
 	w = httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	assert.Equal(t, 200, w.Code)
-	var results []types.Document
-	err := json.NewDecoder(w.Body).Decode(&results)
+	var response types.SearchResponse
+	err := json.NewDecoder(w.Body).Decode(&response)
 	if err != nil {
-		t.Fatalf("Error decoding search results: %v", err)
+		t.Fatalf("Error decoding search response: %v", err)
 	}
-	if len(results) == 0 {
+	if len(response.Hits) == 0 {
 		t.Fatalf("No results returned")
 	}
-	for _, doc := range results {
+	for _, doc := range response.Hits {
 		if doc.Owner.Username != `reginald` {
 			t.Fatalf("Expected owner username reginald, got %s", doc.Owner.Username)
 		}

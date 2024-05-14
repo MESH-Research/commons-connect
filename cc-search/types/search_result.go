@@ -1,5 +1,6 @@
 package types
 
+// SearchResult is the struct that represents the response from an Elasticsearch search
 type SearchResult struct {
 	Took     int64 `json:"took"`
 	TimedOut bool  `json:"timed_out"`
