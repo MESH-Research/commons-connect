@@ -2,10 +2,10 @@
 /**
  * Register REST routes.
  * 
- * @package MESHResearch\CCClient
+ * @package MeshResearch\CCClient
  */
 
-namespace MESHResearch\CCClient;
+namespace MeshResearch\CCClient;
 
 require_once( plugin_dir_path( __FILE__ ) . 'OptionsController.php' );
 

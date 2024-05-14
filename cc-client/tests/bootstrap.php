@@ -7,7 +7,6 @@
 
 require 'vendor/autoload.php';
 
-xdebug_break();
 $_tests_dir = getenv( 'WP_TESTS_DIR' );
 echo "WP_TESTS_DIR: {$_tests_dir}" . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
@@ -33,9 +32,10 @@ require_once "{$_tests_dir}/includes/functions.php";
  * Manually load the plugin being tested.
  */
 function _manually_load_plugin() {
+	include dirname( dirname( __FILE__ ) ) . '/.lando/wordpress/wp-content/plugins/bbpress/bbpress.php';
 	require dirname( dirname( __FILE__ ) ) . '/cc-client.php';
-}
 
+}
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
 // Start up the WP testing environment.

@@ -2,10 +2,10 @@
 /**
  * Server-side control and rendering of profile block.
  * 
- * @package MESHResearch\CCClient
+ * @package MeshResearch\CCClient
  */
 
-namespace MESHResearch\CCClient;
+namespace MeshResearch\CCClient;
 
 function register_profile_block() {
 	register_block_type(
