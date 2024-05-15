@@ -104,7 +104,11 @@ function Paginator() {
 	}
 	const slotMarkup = slots.map((slot, index) => {
 		if (slot.clickable === false) {
-			return <span key={index} className="ccs-page-link">{slot.label}</span>;
+			return (
+				<span key={index} className="ccs-page-link">
+					{slot.label}
+				</span>
+			);
 		}
 		return (
 			<a
@@ -137,7 +141,9 @@ function Paginator() {
 	return (
 		<footer>
 			<nav
-				aria-label="Select a page of search results"
+				aria-label={
+					"Select a page of " + pageData.totalPages + " pages of search results"
+				}
 				className="ccs-footer-nav"
 			>
 				<button
