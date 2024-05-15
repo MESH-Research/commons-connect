@@ -1,0 +1,6 @@
+{
+	"go.testEnvVars": {
+		"CC_OS_ENDPOINT": "http://localhost:9200",
+		"CC_OS_CLIENT_MODE": "noauth"
+	}
+}

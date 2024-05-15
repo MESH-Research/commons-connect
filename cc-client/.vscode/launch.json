@@ -13,6 +13,7 @@
 				"/app/" : "${workspaceFolder}/",
 				"/wordpress/wp-content/plugins/commons-connect-client/": "${workspaceFolder}/",
 				"/wordpress/": "${workspaceFolder}/.lando/wordpress/",
+				"/tmp/wordpress/": "${workspaceFolder}/.lando/wordpress/"
 			}
 		}
 	]

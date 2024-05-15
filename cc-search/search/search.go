@@ -60,7 +60,7 @@ func BasicSearch(searcher types.Searcher, query string) (*types.SearchResult, er
 	return &searchResult, nil
 }
 
-func Search(searcher types.Searcher, params types.SearchParams) ([]types.Document, error) {
+func Search(searcher types.Searcher, params types.SearchParams) (types.SearchResponse, error) {
 	query := buildQuery(params)
 	req := opensearchapi.SearchRequest{
 		Index: []string{searcher.IndexName},
@@ -68,30 +68,25 @@ func Search(searcher types.Searcher, params types.SearchParams) ([]types.Documen
 	}
 	response, err := req.Do(context.Background(), searcher.Client)
 	if err != nil {
-		return nil, err
+		return types.SearchResponse{}, err
 	}
 	defer response.Body.Close()
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return nil, err
+		return types.SearchResponse{}, err
 	}
 	var searchResult types.SearchResult
 	err = json.Unmarshal(body, &searchResult)
 	if err != nil {
-		return nil, err
+		return types.SearchResponse{}, err
 	}
-	docs := searchResultToDocuments(&searchResult)
-	if len(params.ReturnFields) > 0 {
-		for i := range docs {
-			docs[i].FilterByJSON(params.ReturnFields)
-		}
-	}
-	return docs, nil
+	return searchResultToResponse(&searchResult, params), nil
 }
 
 func TypeAheadSearch(searcher types.Searcher, query string) ([]types.Document, error) {
 	queryJson := fmt.Sprintf(`{
 		"fields": ["title", "primary_url", "other_urls"],
+		"size": 5,
 		"query": {
 			"multi_match": {
 				"query": "%s",
@@ -226,4 +221,21 @@ func searchResultToDocuments(searchResult *types.SearchResult) []types.Document 
 		documents = append(documents, hit.Source)
 	}
 	return documents
+}
+
+func searchResultToResponse(searchResult *types.SearchResult, searchParams types.SearchParams) types.SearchResponse {
+	documents := make([]types.Document, 0)
+	for _, hit := range searchResult.Hits.Hits {
+		if len(searchParams.ReturnFields) > 0 {
+			hit.Source.FilterByJSON(searchParams.ReturnFields)
+		}
+		documents = append(documents, hit.Source)
+	}
+	return types.SearchResponse{
+		Total:     searchResult.Hits.Total.Value,
+		Page:      searchParams.Page,
+		PerPage:   searchParams.PerPage,
+		RequestID: searchParams.RequestID,
+		Hits:      documents,
+	}
 }

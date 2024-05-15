@@ -14,6 +14,9 @@ services:
       ports:
         - 2345
         - 80
+      environment:
+        CC_OS_ENDPOINT: http://opensearch:9200
+        CC_OS_CLIENT_MODE: noauth
   opensearch:
     api: 3
     type: lando

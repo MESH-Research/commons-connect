@@ -10,10 +10,10 @@
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       cc-client
  *
- * @package           MESHResearch\CCClient
+ * @package           MeshResearch\CCClient
  */
 
-namespace MESHResearch\CCClient;
+namespace MeshResearch\CCClient;
 
 define( 'CC_CLIENT_BASE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'CC_CLIENT_BASE_URL', plugin_dir_url( __FILE__ ) );
@@ -61,3 +61,4 @@ require_once( CC_CLIENT_BASE_DIR . 'vendor/autoload.php' );
 require_once( CC_CLIENT_BASE_DIR . 'src/admin/admin-settings.php' );
 require_once( CC_CLIENT_BASE_DIR . 'src/rest/rest.php' );
 require_once( CC_CLIENT_BASE_DIR . 'src/blocks/blocks.php' );
+require_once( CC_CLIENT_BASE_DIR . 'src/functions.php' );

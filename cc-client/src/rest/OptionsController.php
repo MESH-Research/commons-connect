@@ -2,10 +2,10 @@
 /**
  * REST controller for plugin options.
  *
- * @package MESHResearch\CCClient
+ * @package MeshResearch\CCClient
  */
 
-namespace MESHResearch\CCClient;
+namespace MeshResearch\CCClient;
 
 use WP_REST_Controller;
 use WP_REST_Response;

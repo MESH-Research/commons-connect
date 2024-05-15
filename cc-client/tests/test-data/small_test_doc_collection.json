@@ -1,35 +1,23 @@
 [
 	{
-		"_internal_id": "1234",
 		"title": "On Open Scholarship",
 		"description": "An essay on the nature of open scholarship and the role of the library in supporting it.",
 		"owner": {
 			"name": "Reginald Gibbons",
-			"username": "reginald",
-			"url": "http://profiles.kcommons.org/reginald"
+			"username": "reginald"
 		},
-		"contributors": [
-			{
-				"name": "Reginald Gibbons",
-				"username": "reginald",
-				"url": "http://profiles.kcommons.org/reginald",
-				"role": "first author",
-				"network_node": "mla"
-			},
+		"others": [
 			{
 				"name": "Edwina Gibbons",
-				"username": "edwina",
-				"url": "http://profiles.kcommons.org/edwina",
-				"role": "author",
-				"network_node": "hc"
+				"username":"edwina"
 			},
 			{
 				"name": "Obadiah Gibbons",
-				"username": "obadiah"
+				"username":"obadiah"
 			},
 			{
 				"name": "Lila Gibbons",
-				"username": "lila"
+				"username":"lila"
 			}
 		],
 		"primary_url": "http://works.kcommons.org/records/1234",
@@ -38,27 +26,20 @@
 			"http://works.mla.kcommons.org/records/1234",
 			"http://works.hastac.kcommons.org/records/1234"
 		],
-		"thumbnail_url": "http://works.kcommons.org/records/1234/thumbnail.png",
 		"content": "This is the content of the essay. It is a long essay, and it is very interesting. It is also very well-written and well-argued and well-researched and well-documented and well-cited",
 		"publication_date": "2018-01-01",
-		"modified_date": "2018-01-02",
 		"language": "en",
 		"content_type": "deposit",
 		"network_node": "works"
 	},
 	{
-		"_internal_id": "2345",
 		"title": "The Art of Programming",
 		"description": "A book on the art of programming and software development.",
 		"owner": {
 			"name": "John Smith",
 			"username": "johnsmith"
 		},
-		"contributors": [
-			{
-				"name": "John Smith",
-				"username": "johnsmith"
-			},
+		"others": [
 			{
 				"name": "Jane Smith",
 				"username":"janesmith"
@@ -80,18 +61,13 @@
 		"network_node": "works"
 	},
 	{
-		"_internal_id": "3456AVCxxa?#?!@",
 		"title": "Introduction to Machine Learning",
 		"description": "A comprehensive guide to machine learning algorithms and techniques.",
 		"owner": {
 			"name": "Emily Johnson",
 			"username": "emilyj"
 		},
-		"contributors": [
-			{
-				"name": "Emily Johnson",
-				"username": "emilyj"
-			},
+		"others": [
 			{
 				"name": "David Johnson",
 				"username":"davidj"
@@ -113,17 +89,20 @@
 		"network_node": "works"
 	},
 	{
-		"_internal_id": "4567",
 		"title": "The Art of Photography",
 		"description": "A book on the art of photography and capturing stunning images.",
 		"owner": {
 			"name": "Sarah Thompson",
 			"username": "sthompson"
 		},
-		"contributors": [
+		"others": [
 			{
-				"name": "Sarah Thompson",
-				"username": "sthompson"
+				"name": "Daniel Thompson",
+				"username":"dthompson"
+			},
+			{
+				"name": "Olivia Thompson",
+				"username":"othompson"
 			}
 		],
 		"primary_url": "http://example.com/photography",
@@ -138,14 +117,13 @@
 		"network_node": "mla"
 	},
 	{
-		"_internal_id": "5678",
 		"title": "The Science of Climate Change",
 		"description": "A comprehensive guide to the science of climate change and its impact on the environment.",
 		"owner": {
 			"name": "Michael Brown",
 			"username": "michaelb"
 		},
-		"contributors": [
+		"others": [
 			{
 				"name": "Emma Brown",
 				"username":"emmab"
@@ -167,14 +145,13 @@
 		"network_node": "mla"
 	},
 	{
-		"_internal_id": "6789",
 		"title": "The Art of Cooking",
 		"description": "A book on the art of cooking and preparing delicious meals.",
 		"owner": {
 			"name": "Reginald Gibbons",
 			"username": "reginald"
 		},
-		"contributors": [
+		"others": [
 			{
 				"name": "Carlos Rodriguez",
 				"username":"crodriguez"
@@ -196,14 +173,13 @@
 		"network_node": "mla"
 	},
 	{
-		"_internal_id": "7890",
 		"title": "The Art of Music",
 		"description": "A book on the art of music and creating beautiful melodies.",
 		"owner": {
 			"name": "James Wilson",
 			"username": "jwilson"
 		},
-		"contributors": [
+		"others": [
 			{
 				"name": "Emma Wilson",
 				"username":"ewilson"
@@ -225,14 +201,13 @@
 		"network_node": "kcommons"
 	},
 	{
-		"_internal_id": "8901",
 		"title": "The Art of Painting",
 		"description": "A book on the art of painting and creating stunning artworks.",
 		"owner": {
 			"name": "Sophie Clark",
 			"username": "sclark"
 		},
-		"contributors": [
+		"others": [
 			{
 				"name": "Daniel Clark",
 				"username":"dclark"
@@ -254,14 +229,13 @@
 		"network_node": "kcommons"
 	},
 	{
-		"_internal_id": "9012",
 		"title": "La Ciencia del Cambio Climático",
 		"description": "Una guía completa sobre la ciencia del cambio climático y su impacto en el medio ambiente.",
 		"owner": {
 			"name": "María López",
 			"username": "mlopez"
 		},
-		"contributors": [
+		"others": [
 			{
 				"name": "Carlos López",
 				"username":"clopez"
@@ -283,14 +257,13 @@
 		"network_node": "kcommons"
 	},
 	{
-		"_internal_id": "0123",
 		"title": "A Arte da Culinária",
 		"description": "Um livro sobre a arte da culinária e preparação de refeições deliciosas.",
 		"owner": {
 			"name": "João Silva",
 			"username": "jsilva"
 		},
-		"contributors": [
+		"others": [
 			{
 				"name": "Ana Silva",
 				"username":"asilva"
@@ -312,14 +285,13 @@
 		"network_node": "kcommons"
 	},
 	{
-		"_internal_id": "1234123s23",
 		"title": "L'Art de la Musique",
 		"description": "Un livre sur l'art de la musique et la création de belles mélodies.",
 		"owner": {
 			"name": "Élise Martin",
 			"username": "emartin"
 		},
-		"contributors": [
+		"others": [
 			{
 				"name": "Lucas Martin",
 				"username":"lmartin"
@@ -341,14 +313,13 @@
 		"network_node": "works"
 	},
 	{
-		"_internal_id": "2345234",
 		"title": "中国历史概览",
 		"description": "一本关于中国历史的概览书籍，介绍了中国的历史事件和文化。",
 		"owner": {
 			"name": "张伟",
 			"username": "zhangwei"
 		},
-		"contributors": [
+		"others": [
 			{
 				"name": "李明",
 				"username":"liming"
@@ -370,14 +341,13 @@
 		"network_node": "works"
 	},
 	{
-		"_internal_id": "3456345",
 		"title": "中國藝術欣賞",
 		"description": "一本关于中国艺术欣赏的书籍，介绍了中国传统艺术和现代艺术。",
 		"owner": {
 			"name": "王小红",
 			"username": "wangxiaohong"
 		},
-		"contributors": [
+		"others": [
 			{
 				"name": "李大明",
 				"username":"lidaming"
@@ -399,14 +369,13 @@
 		"network_node": "works"
 	},
 	{
-		"_internal_id": "4567456",
 		"title": "日本の歴史概要",
 		"description": "日本の歴史についての概要書で、日本の歴史的な出来事や文化を紹介しています。",
 		"owner": {
 			"name": "田中太郎",
 			"username": "tanakataro"
 		},
-		"contributors": [
+		"others": [
 			{
 				"name": "山田花子",
 				"username":"yamadahanako"
@@ -428,14 +397,13 @@
 		"network_node": "works"
 	},
 	{
-		"_internal_id": "5678567",
 		"title": "فن الطهي العربي",
 		"description": "كتاب يتحدث عن فن الطهي العربي وتقديم الأطباق الشهية.",
 		"owner": {
 			"name": "فاطمة خالد",
 			"username": "fatimakh"
 		},
-		"contributors": [
+		"others": [
 			{
 				"name": "أحمد محمد",
 				"username":"ahmedm"
@@ -457,14 +425,13 @@
 		"network_node": "hastac"
 	},
 	{
-		"_internal_id": "67896789",
 		"title": "الشعر العربي الكلاسيكي",
 		"description": "كتاب يتحدث عن الشعر العربي الكلاسيكي وأهم شعراءه.",
 		"owner": {
 			"name": "محمد عبدالله",
 			"username": "mohameda"
 		},
-		"contributors": [
+		"others": [
 			{
 				"name": "أميرة أحمد",
 				"username":"amiraah"
@@ -486,14 +453,13 @@
 		"network_node": "hastac"
 	},
 	{
-		"_internal_id": "78907890",
 		"title": "The Art of Landscape Photography",
 		"description": "A book about the art of landscape photography, showcasing breathtaking natural landscapes.",
 		"owner": {
 			"name": "John Smith",
 			"username": "johnsmith"
 		},
-		"contributors": [
+		"others": [
 			{
 				"name": "Samantha Roberts",
 				"username":"samanthar"
@@ -515,14 +481,13 @@
 		"network_node": "works"
 	},
 	{
-		"_internal_id": "89018901",
 		"title": "The Art of Portrait Photography",
 		"description": "A book about the art of portrait photography, capturing the essence and personality of individuals.",
 		"owner": {
 			"name": "John Smith",
 			"username": "johnsmith"
 		},
-		"contributors": [
+		"others": [
 			{
 				"name": "Olivia Wilson",
 				"username":"oliviaw"
@@ -544,14 +509,13 @@
 		"network_node": "up"
 	},
 	{
-		"_internal_id": "9012901asdfasfasdfsdcv2",
 		"title": "The Art of Street Photography",
 		"description": "A book about the art of street photography, capturing candid moments in urban environments.",
 		"owner": {
 			"name": "John Smith",
 			"username": "johnsmith"
 		},
-		"contributors": [
+		"others": [
 			{
 				"name": "Emma Thompson",
 				"username":"emmat"
@@ -574,14 +538,13 @@
 		"network_node": "up"
 	},
 	{
-		"_internal_id": "23423423asdfsadfw3r4",
 		"title": "The Art of Abstract Photography",
 		"description": "A book about the art of abstract photography, capturing unique and unconventional perspectives.",
 		"owner": {
 			"name": "John Smith",
 			"username": "johnsmith"
 		},
-		"contributors": [
+		"others": [
 			{
 				"name": "Michael Johnson",
 				"username":"michaelj"

@@ -6,6 +6,7 @@ import (
 )
 
 type Document struct {
+	InternalID      string   `json:"_internal_id,omitempty"`
 	ID              string   `json:"_id,omitempty"`
 	Title           string   `json:"title"`
 	Description     string   `json:"description,omitempty"`

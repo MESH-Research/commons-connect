@@ -2,10 +2,10 @@
 /**
  * Settings pages for the Commons Connect Client plugin.
  * 
- * @package MESHResearch\CCClient
+ * @package MeshResearch\CCClient
  */
 
-namespace MESHResearch\CCClient;
+namespace MeshResearch\CCClient;
 
 /**
  * Base 64 encoded Commons Connect icon.

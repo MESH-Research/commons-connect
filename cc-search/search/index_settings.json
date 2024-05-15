@@ -1,6 +1,10 @@
 {
 	"mappings" : {
 		"properties" : {
+			"_internal_id": {
+				"type": "keyword",
+				"index": false
+			},
 			"title": { 
 				"type": "text",
 				"store": true,
