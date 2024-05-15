@@ -1,4 +1,5 @@
-import { useState } from "@wordpress/element";
+import apiFetch from "@wordpress/api-fetch";
+import { useEffect, useState } from "@wordpress/element";
 
 function useFormInput(initialValue) {
 	const [value, setValue] = useState(initialValue);
@@ -377,11 +378,23 @@ function SearchResultSection(searchTerm) {
 		return null;
 	}
 }
+
 function getSearchTermFromUrl() {
 	const urlParams = new URLSearchParams(window.location.search);
 	return urlParams.get("search") ?? "";
 }
 export default function CCSearch() {
+	useEffect(() => {
+		{
+			console.log("Querying API");
+			fetch(
+				"http://commons-connect-client.lndo.site/wp-json/cc-client/v1/search",
+			).then((response) => {
+				console.log(response.json());
+			});
+		}
+	});
+
 	const searchTerm = useFormInput(getSearchTermFromUrl());
 	const searchType = useFormInput("all");
 	const sortBy = useFormInput("relevance");
