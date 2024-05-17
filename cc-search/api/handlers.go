@@ -59,7 +59,7 @@ func handleNewDocument(c *gin.Context) {
 		return
 	}
 	log.Println("Received document ID: ", indexedDocument.ID)
-	indexedDocument.Filter([]string{"InternalID", "ID", "Title", "PrimaryURL"})
+	indexedDocument.FilterOut([]string{"Content"})
 	c.JSON(http.StatusOK, indexedDocument)
 }
 
@@ -87,7 +87,7 @@ func handleBulkNewDocuments(c *gin.Context) {
 		return
 	}
 	for i := range indexedDocuments {
-		indexedDocuments[i].Filter([]string{"InternalID", "ID", "Title", "PrimaryURL"})
+		indexedDocuments[i].FilterOut([]string{"Content"})
 	}
 	c.JSON(http.StatusOK, indexedDocuments)
 }
@@ -144,6 +144,21 @@ func handleDeleteDocument(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Document deleted"})
+}
+
+func handleDeleteNode(c *gin.Context) {
+	node := c.Query("network_node")
+	if node == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Network node is required"})
+		return
+	}
+	searcher := c.MustGet("searcher").(types.Searcher)
+	err := search.DeleteNode(searcher, node)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Node deleted"})
 }
 
 func handleSearch(c *gin.Context) {

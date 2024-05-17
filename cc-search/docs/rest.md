@@ -11,6 +11,7 @@
 - POST /documents/bulk - Bulk index new documents {auth: api_key}
 - PUT /documents/{id} - Update existing document {auth: api_key}
 - DELETE /documents/{id} - Delete existing document {auth: api_key}
+- DELETE /documents/?network_node={network_node} - Delete all documents from a network node {auth: admin_api_key}
 
 /search
 - GET /search?q={search text} - Basic search (searches all indexed fields)
@@ -119,15 +120,19 @@ A successful indexing will return with a 200 response code and a body like:
 		"_id": "2E9SqY0Bdd2QL-HGeUuA",
 		"title": "On Open Scholarship",
 		"primary_url": "http://works.kcommons.org/records/1234"
+		...
 	},
 	{
 		"_internal_id": "234jdfg3w4rerf23dsf",
 		"_id": "234jdfg3w4rerf23dsf",
 		"title": "The Art of Programming",
 		"primary_url": "http://example.com/machine-learning"
+		...
 	},
 ]
 ```
+
+The content field is omitted from the response for brevity.
 
 Reading, updating, and deleting documents requires the `_id` field as returned by initial indexing. To update the "On Open Scholarship" document above, send a PUT request to `/documents/2E9SqY0Bdd2QL-HGeUuA` . The request body should have just the fields that require updating. Eg:
 
