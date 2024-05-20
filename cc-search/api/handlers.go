@@ -225,3 +225,11 @@ func handleTypeAheadSearch(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, result)
 }
+
+func handleAuthCheck(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "Authenticated"})
+}
+
+func handleAdminAuthCheck(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "Authenticated as admin"})
+}

@@ -581,3 +581,31 @@ func TestDeleteNode(t *testing.T) {
 	}
 	assert.Equal(t, 0, len(response.Hits))
 }
+
+func TestAuthCheck(t *testing.T) {
+	conf := config.GetConfig()
+	router := setupTestRouter()
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/v1/auth_check", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.APIKey))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", `invalid`))
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 401, w.Code)
+}
+
+func TestAdminAuthCheck(t *testing.T) {
+	conf := config.GetConfig()
+	router := setupTestRouter()
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/v1/admin_auth_check", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.AdminAPIKey))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", `invalid`))
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 401, w.Code)
+}

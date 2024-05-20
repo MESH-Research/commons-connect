@@ -23,6 +23,8 @@ func SetupRouter(searcher types.Searcher, conf types.Config) *gin.Engine {
 
 	v1.GET("/index", validateAPIToken, handleGetIndex)
 	v1.POST("/index", validateAdminAPIToken, handleResetIndex)
+	v1.GET("/auth_check", validateAPIToken, handleAuthCheck)
+	v1.GET("/admin_auth_check", validateAdminAPIToken, handleAuthCheck)
 
 	v1.GET("/documents/:id", handleGetDocument)
 	v1.POST("/documents", validateAPIToken, handleNewDocument)

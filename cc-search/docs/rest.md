@@ -3,6 +3,8 @@
 /index
 - GET /index - Get information about the index {auth: api_key}
 - POST /index - Reset the index {auth: admin_api_key}
+- GET /auth_check - Check if the api_key is valid {auth: api_key}
+- GET /admin_auth_check - Check if the admin_api_key is valid {auth: admin_api_key}
 
 /documents
 - GET /documents/{id} - Get document by id
