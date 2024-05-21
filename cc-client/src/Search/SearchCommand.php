@@ -10,7 +10,9 @@ namespace MeshResearch\CCClient\Search;
 use MeshResearch\CCClient\Search\SearchAPI;
 
 use function MeshResearch\CCClient\get_ccc_options;
-use function MeshResearch\CCClient\get_provisioner_by_type;
+use function MeshResearch\CCClient\Search\Provisioning\get_network_nodes;
+use function MeshResearch\CCClient\Search\Provisioning\get_provisioner_by_type;
+use function MeshResearch\CCClient\Search\Provisioning\bulk_provision;
 
 class SearchCommand {
 	/**
@@ -23,7 +25,11 @@ class SearchCommand {
 		} catch ( \Exception $e ) {
 			\WP_CLI::error( $e->getMessage() );
 		}
-		$response = $search_api->ping();
+		try {
+			$response = $search_api->ping();
+		} catch ( \Exception $e ) {
+			$response = false;
+		}
 		if ( $response === true ) {
 			\WP_CLI::success( 'Search service is up and running.' );
 		} else {
@@ -37,12 +43,17 @@ class SearchCommand {
 	public function status() {
 		$options = get_ccc_options();
 		if ( empty( $options['cc_search_key'] ) ) {
-			\WP_CLI::error( 'Search service API key is not configured.' );
+			\WP_CLI::warning( 'Search service API key is not configured.' );
 		} else {
 			\WP_CLI::success( 'Search service API key is configured.' );
 		}
+		if ( empty( $options['cc_search_admin_key'] ) ) {
+			\WP_CLI::warning( 'Search service admin API key is not configured.' );
+		} else {
+			\WP_CLI::success( 'Search service admin API key is configured.' );
+		}
 		if ( empty( $options['cc_search_endpoint'] ) ) {
-			\WP_CLI::error( 'Search service endpoint is not configured.' );
+			\WP_CLI::warning( 'Search service endpoint is not configured.' );
 		} else {
 			\WP_CLI::success( 'Search service endpoint: ' . $options['cc_search_endpoint'] );
 		}
@@ -52,12 +63,28 @@ class SearchCommand {
 		} catch ( \Exception $e ) {
 			\WP_CLI::error( 'Search service is not configured: ' . $e->getMessage() );
 		}
+
 		$response = $search_api->ping();
 		if ( $response === true ) {
 			\WP_CLI::success( 'Search service is up and running.' );
 		} else {
-			\WP_CLI::error( 'Search service is not responding.' );
+			\WP_CLI::warning( 'Search service is not responding.' );
 		}
+
+		$response = $search_api->check_api_key();
+		if ( $response === true ) {
+			\WP_CLI::success( 'Search service API key is valid.' );
+		} else {
+			\WP_CLI::warning( 'Search service API key is not valid.' );
+		}
+
+		$response = $search_api->check_admin_api_key();
+		if ( $response === true ) {
+			\WP_CLI::success( 'Search service admin API key is valid.' );
+		} else {
+			\WP_CLI::warning( 'Search service admin API key is not valid.' );
+		}
+
 		if ( class_exists( 'BP_Groups_Group' ) ) {
 			\WP_CLI::line( 'BuddyPress Groups is active.' );
 		} else {
@@ -77,9 +104,10 @@ class SearchCommand {
 		\WP_CLI::line( 'SiteURL: ' . get_site_url() );
 		\WP_CLI::line( 'SiteID: ' . get_current_blog_id() );
 		if ( is_multisite() ) {
-			\WP_CLI::line( 'NetworkID: ' . get_current_network_id() );
-			$root_blog_url = get_site_url( get_current_network_id(), '/' );
-			\WP_CLI::line( 'RootBlogURL: ' . $root_blog_url );
+			$network_id = get_current_network_id();
+			$network = get_network( $network_id );
+			\WP_CLI::line( 'Network ID: ' . $network_id );
+			\WP_CLI::line( 'Network domain: ' . $network->domain );
 		} else {
 			\WP_CLI::line( 'Multisite is not enabled.' );
 		}
@@ -111,7 +139,11 @@ class SearchCommand {
 		}
 		\WP_CLI::line( 'Getting document...' );
 		$search_api = new SearchAPI();
-		$response = $search_api->get_document( $doc_id );
+		try {
+			$response = $search_api->get_document( $doc_id );
+		} catch ( \Exception $e ) {
+			\WP_CLI::error( $e->getMessage() );
+		}
 		\WP_CLI::line( $response->toJSON() );
 	}
 
@@ -173,11 +205,122 @@ class SearchCommand {
 		}
 		$search_api = new SearchAPI();
 		$document = $provisionable_item->toDocument();
-		$indexed_document = $search_api->index_or_update( $document );
+		try {
+			$indexed_document = $search_api->index_or_update( $document );
+		} catch ( \Exception $e ) {
+			\WP_CLI::error( $e->getMessage() );
+		}
 		if ( empty( $indexed_document->_id ) ) {
 			\WP_CLI::error( 'Failed to index document.' );
 		}
 		$provisionable_item->setSearchID( $indexed_document->_id );
 		\WP_CLI::success( 'Item provisioned with ID: ' . $indexed_document->_id );
+	}
+
+	/**
+	 * Bulk provision items to the search service.
+	 */
+	public function provision_all( $args, $assoc_args ) {
+		$on_base_site = false;
+		$networks = get_networks();
+		foreach ( $networks as $network ) {
+			if ( intval($network->blog_id) === get_current_blog_id() ) {
+				$on_base_site = true;
+				break;
+			}
+		}
+		if ( ! $on_base_site ) {
+			\WP_CLI::error( 'This command must be run on a base site.' );
+		}
+		$search_api = new SearchAPI();
+
+		if ( ! $search_api->check_api_key() ) {
+			\WP_CLI::error( 'Search service API key is not valid.' );
+		}
+		if ( ! $search_api->check_admin_api_key() ) {
+			\WP_CLI::error( 'Search service admin API key is not valid.' );
+		}
+		
+		\WP_CLI::line( 'Resetting documents from all nodes...' );
+		$network_nodes = get_network_nodes();
+		foreach ( $network_nodes as $node ) {
+			try {
+				$deleted = $search_api->delete_node( $node );
+				if ( ! $deleted ) {
+					\WP_CLI::warning( 'Failed to delete documents from node: ' . $node );
+				}
+			} catch ( \Exception $e ) {
+				\WP_CLI::error( $e->getMessage() );
+			}
+		}
+
+		\WP_CLI::line( 'Provisioning users...' );
+		try {
+			bulk_provision(
+				document_types: [ 'user' ],
+				search_api: $search_api,
+				show_progress: true
+			);
+		} catch ( \Exception $e ) {
+			\WP_CLI::error( $e->getMessage() );
+		}
+
+		\WP_CLI::line( 'Provisioning sites...' );
+		try {
+			bulk_provision(
+				document_types: [ 'site' ],
+				search_api: $search_api,
+				show_progress: true
+			);
+		} catch ( \Exception $e ) {
+			\WP_CLI::error( $e->getMessage() );
+		}
+
+		\WP_CLI::line( 'Provisioning groups...' );
+		try {
+			bulk_provision(
+				document_types: [ 'group' ],
+				search_api: $search_api,
+				show_progress: true
+			);
+		} catch ( \Exception $e ) {
+			\WP_CLI::error( $e->getMessage() );
+		}
+
+		\WP_CLI::line( 'Provisioning discussion posts...' );
+		foreach ( $networks as $network ) {
+			switch_to_blog( $network->blog_id );
+			\WP_CLI::line( 'Provisioning discussion posts for ' . $network->domain . '...' );
+			try {
+				bulk_provision(
+					document_types: [ 'discussion' ],
+					search_api: $search_api,
+					show_progress: true
+				);
+			} catch ( \Exception $e ) {
+				\WP_CLI::error( $e->getMessage() );
+			}
+			restore_current_blog();
+		}
+
+		\WP_CLI::line( 'Provisioning posts...' );
+		$blogs = get_sites([ 'number' => 50000 ]);
+		\WP_CLI::line( 'Provisioning posts for ' . count( $blogs ) . ' blogs...' );
+		foreach ( $blogs as $blog ) {
+			\WP_CLI::line( 'Provisioning posts for ' . $blog->domain . '...' );
+			switch_to_blog( $blog->blog_id );
+			try {
+				bulk_provision(
+					document_types: [ 'post' ],
+					search_api: $search_api,
+					show_progress: false
+				);
+			} catch ( \Exception $e ) {
+				\WP_CLI::error( $e->getMessage() );
+			}
+			restore_current_blog();
+		}
+
+		\WP_CLI::success( 'Bulk provisioning complete.' );
 	}
 }

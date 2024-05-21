@@ -7,7 +7,14 @@
 
 namespace MeshResearch\CCClient\Search;
 
+use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\Handler\CurlHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
+
 use function MeshResearch\CCClient\get_ccc_options;
 
 class SearchAPI {
@@ -17,7 +24,8 @@ class SearchAPI {
 
 	public function __construct(
 		private string $api_key = '',
-		private string $api_url = ''
+		private string $api_url = '',
+		private string $admin_api_key = ''
 	) {
 		$options = get_ccc_options();
 		if ( empty($this->api_key ) ) {
@@ -32,7 +40,18 @@ class SearchAPI {
 			}
 			$this->api_url = $options['cc_search_endpoint'];
 		}
-		$this->client = new Client();
+		if ( empty($this->admin_api_key ) ) {
+			$this->admin_api_key = $options['cc_search_admin_key'] ?? '';
+		}
+		
+		$handler_stack = HandlerStack::create(new CurlHandler());
+		$handler_stack->push($this->_retryMiddleware());
+		$this->client = new Client(
+			[
+				'handler' => $handler_stack,
+				'timeout' => 60,
+			]
+		);
 	}
 
 	/**
@@ -40,6 +59,40 @@ class SearchAPI {
 	 */
 	public function ping(): bool {
 		$response = $this->client->request('GET', $this->api_url . '/ping');
+		return $response->getStatusCode() == 200;
+	}
+
+	/**
+	 * Check if the API key is valid
+	 */
+	public function check_api_key(): bool {
+		try {
+			$response = $this->client->request('GET', $this->api_url . '/auth_check', [
+				'headers' => [
+					'Authorization' => 'Bearer ' . $this->api_key,
+					'Content-Type' => 'application/json'
+				],
+			]);
+		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+			return false;
+		}
+		return $response->getStatusCode() == 200;
+	}
+
+	/**
+	 * Check if the admin API key is valid
+	 */
+	public function check_admin_api_key(): bool {
+		try {
+			$response = $this->client->request('GET', $this->api_url . '/admin_auth_check', [
+				'headers' => [
+					'Authorization' => 'Bearer ' . $this->admin_api_key,
+					'Content-Type' => 'application/json'
+				],
+			]);
+		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+			return false;
+		}
 		return $response->getStatusCode() == 200;
 	}
 
@@ -67,9 +120,13 @@ class SearchAPI {
 	 * @param array $documents An array of SearchDocument objects
 	 * @return array An array of SearchDocument objects
 	 */
-	public function bulk_index(array $documents): array {
+	public function bulk_index(array $documents, bool $show_progress = false): array {
 		$document_chunks = array_chunk($documents, self::MAX_DOCUMENTS_PER_BULK_INDEX_REQUEST);
 		$returned_documents = [];
+		if ( $show_progress && class_exists('WP_CLI') ) {
+			\WP_CLI::line('Indexing ' . count($documents) . ' documents in ' . count($document_chunks) . ' chunks...');
+		}
+
 		foreach ( $document_chunks as $chunk ) {
 			$documents_json = json_encode($chunk);
 			$response = $this->client->request('POST', $this->api_url . '/documents/bulk', [
@@ -83,6 +140,9 @@ class SearchAPI {
 				throw new \Exception('Failed to bulk index documents. Status code: ' . $response->getStatusCode());
 			}
 			$returned_documents = array_merge($returned_documents, SearchDocument::fromJSON($response->getBody()));
+		}
+		if ( $show_progress && class_exists('WP_CLI') ) {
+			\WP_CLI::line('Indexing complete');
 		}
 		return $returned_documents;
 	}
@@ -122,11 +182,31 @@ class SearchAPI {
 	 * Delete a document
 	 */
 	public function delete(string $id): bool {
-		$response = $this->client->request('DELETE', $this->api_url . '/documents/' . $id, [
-			'headers' => [
-				'Authorization' => 'Bearer ' . $this->api_key
-			]
-		]);
+		try {
+			$response = $this->client->request('DELETE', $this->api_url . '/documents/' . $id, [
+				'headers' => [
+					'Authorization' => 'Bearer ' . $this->api_key
+				]
+			]);
+		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+			return false;
+		}
+		return $response->getStatusCode() == 200;
+	}
+
+	/**
+	 * Delete all documents from a node
+	 */
+	public function delete_node(string $node ): bool {
+		try {
+			$response = $this->client->request('DELETE', $this->api_url . '/documents?network_node=' . $node, [
+				'headers' => [
+					'Authorization' => 'Bearer ' . $this->admin_api_key
+				]
+			]);
+		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+			return false;
+		}
 		return $response->getStatusCode() == 200;
 	}
 
@@ -162,5 +242,53 @@ class SearchAPI {
 		}
 		$result = SearchResult::fromJSON($response->getBody());
 		return $result;
+	}
+
+	/**
+	 * Possibly retry failed requests.
+	 *
+	 * @see: https://github.com/guzzle/guzzle/issues/1806
+	 */
+	public function _retryMiddleware(): callable {
+		return Middleware::retry(
+			function (
+				int $retries,
+				Request $request,
+				Response $response = null,
+				Exception $error = null
+			) {
+				if ($retries >= 5) {
+					if ( class_exists('WP_CLI') ) {
+						\WP_CLI::warning('Maximum retries reached. Aborting...');
+					}
+					return false;
+				}
+
+				if ($error instanceof ConnectException) {
+					if ( class_exists('WP_CLI') ) {
+						\WP_CLI::warning('Connection error. Retrying...');
+					}
+					return true;
+				}
+
+				if ($response) {
+					if ($response->getStatusCode() >= 500) {
+						if ( class_exists('WP_CLI') ) {
+							\WP_CLI::warning('Server error. Retrying...');
+						}
+						return true;
+					}
+				}
+
+				if ( $error && class_exists('WP_CLI') ) {
+					\WP_CLI::warning('Exception thrown: ' . $error->getMessage());
+					\WP_CLI::warning('Unhandled HTTP error. Aborting...');
+				}
+				return false;
+			},
+			function (int $retries) {
+				return 1000 * $retries;
+			}
+		);
 	}
 }

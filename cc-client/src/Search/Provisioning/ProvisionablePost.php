@@ -14,7 +14,8 @@ require_once __DIR__ . '/functions.php';
 
 class ProvisionablePost implements ProvisionableInterface {
 	public function __construct(
-		public \WP_Post $post
+		public \WP_Post $post,
+		public string $search_id = ''
 	) {}
 
 	public function toDocument(): SearchDocument {
@@ -46,11 +47,15 @@ class ProvisionablePost implements ProvisionableInterface {
 			primary_url: \get_permalink( $this->post ),
 			thumbnail_url: \get_the_post_thumbnail_url( $this->post ),
 			content: \wp_strip_all_tags( \get_the_content( '', false, $this->post ) ),
-			publication_date: \get_the_date( 'Y-m-d', $this->post ),
-			modified_date: \get_the_modified_date( 'Y-m-d', $this->post ),
+			publication_date: new \DateTime( get_the_date( 'Y-m-d', $this->post ) ),
+			modified_date: new \DateTime( get_the_modified_date( 'Y-m-d', $this->post ) ),
 			content_type: 'post',
 			network_node: get_current_network_node()
 		);
+
+		if ( $this->search_id ) {
+			$document->_id = $this->search_id;
+		}
 		
 		return $document;
 	}
@@ -65,6 +70,11 @@ class ProvisionablePost implements ProvisionableInterface {
 
 	public function setSearchID( string $search_id ): void {
 		update_post_meta( $this->post->ID, 'cc_search_id', $search_id );
+	}
+
+	public function updateSearchID(): void {
+		$search_id = $this->getSearchID();
+		$this->search_id = $search_id;
 	}
 
 	public static function getAll( $post_types = [ 'post', 'page' ] ): array {
@@ -82,12 +92,16 @@ class ProvisionablePost implements ProvisionableInterface {
 		return $provisionable_posts;
 	}
 
-	public static function getAllAsDocuments(): array {
-		$provisionable_posts = self::getAll();
+	public static function getAllAsDocuments( $post_types = [ 'post', 'page' ] ): array {
+		$provisionable_posts = self::getAll( $post_types );
 		$documents = [];
 		foreach ( $provisionable_posts as $provisionable_post ) {
 			$documents[] = $provisionable_post->toDocument();
 		}
 		return $documents;
+	}
+
+	public static function isAvailable(): bool {
+		return true;
 	}
 }

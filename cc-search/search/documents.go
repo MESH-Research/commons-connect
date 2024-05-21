@@ -194,3 +194,20 @@ func DeleteDocument(searcher types.Searcher, id string) error {
 	_, err := req.Do(context.Background(), searcher.Client)
 	return err
 }
+
+func DeleteNode(searcher types.Searcher, node string) error {
+	req := opensearchapi.DeleteByQueryRequest{
+		Index: []string{searcher.IndexName},
+		Body:  strings.NewReader(`{"query":{"match":{"network_node":"` + node + `"}}}`),
+	}
+	response, err := req.Do(context.Background(), searcher.Client)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+	if response.StatusCode != 200 {
+		bodyBytes, _ := io.ReadAll(response.Body)
+		return errors.New(string(bodyBytes))
+	}
+	return nil
+}

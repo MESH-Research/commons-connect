@@ -2,6 +2,7 @@ package types
 
 import (
 	"reflect"
+	"slices"
 	"strings"
 )
 
@@ -33,6 +34,24 @@ func (originalDocument *Document) Filter(fields []string) {
 			continue
 		}
 		reflect.ValueOf(&filteredDocument).Elem().FieldByName(field).Set(fieldValue)
+	}
+	*originalDocument = filteredDocument
+}
+
+// Filter out unnecessary fields from the document for the response. Fields to
+// remove are specified by name.
+func (originalDocument *Document) FilterOut(fields []string) {
+	filteredDocument := Document{}
+	for i := 0; i < reflect.TypeOf(*originalDocument).NumField(); i++ {
+		fieldName := reflect.TypeOf(*originalDocument).Field(i).Name
+		if slices.Contains(fields, fieldName) {
+			continue
+		}
+		fieldValue := reflect.ValueOf(*originalDocument).FieldByName(fieldName)
+		if !fieldValue.IsValid() {
+			continue
+		}
+		reflect.ValueOf(&filteredDocument).Elem().FieldByName(fieldName).Set(fieldValue)
 	}
 	*originalDocument = filteredDocument
 }

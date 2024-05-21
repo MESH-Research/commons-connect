@@ -541,3 +541,71 @@ func TestUsernameSearch(t *testing.T) {
 		}
 	}
 }
+
+func TestDeleteNode(t *testing.T) {
+	conf := config.GetConfig()
+	router := setupTestRouter()
+	resetIndex()
+	data := getTestFileReader("small_test_doc_collection.json")
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/v1/documents/bulk", data)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.APIKey))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	// Pause to allow indexing to complete
+	time.Sleep(1 * time.Second)
+	req, _ = http.NewRequest("GET", "/v1/search?network_node=up", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	var response types.SearchResponse
+	err := json.NewDecoder(w.Body).Decode(&response)
+	if err != nil {
+		t.Fatalf("Error decoding search response for initial node search: %v", err)
+	}
+	assert.Equal(t, 3, len(response.Hits))
+	req, _ = http.NewRequest("DELETE", "/v1/documents?network_node=up", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.AdminAPIKey))
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	// Pause to allow indexing to complete
+	time.Sleep(1 * time.Second)
+	req, _ = http.NewRequest("GET", "/v1/search?network_node=up", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	err = json.NewDecoder(w.Body).Decode(&response)
+	if err != nil {
+		t.Fatalf("Error decoding search response for final node search: %v", err)
+	}
+	assert.Equal(t, 0, len(response.Hits))
+}
+
+func TestAuthCheck(t *testing.T) {
+	conf := config.GetConfig()
+	router := setupTestRouter()
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/v1/auth_check", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.APIKey))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", `invalid`))
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 401, w.Code)
+}
+
+func TestAdminAuthCheck(t *testing.T) {
+	conf := config.GetConfig()
+	router := setupTestRouter()
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/v1/admin_auth_check", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", conf.AdminAPIKey))
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", `invalid`))
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 401, w.Code)
+}
