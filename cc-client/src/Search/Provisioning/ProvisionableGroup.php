@@ -12,60 +12,79 @@ use MeshResearch\CCClient\Search\SearchPerson;
 
 require_once __DIR__ . '/functions.php';
 
-class ProvisionalGroup implements ProvisionableInterface {
+class ProvisionableGroup implements ProvisionableInterface {
 	public function __construct(
-		public \BP_Groups_Group $group
+		public \BP_Groups_Group $group,
+		public string $search_id = ''
 	) {}
 
 	public function toDocument(): SearchDocument {
-		$group_admin = get_users( [ 'group_id' => $this->group->id, 'role' => 'admin' ] )[0];
-		$admin = new SearchPerson(
-			name: $group_admin->display_name,
-			username: $group_admin->user_login,
-			url: get_profile_url( $group_admin ),
-			role: 'admin',
-			network_node: get_current_network_node()
-		);
-
-		$group_users = get_users( [ 
+		if ( ! function_exists( 'groups_get_group_members') ) {
+			throw new \Exception( 'BuddyPress Groups plugin is not active.' );
+		}
+		$group_admins = groups_get_group_members( [
 			'group_id' => $this->group->id,
-			'role_in' => [ 'admin', 'mod', 'member' ]
+			'per_page' => 0,
+			'exclude_admins_mods' => false,
+			'group_role' => 'admin'
 		] );
-		$members = array_map( function( $user ) {
-			return new SearchPerson(
-				name: $user->display_name,
-				username: $user->user_login,
-				url: get_profile_url( $user ),
-				role: $user->roles[0],
-				network_node: get_current_network_node()
-			);
-		}, $group_users );
+		$group_admin_id = $group_admins['members'][0] ?? null;
+		$group_admin = get_user_by( 'ID', $group_admin_id );
+		
+		if ( function_exists( 'bp_groups_get_group_type') ) {
+			$network_node = bp_groups_get_group_type( $this->group->id );
+		} else {
+			$network_node = get_current_network_node();
+		}
 
-		return new SearchDocument(
+		$admin = null;
+		if ( $group_admin ) {
+			$admin = new SearchPerson(
+				name: $group_admin->display_name,
+				username: $group_admin->user_login,
+				url: get_profile_url( $group_admin ),
+				role: 'admin',
+				network_node: $network_node
+			);
+		}
+
+		$doc = new SearchDocument(
+			_internal_id: strval($this->group->id),
 			title: $this->group->name,
 			description: $this->group->description,
 			owner: $admin,
-			contributors: $members,
+			contributors: [],
 			primary_url: bp_get_group_permalink( $this->group ),
 			thumbnail_url: '',
 			content: '',
-			publication_date: '',
-			modified_date: '',
+			publication_date: null,
+			modified_date: null,
 			content_type: 'group',
-			network_node: get_current_network_node()
+			network_node: $network_node
 		);
+
+		if ( $this->search_id ) {
+			$doc->_id = $this->search_id;
+		}
+
+		return $doc;
 	}
 
 	public function getSearchID(): string {
 		$search_id = groups_get_groupmeta( $this->group->id, 'cc_search_id', true );
 		if ( $search_id === false ) {
-			throw new \Exception( 'Group does not exist.' );
+			$search_id = '';
 		}
 		return $search_id;
 	}
 
 	public function setSearchID(string $search_id): void {
 		groups_update_groupmeta( $this->group->id, 'cc_search_id', $search_id );
+	}
+
+	public function updateSearchID() : void {
+		$search_id = $this->getSearchID();
+		$this->search_id = $search_id;
 	}
 
 	public static function getAll(): array {
@@ -77,7 +96,7 @@ class ProvisionalGroup implements ProvisionableInterface {
 
 		$provisionable_groups = [];
 		foreach ( $groups['groups'] as $group ) {
-			$provisionable_groups[] = new ProvisionalGroup( $group );
+			$provisionable_groups[] = new ProvisionableGroup( $group );
 		}
 
 		return $provisionable_groups;
@@ -90,5 +109,9 @@ class ProvisionalGroup implements ProvisionableInterface {
 			$documents[] = $provisionable_group->toDocument();
 		}
 		return $documents;
+	}
+
+	public static function isAvailable(): bool {
+		return class_exists( '\BP_Groups_Group' );
 	}
 }

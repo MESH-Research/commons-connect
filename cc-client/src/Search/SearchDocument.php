@@ -19,8 +19,8 @@ class SearchDocument implements \JsonSerializable {
 		public array               $other_urls       = [],
 		public string              $thumbnail_url    = '',
 		public string              $content          = '',
-		public string              $publication_date = '',
-		public string              $modified_date    = '',
+		public \DateTime | null    $publication_date = null,
+		public \DateTime | null    $modified_date    = null,
 		public string              $language         = '',
 		public string              $content_type     = '',
 		public string              $network_node     = ''
@@ -31,6 +31,10 @@ class SearchDocument implements \JsonSerializable {
 		$to_serialize = new \stdClass();
 		foreach ( $this as $key => $value ) {
 			if ( empty( $value ) ) {
+				continue;
+			}
+			if ( $value instanceof \DateTime ) {
+				$to_serialize->$key = $value->format( 'Y-m-d' );
 				continue;
 			}
 			$to_serialize->$key = $value;
@@ -59,23 +63,26 @@ class SearchDocument implements \JsonSerializable {
 				$contributors[] = SearchPerson::fromJSON( json_encode( $contributor ) );
 			}
 		}
+
+		$publication_date = ! empty( $data['publication_date'] ) ? new \DateTime( $data['publication_date'] ) : null;
+		$modified_date = ! empty( $data['modified_date'] ) ? new \DateTime( $data['modified_date'] ) : null;
 			
 		return new SearchDocument(
-			_internal_id: $data['_internal_id'] ?? 0,
-			_id: $data['_id'] ?? '',
-			title: $data['title'] ?? '',
-			description: $data['description'] ?? '',
-			owner: $owner,
-			contributors: $contributors,
-			primary_url: $data['primary_url'] ?? '',
-			other_urls: $data['other_urls'] ?? [],
-			thumbnail_url: $data['thumbnail_url'] ?? '',
-			content: $data['content'] ?? '',
-			publication_date: $data['publication_date'] ?? '',
-			modified_date: $data['modified_date'] ?? '',
-			language: $data['language'] ?? '',
-			content_type: $data['content_type'] ?? '',
-			network_node: $data['network_node'] ?? ''
+			_internal_id:     $data['_internal_id'] ?? 0,
+			_id:              $data['_id'] ?? '',
+			title:            $data['title'] ?? '',
+			description:      $data['description'] ?? '',
+			owner:            $owner,
+			contributors:     $contributors,
+			primary_url:      $data['primary_url'] ?? '',
+			other_urls:       $data['other_urls'] ?? [],
+			thumbnail_url:    $data['thumbnail_url'] ?? '',
+			content:          $data['content'] ?? '',
+			publication_date: $publication_date,
+			modified_date:    $modified_date,
+			language:         $data['language'] ?? '',
+			content_type:     $data['content_type'] ?? '',
+			network_node:     $data['network_node'] ?? ''
 		);
 	}
 
