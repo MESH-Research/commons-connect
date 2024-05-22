@@ -382,7 +382,7 @@ export default function CCSearch() {
     useEffect(() => {
         {
             fetch(
-                "http://commons-connect-client.lndo.site/wp-json/cc-client/v1/search",
+                "https://commons-connect-client.lndo.site/wp-json/cc-client/v1/search",
             )
                 .then((response) => response.json())
                 .then((data) => setFetchResponse(data));
@@ -397,7 +397,6 @@ export default function CCSearch() {
         <main>
             <article className="ccs-row ccs-top">
                 <search className="ccs-search">
-                    <span>Response: { fetchResponse }</span>
                     <form>
                         <div className="ccs-row ccs-search-input">
                             <label>
@@ -453,6 +452,9 @@ export default function CCSearch() {
                                 <span>Search only this Commons</span>
                             </label>
                         </div>
+                        <div className="ccs-search-button">
+                            <button type="submit">Search</button>
+                        </div>
                     </form>
                 </search>
                 <aside className="ccs-aside">
@@ -461,6 +463,7 @@ export default function CCSearch() {
                 </aside>
             </article>
             <article>
+                <span>Response: { fetchResponse }</span>
                 <SearchResultSection searchTerm={searchTerm} />
                 {resultsData.length > 0 && searchTerm.value != "" && <Paginator />}
             </article>
