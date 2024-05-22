@@ -1,4 +1,3 @@
-import apiFetch from "@wordpress/api-fetch";
 import { useEffect, useState } from "@wordpress/element";
 
 function useFormInput(initialValue) {
@@ -26,12 +25,7 @@ function CustomDateRange({ dateRangeValue }) {
 				<label>
 					<span>End Date</span>
 					<br />
-					<input
-						type="date"
-						name="customEndDate"
-						{...endDate}
-						defaultValue={defaultEndDate}
-					/>
+					<input type="date" name="customEndDate" {...endDate} />
 				</label>
 			</div>
 		)
@@ -254,7 +248,7 @@ const sampleResults = [
 			"http://works.mla.kcommons.org/records/1234",
 			"http://works.hastac.kcommons.org/records/1234",
 		],
-		thumbnail_url: "http://works.kcommons.org/records/1234/thumbnail.png",
+		thumbnail_url: "https://placehold.co/75x200/000000/FFF",
 		content:
 			"This is the content of the essay. It is a long essay, and it is very interesting. It is also very well-written and well-argued and well-researched and well-documented and well-cited",
 		publication_date: "2018-01-01",
@@ -384,16 +378,16 @@ function getSearchTermFromUrl() {
 	return urlParams.get("search") ?? "";
 }
 export default function CCSearch() {
+	let [fetchResponse, setFetchResponse] = useState(null);
 	useEffect(() => {
 		{
-			console.log("Querying API");
 			fetch(
 				"http://commons-connect-client.lndo.site/wp-json/cc-client/v1/search",
-			).then((response) => {
-				console.log(response.json());
-			});
+			)
+				.then((response) => response.json())
+				.then((data) => setFetchResponse(data));
 		}
-	});
+	}, []);
 
 	const searchTerm = useFormInput(getSearchTermFromUrl());
 	const searchType = useFormInput("all");
@@ -403,6 +397,7 @@ export default function CCSearch() {
 		<main>
 			<article className="ccs-row ccs-top">
 				<search className="ccs-search">
+					<span>Response: { fetchResponse }</span>
 					<form>
 						<div className="ccs-row ccs-search-input">
 							<label>
