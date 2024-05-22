@@ -5,114 +5,114 @@
  * Replace them with your own styles or remove the file completely.
  */
 .ccs-top {
-	justify-content: space-between;
-	align-items: flex-start;
+    justify-content: space-between;
+    align-items: flex-start;
 }
 .ccs-row {
-	display: flex;
+    display: flex;
 }
 .ccs-col {
-	display: column;
+    display: column;
 }
 .ccs-aside {
-	flex-basis: 15vw;
-	flex-grow: initial;
-	padding: 16px;
-	border: 1px solid #bbb;
-	margin: 16px;
-	text-align: center;
+    flex-basis: 15vw;
+    flex-grow: initial;
+    padding: 16px;
+    border: 1px solid #bbb;
+    margin: 16px;
+    text-align: center;
 }
 .ccs-aside a {
-	border: 2px solid black;
-	border-radius: 3px;
-	padding: 5px 8px;
-	display: inline-block;
-	text-align: center;
-	margin-top: 10px;
+    border: 2px solid black;
+    border-radius: 3px;
+    padding: 5px 8px;
+    display: inline-block;
+    text-align: center;
+    margin-top: 10px;
 }
 .ccs-search {
-	flex-basis: 65vw;
-	padding: 16px;
+    flex-basis: 65vw;
+    padding: 16px;
 }
 .ccs-search-input label {
-	width: 100%;
+    width: 100%;
 }
 .ccs-search-input input {
-	line-height: 16px;
-	padding: 6px;
-	width: calc(100% - 38px);
+    line-height: 16px;
+    padding: 6px;
+    width: calc(100% - 38px);
 }
 .ccs-search-input button {
-	line-height: 16px;
-	padding: 6px;
+    line-height: 16px;
+    padding: 6px;
 }
 .ccs-date-ranges,
 .ccs-search-options {
-	gap: 16px;
-	flex-wrap: wrap;
-	padding: 16px 0;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 16px 0;
 }
 .ccs-label {
-	font-weight: bold;
+    font-weight: bold;
 }
 .ccs-result {
-	padding: 16px;
-	clear: left;
+    padding: 16px;
+    clear: left;
 }
 .ccs-result-header {
-	align-items: center;
-	gap: 8px;
-	flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 .ccs-tag {
-	background-color: #595959;
-	color: #fff;
-	display: inline-block;
-	padding: 4px 16px;
-	position: relative;
-	height: auto;
-	border-radius: 9999px;
+    background-color: #595959;
+    color: #fff;
+    display: inline-block;
+    padding: 4px 16px;
+    position: relative;
+    height: auto;
+    border-radius: 9999px;
 }
 .ccs-result-title {
-	font-weight: bold;
+    font-weight: bold;
 }
 .ccs-result-description {
-	padding: 10px;
-	flex-wrap: flex-start;
+    padding: 10px;
+    flex-wrap: flex-start;
 }
 .ccs-result-thumbnail {
-	float: left;
-	margin: 0 10px 10px 0;
-	max-width: 100px;
-	max-height: 100px;
+    float: left;
+    margin: 0 10px 10px 0;
+    max-width: 100px;
+    max-height: 100px;
 }
 .ccs-result-description > p {
-	margin: 0;
+    margin: 0;
 }
 .ccs-footer-nav {
-	display: flex;
-	gap: 16px;
-	justify-content: center;
-	padding: 16px;
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    padding: 16px;
 }
 .ccs-page-link {
-	display: inline-block;
-	min-width: 18px;
-	text-align: center;
+    display: inline-block;
+    min-width: 18px;
+    text-align: center;
 }
 @media (max-width: 40rem) {
-	.ccs-top {
-		flex-direction: column;
-		align-items: stretch;
-	}
-	.ccs-search,
-	.ccs-aside {
-		flex-basis: inherit;
-	}
-	.ccs-aside {
-		text-align: initial;
-	}
-	.ccs-aside p {
-		margin: 0;
-	}
+    .ccs-top {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .ccs-search,
+    .ccs-aside {
+        flex-basis: inherit;
+    }
+    .ccs-aside {
+        text-align: initial;
+    }
+    .ccs-aside p {
+        margin: 0;
+    }
 }
