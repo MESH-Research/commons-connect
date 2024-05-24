@@ -34,7 +34,6 @@ require_once "{$_tests_dir}/includes/functions.php";
 function _manually_load_plugin() {
 	include dirname( dirname( __FILE__ ) ) . '/.lando/wordpress/wp-content/plugins/bbpress/bbpress.php';
 	require dirname( dirname( __FILE__ ) ) . '/cc-client.php';
-
 }
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
