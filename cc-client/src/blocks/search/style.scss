@@ -83,7 +83,6 @@
 }
 .ccs-result-description {
     padding: 10px;
-    flex-wrap: flex-start;
 }
 .ccs-result-thumbnail {
     float: left;
@@ -95,6 +94,7 @@
     margin: 0;
 }
 .ccs-footer-nav {
+    clear: left;
     display: flex;
     gap: 16px;
     justify-content: center;
