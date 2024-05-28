@@ -379,6 +379,37 @@ function getSearchTermFromUrl() {
 }
 export default function CCSearch() {
     let [fetchResponse, setFetchResponse] = useState(null);
+
+    const date_params = {
+        start_date: "",
+        end_date: "",
+    };
+    console.log(date_params);
+
+    const searchTerm = useFormInput(getSearchTermFromUrl());
+    const searchType = useFormInput("all");
+    const sortBy = useFormInput("relevance");
+    const dateRange = useFormInput("anytime");
+
+    const params = {
+		sort_by: sortBy.value,
+        content_type: searchType.value,
+        page: 0,
+        per_page: 10,
+        q: searchTerm.value,
+    };
+
+    const url = new URL(
+        "https://commons-connect-client.lndo.site/wp-json/cc-client/v1/search",
+    );
+    Object.keys(params).forEach((key) =>
+        url.searchParams.append(key, params[key]),
+    );
+
+    fetch(url)
+        .then((response) => response.json())
+        .then((data) => setFetchResponse(data));
+
     useEffect(() => {
         {
             fetch(
@@ -389,10 +420,6 @@ export default function CCSearch() {
         }
     }, []);
 
-    const searchTerm = useFormInput(getSearchTermFromUrl());
-    const searchType = useFormInput("all");
-    const sortBy = useFormInput("relevance");
-    const dateRange = useFormInput("anytime");
     return (
         <main>
             <article className="ccs-row ccs-top">
@@ -426,7 +453,8 @@ export default function CCSearch() {
                                     <br />
                                     <select {...sortBy}>
                                         <option value="relevance">Relevance</option>
-                                        <option value="date">Date Updated</option>
+                                        <option value="publication_date">Publication Date</option>
+                                        <option value="modified_date">Modified Date</option>
                                     </select>
                                 </label>
                             </div>
@@ -463,7 +491,7 @@ export default function CCSearch() {
                 </aside>
             </article>
             <article>
-                <span>Response: { fetchResponse }</span>
+                <span>Response: {fetchResponse}</span>
                 <SearchResultSection searchTerm={searchTerm} />
                 {resultsData.length > 0 && searchTerm.value != "" && <Paginator />}
             </article>
