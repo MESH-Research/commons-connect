@@ -1,4 +1,5 @@
-import { useEffect, useState } from "@wordpress/element";
+import { useState } from "@wordpress/element";
+// import { useEffect, useState } from "@wordpress/element";
 
 function useFormInput(initialValue) {
     const [value, setValue] = useState(initialValue);
@@ -10,10 +11,7 @@ function useFormInput(initialValue) {
         onChange: handleChange,
     };
 }
-function CustomDateRange({ dateRangeValue }) {
-    const defaultEndDate = new Date().toISOString().split("T")[0];
-    const endDate = useFormInput(defaultEndDate);
-    const startDate = useFormInput("");
+function CustomDateRange({ dateRangeValue, startDate, endDate }) {
     return (
         dateRangeValue == "custom" && (
             <div className="ccs-row ccs-date-ranges">
@@ -377,54 +375,61 @@ function getSearchTermFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get("search") ?? "";
 }
+
+// const appState = {
+// 	searchTerm: useFormInput(getSearchTermFromUrl()),
+// };
+
 export default function CCSearch() {
     let [fetchResponse, setFetchResponse] = useState(null);
 
-    const date_params = {
-        start_date: "",
-        end_date: "",
-    };
-    console.log(date_params);
-
+    const defaultEndDate = new Date().toISOString().split("T")[0];
     const searchTerm = useFormInput(getSearchTermFromUrl());
     const searchType = useFormInput("all");
     const sortBy = useFormInput("relevance");
     const dateRange = useFormInput("anytime");
+    const endDate = useFormInput(defaultEndDate);
+    const startDate = useFormInput("");
 
-    const params = {
-		sort_by: sortBy.value,
-        content_type: searchType.value,
-        page: 0,
-        per_page: 10,
-        q: searchTerm.value,
-    };
-
-    const url = new URL(
-        "https://commons-connect-client.lndo.site/wp-json/cc-client/v1/search",
-    );
-    Object.keys(params).forEach((key) =>
-        url.searchParams.append(key, params[key]),
-    );
-
-    fetch(url)
-        .then((response) => response.json())
-        .then((data) => setFetchResponse(data));
-
-    useEffect(() => {
-        {
-            fetch(
-                "https://commons-connect-client.lndo.site/wp-json/cc-client/v1/search",
-            )
-                .then((response) => response.json())
-                .then((data) => setFetchResponse(data));
+    function performSearch(event) {
+		event.preventDefault();
+        const params = {
+            sort_by: sortBy.value,
+            content_type: searchType.value,
+            page: 0,
+            per_page: 10,
+            q: searchTerm.value,
+        };
+        if (dateRange.value === "custom") {
+            params.start_date = startDate.value;
+            params.end_date = endDate.value;
         }
-    }, []);
+
+        const url = new URL("https://commons-connect-client.lndo.site/wp-json/cc-client/v1/search");
+        Object.keys(params).forEach((key) =>
+            url.searchParams.append(key, params[key]),
+        );
+
+        fetch(url)
+            .then((response) => response.json())
+            .then((data) => setFetchResponse(data));
+    }
+
+    // useEffect(() => {
+    //     {
+    //         fetch(
+    //             "https://commons-connect-client.lndo.site/wp-json/cc-client/v1/search",
+    //         )
+    //             .then((response) => response.json())
+    //             .then((data) => setFetchResponse(data));
+    //     }
+    // }, []);
 
     return (
         <main>
             <article className="ccs-row ccs-top">
                 <search className="ccs-search">
-                    <form>
+                    <form onSubmit={performSearch}>
                         <div className="ccs-row ccs-search-input">
                             <label>
                                 <span className="ccs-label">Search</span>
@@ -470,7 +475,11 @@ export default function CCSearch() {
                                         <option value="custom">Custom</option>
                                     </select>
                                 </label>
-                                <CustomDateRange dateRangeValue={dateRange.value} />
+                                <CustomDateRange
+                                    dateRangeValue={dateRange.value}
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                />
                             </div>
                         </div>
                         <div>
