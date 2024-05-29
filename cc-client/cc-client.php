@@ -63,3 +63,4 @@ require_once( CC_CLIENT_BASE_DIR . 'src/rest/rest.php' );
 require_once( CC_CLIENT_BASE_DIR . 'src/blocks/blocks.php' );
 require_once( CC_CLIENT_BASE_DIR . 'src/functions.php' );
 require_once( CC_CLIENT_BASE_DIR . 'src/Search/Provisioning/functions.php' );
+require_once( CC_CLIENT_BASE_DIR . 'src/Search/Provisioning/incremental_provisioning.php' );
