@@ -1,5 +1,4 @@
 import { useEffect, useState } from "@wordpress/element";
-// import { useState } from "@wordpress/element";
 
 function useFormInput(initialValue) {
     const [value, setValue] = useState(initialValue);
@@ -285,12 +284,13 @@ function pushResults(data) {
 }
 function getContentTypeLabel(type) {
     const labels = {
+        deposit: "Work/Deposit",
+        post: "Post",
         user: "Profile",
         profile: "Profile",
         group: "Group",
         site: "Site",
-        deposit: "Work/Deposit",
-        post: "Work/Deposit",
+        discussion: "Discussion"
     };
     return labels[type] ?? "Unknown";
 }
@@ -453,10 +453,12 @@ export default function CCSearch() {
                                     <br />
                                     <select {...searchType}>
                                         <option value="all">All Types</option>
-                                        <option value="profile">Profile</option>
-                                        <option value="site">Site</option>
-                                        <option value="group">Group</option>
                                         <option value="work">Deposit/Work</option>
+                                        <option value="post">Post</option>
+                                        <option value="profile">Profile</option>
+                                        <option value="group">Group</option>
+                                        <option value="site">Site</option>
+                                        <option value="discussion">Discussion</option>
                                     </select>
                                 </label>
                             </div>
