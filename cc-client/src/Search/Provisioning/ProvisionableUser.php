@@ -46,7 +46,7 @@ class ProvisionableUser implements ProvisionableInterface {
 			content: '',
 			publication_date: $this->user->user_registered ? new \DateTime( $this->user->user_registered ) : null,
 			modified_date: null,
-			content_type: 'user',
+			content_type: 'profile',
 			network_node: $network_node
 		);
 

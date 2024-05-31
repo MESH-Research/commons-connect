@@ -7,6 +7,8 @@
 
 namespace MeshResearch\CCClient\Search\Provisioning;
 
+use MeshResearch\CCClient\Search\SearchDocument;
+
 class ProvisionableDiscussion extends ProvisionablePost {
 	public static function getAll( $post_types = [ 'topic', 'reply' ] ) : array {
 		$posts = get_posts( [
@@ -24,6 +26,12 @@ class ProvisionableDiscussion extends ProvisionablePost {
 		}
 
 		return $provisionable_posts;
+	}
+
+	public function toDocument(): SearchDocument {
+		$document = parent::toDocument();
+		$document->content_type = 'discussion';
+		return $document;
 	}
 
 	public function is_public(): bool {
