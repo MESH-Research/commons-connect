@@ -327,8 +327,15 @@ function renderContributor(data) {
         return null;
     }
 }
+function decodeHTMLElement (text) {
+    const textArea = document.createElement("textarea");
+    textArea.innerHTML = text;
+    return (textArea.value);
+}
 function SearchResult({ data }) {
     const dateLabel = getDateLabel(data.publication_date, data.modified_date);
+    const description = decodeHTMLElement(data.description);
+
     return (
         <section className="ccs-result">
             <header className="ccs-row ccs-result-header">
@@ -351,7 +358,7 @@ function SearchResult({ data }) {
                         className="ccs-result-thumbnail"
                     />
                 )}
-                <p>{data.description}</p>
+                <p>{description}</p>
             </div>
         </section>
     );
