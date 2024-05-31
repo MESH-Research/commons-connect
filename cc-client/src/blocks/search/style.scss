@@ -82,12 +82,13 @@
     font-weight: bold;
 }
 .ccs-result-description {
+    overflow: hidden;
     padding: 10px;
 }
 .ccs-result-thumbnail {
     float: left;
     margin: 0 10px 10px 0;
-    max-width: 70px;
+    max-width: 62px;
     max-height: 100px;
 }
 .ccs-result-description > p {
