@@ -334,7 +334,6 @@ function decodeHTMLElement (text) {
 }
 function SearchResult({ data }) {
     const dateLabel = getDateLabel(data.publication_date, data.modified_date);
-    const description = decodeHTMLElement(data.description);
 
     return (
         <section className="ccs-result">
@@ -358,7 +357,7 @@ function SearchResult({ data }) {
                         className="ccs-result-thumbnail"
                     />
                 )}
-                <p>{description}</p>
+                <p>{decodeHTMLElement(data.description)}</p>
             </div>
         </section>
     );
