@@ -1,5 +1,5 @@
-import { useState } from "@wordpress/element";
-// import { useEffect, useState } from "@wordpress/element";
+import { useEffect, useState } from "@wordpress/element";
+// import { useState } from "@wordpress/element";
 
 function useFormInput(initialValue) {
     const [value, setValue] = useState(initialValue);
@@ -256,6 +256,7 @@ const sampleResults = [
         network_node: "works",
     },
 ];
+console.log(sampleResults);
 const resultsData = [];
 function generateSampleJson(options) {
     const record = {
@@ -277,20 +278,21 @@ function generateSampleJson(options) {
     };
     return { ...record, ...options };
 }
-function pushResults() {
-    sampleResults.forEach((result) => {
+function pushResults(data) {
+    data.forEach((result) => {
         resultsData.push(generateSampleJson(result));
     });
 }
-pushResults();
 function getContentTypeLabel(type) {
     const labels = {
+        user: "Profile",
         profile: "Profile",
         group: "Group",
         site: "Site",
         deposit: "Work/Deposit",
+        post: "Work/Deposit",
     };
-    return labels[type] ?? "";
+    return labels[type] ?? "Unknown";
 }
 function getDateLabel(publication_date, modified_date) {
     let date = "";
@@ -330,9 +332,11 @@ function SearchResult({ data }) {
     return (
         <section className="ccs-result">
             <header className="ccs-row ccs-result-header">
-                <span className="ccs-tag">
-                    {getContentTypeLabel(data.content_type)}
-                </span>
+                {data.content_type && (
+                    <span className="ccs-tag">
+                        {getContentTypeLabel(data.content_type)}
+                    </span>
+                )}
                 <a href={data.primary_url} className="ccs-result-title">
                     {data.title}
                 </a>
@@ -367,7 +371,7 @@ function SearchResultSection(searchTerm) {
             return <SearchResult key={i} data={result} />;
         });
     } else {
-        return null;
+        return "";
     }
 }
 
@@ -375,10 +379,6 @@ function getSearchTermFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get("search") ?? "";
 }
-
-// const appState = {
-// 	searchTerm: useFormInput(getSearchTermFromUrl()),
-// };
 
 export default function CCSearch() {
     let [fetchResponse, setFetchResponse] = useState(null);
@@ -392,7 +392,10 @@ export default function CCSearch() {
     const startDate = useFormInput("");
 
     function performSearch(event) {
-		event.preventDefault();
+        if (event !== null) {
+            event.preventDefault();
+        }
+        console.log("performSearch");
         const params = {
             sort_by: sortBy.value,
             content_type: searchType.value,
@@ -405,25 +408,24 @@ export default function CCSearch() {
             params.end_date = endDate.value;
         }
 
-        const url = new URL("https://commons-connect-client.lndo.site/wp-json/cc-client/v1/search");
+        const url = new URL(
+            "https://commons-connect-client.lndo.site/wp-json/cc-client/v1/search",
+        );
         Object.keys(params).forEach((key) =>
             url.searchParams.append(key, params[key]),
         );
 
         fetch(url)
             .then((response) => response.json())
-            .then((data) => setFetchResponse(data));
+            .then((data) => {
+                setFetchResponse(JSON.parse(data));
+                pushResults(JSON.parse(data).hits);
+            });
     }
 
-    // useEffect(() => {
-    //     {
-    //         fetch(
-    //             "https://commons-connect-client.lndo.site/wp-json/cc-client/v1/search",
-    //         )
-    //             .then((response) => response.json())
-    //             .then((data) => setFetchResponse(data));
-    //     }
-    // }, []);
+    useEffect(() => {
+        performSearch(null);
+    }, []);
 
     return (
         <main>
@@ -500,7 +502,6 @@ export default function CCSearch() {
                 </aside>
             </article>
             <article>
-                <span>Response: {fetchResponse}</span>
                 <SearchResultSection searchTerm={searchTerm} />
                 {resultsData.length > 0 && searchTerm.value != "" && <Paginator />}
             </article>
