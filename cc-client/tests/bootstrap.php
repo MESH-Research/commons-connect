@@ -32,8 +32,22 @@ require_once "{$_tests_dir}/includes/functions.php";
  * Manually load the plugin being tested.
  */
 function _manually_load_plugin() {
+	define( 'CC_CLIENT_DOING_TESTING', true );
 	include dirname( dirname( __FILE__ ) ) . '/.lando/wordpress/wp-content/plugins/bbpress/bbpress.php';
 	require dirname( dirname( __FILE__ ) ) . '/cc-client.php';
+
+	// Reset the search service
+	// We do it here to avoid side effects that can result from running it in
+	// setUp() or tearDown() methods. This does mean that test pollution is
+	// possible as the search index is not reset between tests.
+	$options = new MeshResearch\CCClient\CCClientOptions(
+		cc_search_key: '12345',
+		cc_search_endpoint: 'http://commonsconnect-search.lndo.site/v1',
+		cc_search_admin_key: '12345',
+		incremental_provisioning_enabled: false
+	);
+	$search_api = new MeshResearch\CCClient\Search\SearchAPI( $options );
+	$search_api->reset_index();
 }
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 

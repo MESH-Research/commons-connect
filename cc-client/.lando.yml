@@ -12,8 +12,7 @@ services:
     run:
       - /app/.lando/install-wordpress.sh
       - /app/bin/install-wp-tests.sh lemp lemp lemp database:3306
-      - ln -s /app/.lando/wordpress/wp-content/plugins/buddypress /tmp/wordpress/wp-content/plugins/buddypress
-      - ln -s /app/.lando/wordpress/wp-content/plugins/bbpress /tmp/wordpress/wp-content/plugins/bbpress
+      - sed -i "s|// define( 'WP_TESTS_MULTISITE', true );|define( 'WP_TESTS_MULTISITE', true );|g" /tmp/wordpress-tests-lib/wp-tests-config.php
     overrides:
       volumes:
         - .lando/wordpress:/wordpress

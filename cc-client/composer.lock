@@ -2509,15 +2509,15 @@
         },
         {
             "name": "wpackagist-plugin/buddypress",
-            "version": "12.4.1",
+            "version": "12.5.0",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/buddypress/",
-                "reference": "tags/12.4.1"
+                "reference": "tags/12.5.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/buddypress.12.4.1.zip"
+                "url": "https://downloads.wordpress.org/plugin/buddypress.12.5.0.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"

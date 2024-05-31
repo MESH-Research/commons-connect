@@ -15,34 +15,28 @@ use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 
-use function MeshResearch\CCClient\get_ccc_options;
+use MeshResearch\CCClient\CCClientOptions;
 
 class SearchAPI {
 	const MAX_DOCUMENTS_PER_BULK_INDEX_REQUEST = 100;
 	
 	private $client;
+	private $api_key;
+	private $api_url;
+	private $admin_api_key;
 
 	public function __construct(
-		private string $api_key = '',
-		private string $api_url = '',
-		private string $admin_api_key = ''
+		private CCClientOptions $options,
 	) {
-		$options = get_ccc_options();
-		if ( empty($this->api_key ) ) {
-			if ( empty($options['cc_search_key'] ) ) {
-				throw new \Exception('API key is required');
-			}
-			$this->api_key = $options['cc_search_key'];
+		if ( empty($options->cc_search_key ) ) {
+			throw new \Exception('API key is required');
 		}
-		if ( empty($this->api_url ) ) {
-			if ( empty($options['cc_search_endpoint'] ) ) {
-				throw new \Exception('API URL is required');
-			}
-			$this->api_url = $options['cc_search_endpoint'];
+		$this->api_key = $options->cc_search_key;
+		if ( empty($options->cc_search_endpoint ) ) {
+			throw new \Exception('API URL is required');
 		}
-		if ( empty($this->admin_api_key ) ) {
-			$this->admin_api_key = $options['cc_search_admin_key'] ?? '';
-		}
+		$this->api_url = $options->cc_search_endpoint;
+		$this->admin_api_key = $options->cc_search_admin_key ?? '';
 		
 		$handler_stack = HandlerStack::create(new CurlHandler());
 		$handler_stack->push($this->_retryMiddleware());
@@ -200,6 +194,22 @@ class SearchAPI {
 	public function delete_node(string $node ): bool {
 		try {
 			$response = $this->client->request('DELETE', $this->api_url . '/documents?network_node=' . $node, [
+				'headers' => [
+					'Authorization' => 'Bearer ' . $this->admin_api_key
+				]
+			]);
+		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+			return false;
+		}
+		return $response->getStatusCode() == 200;
+	}
+
+	/**
+	 * Reset the index
+	 */
+	public function reset_index(): bool {
+		try {
+			$response = $this->client->request('POST', $this->api_url . '/index', [
 				'headers' => [
 					'Authorization' => 'Bearer ' . $this->admin_api_key
 				]
