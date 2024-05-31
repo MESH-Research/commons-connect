@@ -21,15 +21,13 @@
  */
 
 import { createRoot } from "@wordpress/element";
-import CCSearch from './search';
-import './style.scss'
+import CCSearch from "./search";
+import "./style.scss";
 
-window.addEventListener( 'DOMContentLoaded', () => {
-    const Search = document.querySelectorAll( '.wp-block-cc-client-search-page' );
-    Array.from( Search ).forEach( view => {
-        const root = createRoot( view );
-        root.render(
-            <CCSearch />
-        );
-    } );
-} );
+window.addEventListener("DOMContentLoaded", () => {
+    const Search = document.querySelectorAll(".wp-block-cc-client-search-page");
+    Array.from(Search).forEach((view) => {
+        const root = createRoot(view);
+        root.render(<CCSearch />);
+    });
+});

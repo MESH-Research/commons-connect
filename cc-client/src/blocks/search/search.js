@@ -63,9 +63,15 @@ function Paginator() {
             setSlots([
                 { label: 1, value: 1 },
                 { label: "...", value: null, clickable: false },
-                { label: pageData.currentPage - 1, value: pageData.currentPage - 1 },
+                {
+                    label: pageData.currentPage - 1,
+                    value: pageData.currentPage - 1,
+                },
                 { label: pageData.currentPage, value: pageData.currentPage },
-                { label: pageData.currentPage + 1, value: pageData.currentPage + 1 },
+                {
+                    label: pageData.currentPage + 1,
+                    value: pageData.currentPage + 1,
+                },
                 { label: "...", value: null, clickable: false },
                 { label: pageData.totalPages, value: pageData.totalPages },
             ]);
@@ -76,10 +82,22 @@ function Paginator() {
             setSlots([
                 { label: 1, value: 1 },
                 { label: "...", value: null, clickable: false },
-                { label: pageData.totalPages - 4, value: pageData.totalPages - 4 },
-                { label: pageData.totalPages - 3, value: pageData.totalPages - 3 },
-                { label: pageData.totalPages - 2, value: pageData.totalPages - 2 },
-                { label: pageData.totalPages - 1, value: pageData.totalPages - 1 },
+                {
+                    label: pageData.totalPages - 4,
+                    value: pageData.totalPages - 4,
+                },
+                {
+                    label: pageData.totalPages - 3,
+                    value: pageData.totalPages - 3,
+                },
+                {
+                    label: pageData.totalPages - 2,
+                    value: pageData.totalPages - 2,
+                },
+                {
+                    label: pageData.totalPages - 1,
+                    value: pageData.totalPages - 1,
+                },
                 { label: pageData.totalPages, value: pageData.totalPages },
             ]);
         }
@@ -107,7 +125,11 @@ function Paginator() {
                 key={index}
                 href="#"
                 onClick={(e) => setPage(e, slot.value)}
-                style={pageData.currentPage == slot.value ? { fontWeight: "bold" } : {}}
+                style={
+                    pageData.currentPage == slot.value
+                        ? { fontWeight: "bold" }
+                        : {}
+                }
                 className="ccs-page-link"
                 aria-current={pageData.currentPage == slot.value ? true : null}
                 aria-label={"Page " + slot.value + " of " + pageData.totalPages}
@@ -122,19 +144,27 @@ function Paginator() {
     }
     function decrementPage() {
         if (pageData.currentPage > 1) {
-            setPageData({ ...pageData, currentPage: (pageData.currentPage -= 1) });
+            setPageData({
+                ...pageData,
+                currentPage: (pageData.currentPage -= 1),
+            });
         }
     }
     function incrementPage() {
         if (pageData.currentPage != pageData.totalPages) {
-            setPageData({ ...pageData, currentPage: (pageData.currentPage += 1) });
+            setPageData({
+                ...pageData,
+                currentPage: (pageData.currentPage += 1),
+            });
         }
     }
     return (
         <footer>
             <nav
                 aria-label={
-                    "Select a page of " + pageData.totalPages + " pages of search results"
+                    "Select a page of " +
+                    pageData.totalPages +
+                    " pages of search results"
                 }
                 className="ccs-footer-nav"
             >
@@ -290,7 +320,7 @@ function getContentTypeLabel(type) {
         profile: "Profile",
         group: "Group",
         site: "Site",
-        discussion: "Discussion"
+        discussion: "Discussion",
     };
     return labels[type] ?? "Unknown";
 }
@@ -312,7 +342,10 @@ function getDateLabel(publication_date, modified_date) {
 }
 function renderContributor(data) {
     if (Object.hasOwn(data, "owner")) {
-        if (Object.hasOwn(data.owner, "url") && Object.hasOwn(data.owner, "name")) {
+        if (
+            Object.hasOwn(data.owner, "url") &&
+            Object.hasOwn(data.owner, "name")
+        ) {
             return (
                 <a href={data.owner.url} className="ccs-result-person">
                     {data.owner.name}
@@ -327,10 +360,10 @@ function renderContributor(data) {
         return null;
     }
 }
-function decodeHTMLElement (text) {
+function decodeHTMLElement(text) {
     const textArea = document.createElement("textarea");
     textArea.innerHTML = text;
-    return (textArea.value);
+    return textArea.value;
 }
 function SearchResult({ data }) {
     const dateLabel = getDateLabel(data.publication_date, data.modified_date);
@@ -442,7 +475,11 @@ export default function CCSearch() {
                             <label>
                                 <span className="ccs-label">Search</span>
                                 <br />
-                                <input type="search" name="ccSearch" {...searchTerm} />
+                                <input
+                                    type="search"
+                                    name="ccSearch"
+                                    {...searchTerm}
+                                />
                                 <button aria-label="Search">🔍</button>
                             </label>
                         </div>
@@ -453,12 +490,16 @@ export default function CCSearch() {
                                     <br />
                                     <select {...searchType}>
                                         <option value="all">All Types</option>
-                                        <option value="work">Deposit/Work</option>
+                                        <option value="work">
+                                            Deposit/Work
+                                        </option>
                                         <option value="post">Post</option>
                                         <option value="profile">Profile</option>
                                         <option value="group">Group</option>
                                         <option value="site">Site</option>
-                                        <option value="discussion">Discussion</option>
+                                        <option value="discussion">
+                                            Discussion
+                                        </option>
                                     </select>
                                 </label>
                             </div>
@@ -467,20 +508,30 @@ export default function CCSearch() {
                                     <span className="ccs-label">Sort By</span>
                                     <br />
                                     <select {...sortBy}>
-                                        <option value="relevance">Relevance</option>
-                                        <option value="publication_date">Publication Date</option>
-                                        <option value="modified_date">Modified Date</option>
+                                        <option value="relevance">
+                                            Relevance
+                                        </option>
+                                        <option value="publication_date">
+                                            Publication Date
+                                        </option>
+                                        <option value="modified_date">
+                                            Modified Date
+                                        </option>
                                     </select>
                                 </label>
                             </div>
                             <div className="search-option">
                                 <label>
-                                    <span className="ccs-label">Date Range</span>
+                                    <span className="ccs-label">
+                                        Date Range
+                                    </span>
                                     <br />
                                     <select {...dateRange}>
                                         <option value="anytime">Anytime</option>
                                         <option value="week">Past Week</option>
-                                        <option value="month">Past Month</option>
+                                        <option value="month">
+                                            Past Month
+                                        </option>
                                         <option value="year">Past Year</option>
                                         <option value="custom">Custom</option>
                                     </select>
@@ -494,7 +545,10 @@ export default function CCSearch() {
                         </div>
                         <div>
                             <label>
-                                <input type="checkbox" name="searchCommonsOnly" />
+                                <input
+                                    type="checkbox"
+                                    name="searchCommonsOnly"
+                                />
                                 <span>&nbsp;</span>
                                 <span>Search only this Commons</span>
                             </label>
@@ -511,7 +565,9 @@ export default function CCSearch() {
             </article>
             <article>
                 <SearchResultSection searchTerm={searchTerm} />
-                {resultsData.length > 0 && searchTerm.value != "" && <Paginator />}
+                {resultsData.length > 0 && searchTerm.value != "" && (
+                    <Paginator />
+                )}
             </article>
         </main>
     );

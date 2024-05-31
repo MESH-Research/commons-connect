@@ -1,7 +1,7 @@
-import { __ } from '@wordpress/i18n';
-import { useBlockProps } from '@wordpress/block-editor';
+import { __ } from "@wordpress/i18n";
+import { useBlockProps } from "@wordpress/block-editor";
 
-import './editor.scss';
+import "./editor.scss";
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -12,9 +12,9 @@ import './editor.scss';
  * @return {WPElement} Element to render.
  */
 export default function Edit() {
-	return (
-		<p { ...useBlockProps() }>
-			{ __( 'Cc Client – hello from the editor!', 'cc-client' ) }
-		</p>
-	);
+    return (
+        <p {...useBlockProps()}>
+            {__("Cc Client – hello from the editor!", "cc-client")}
+        </p>
+    );
 }

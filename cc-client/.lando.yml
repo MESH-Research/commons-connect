@@ -1,56 +1,56 @@
 name: commons-connect-client
 recipe: lemp
 services:
-  appserver:
-    config:
-      php: .lando/php.ini
-    build_as_root:
-      - cd /app/.lando/ && ./setup-wordpress-files.sh && ./install-wp-cli.sh
-      - cd /app/ && composer update
-      - apt-get update && apt-get install subversion -y
-      - curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs
-    run:
-      - /app/.lando/install-wordpress.sh
-      - /app/bin/install-wp-tests.sh lemp lemp lemp database:3306
-      - ln -s /app/.lando/wordpress/wp-content/plugins/buddypress /tmp/wordpress/wp-content/plugins/buddypress
-      - ln -s /app/.lando/wordpress/wp-content/plugins/bbpress /tmp/wordpress/wp-content/plugins/bbpress
-    overrides:
-      volumes:
-        - .lando/wordpress:/wordpress
-      environment:
-        WP_CLI_CONFIG_PATH: /wordpress/wp-cli.yml
-        CC_SEARCH_KEY: 12345
-        CC_SEARCH_ENDPOINT: http://commonsconnect-search.lndo.site/v1
-  appserver_nginx:
-    overrides:
-      volumes:
-        - .lando/wordpress:/wordpress
+    appserver:
+        config:
+            php: .lando/php.ini
+        build_as_root:
+            - cd /app/.lando/ && ./setup-wordpress-files.sh && ./install-wp-cli.sh
+            - cd /app/ && composer update
+            - apt-get update && apt-get install subversion -y
+            - curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs
+        run:
+            - /app/.lando/install-wordpress.sh
+            - /app/bin/install-wp-tests.sh lemp lemp lemp database:3306
+            - ln -s /app/.lando/wordpress/wp-content/plugins/buddypress /tmp/wordpress/wp-content/plugins/buddypress
+            - ln -s /app/.lando/wordpress/wp-content/plugins/bbpress /tmp/wordpress/wp-content/plugins/bbpress
+        overrides:
+            volumes:
+                - .lando/wordpress:/wordpress
+            environment:
+                WP_CLI_CONFIG_PATH: /wordpress/wp-cli.yml
+                CC_SEARCH_KEY: 12345
+                CC_SEARCH_ENDPOINT: http://commonsconnect-search.lndo.site/v1
+    appserver_nginx:
+        overrides:
+            volumes:
+                - .lando/wordpress:/wordpress
 config:
-  php: 8.2
-  database: mariadb
-  xdebug: debug
-  config:  
-    vhosts: .lando/nginx.conf
+    php: 8.2
+    database: mariadb
+    xdebug: debug
+    config:
+        vhosts: .lando/nginx.conf
 tooling:
-  wp:
-    service: appserver
-    description: Runs WP-CLI commands
-    cmd: wp
-  wpd:
-    service: appserver
-    description: Runs WP-CLI commands with xdebug
-    cmd: php -d xdebug.start_with_request=yes /usr/local/bin/wp
-  phpunit:
-    service: appserver
-    description: Runs local tests
-    dir: /app
-    cmd: vendor/bin/phpunit /app/tests
-  phpunit-debug:
-    service: appserver
-    description: Runs local tests with xdebug
-    dir: /app
-    cmd: php -d xdebug.start_with_request=yes vendor/bin/phpunit /app/tests
-  npm:
-    service: appserver
-    description: Runs npm commands
-    cmd: npm
+    wp:
+        service: appserver
+        description: Runs WP-CLI commands
+        cmd: wp
+    wpd:
+        service: appserver
+        description: Runs WP-CLI commands with xdebug
+        cmd: php -d xdebug.start_with_request=yes /usr/local/bin/wp
+    phpunit:
+        service: appserver
+        description: Runs local tests
+        dir: /app
+        cmd: vendor/bin/phpunit /app/tests
+    phpunit-debug:
+        service: appserver
+        description: Runs local tests with xdebug
+        dir: /app
+        cmd: php -d xdebug.start_with_request=yes vendor/bin/phpunit /app/tests
+    npm:
+        service: appserver
+        description: Runs npm commands
+        cmd: npm
