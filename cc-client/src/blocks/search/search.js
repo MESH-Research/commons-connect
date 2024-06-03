@@ -441,8 +441,8 @@ export default function CCSearch() {
         const params = {
             sort_by: sortBy.value,
             content_type: searchType.value,
-            page: 0,
-            per_page: 10,
+            page: currentPage.current,
+            per_page: perPage.current,
             q: searchTerm.value,
         };
         if (dateRange.value === "custom") {
@@ -463,7 +463,7 @@ export default function CCSearch() {
                 const parsed = JSON.parse(data);
                 console.log(parsed)
                 pushResults(JSON.parse(data).hits);
-                totalPages.value =
+                totalPages.current = JSON.parse(data).total_pages;
             });
     }
 
