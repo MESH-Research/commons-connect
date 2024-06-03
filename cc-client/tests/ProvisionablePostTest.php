@@ -22,9 +22,6 @@ class ProvisionablePostTest extends \WP_UnitTestCase
 		$post = \get_post($post->ID);
 		$provisionable_post = new ProvisionablePost($post);
 		$document = $provisionable_post->toDocument();
-
-		$a = $document->toJSON();
-
 		$this->assertEquals($post->post_title, $document->title);
 	}
 }

@@ -10,8 +10,6 @@ namespace MeshResearch\CCClient\Search\Provisioning;
 use MeshResearch\CCClient\Search\SearchDocument;
 use MeshResearch\CCClient\Search\SearchPerson;
 
-require_once __DIR__ . '/functions.php';
-
 class ProvisionablePost implements ProvisionableInterface {
 	public function __construct(
 		public \WP_Post $post,
@@ -65,16 +63,12 @@ class ProvisionablePost implements ProvisionableInterface {
 		if ( $search_id === false ) {
 			throw new \Exception( 'Invalid post ID' );
 		}
+		$this->search_id = $search_id;
 		return $search_id;
 	}
 
 	public function setSearchID( string $search_id ): void {
 		update_post_meta( $this->post->ID, 'cc_search_id', $search_id );
-	}
-
-	public function updateSearchID(): void {
-		$search_id = $this->getSearchID();
-		$this->search_id = $search_id;
 	}
 
 	public static function getAll( $post_types = [ 'post', 'page' ] ): array {

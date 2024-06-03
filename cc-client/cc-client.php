@@ -15,6 +15,10 @@
 
 namespace MeshResearch\CCClient;
 
+if ( ! defined( 'CC_CLIENT_DOING_TESTING') ) {
+	define( 'CC_CLIENT_DOING_TESTING', false );
+}
+
 define( 'CC_CLIENT_BASE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'CC_CLIENT_BASE_URL', plugin_dir_url( __FILE__ ) );
 
@@ -62,5 +66,8 @@ require_once( CC_CLIENT_BASE_DIR . 'src/admin/admin-settings.php' );
 require_once( CC_CLIENT_BASE_DIR . 'src/rest/rest.php' );
 require_once( CC_CLIENT_BASE_DIR . 'src/blocks/blocks.php' );
 require_once( CC_CLIENT_BASE_DIR . 'src/functions.php' );
-require_once( CC_CLIENT_BASE_DIR . 'src/Search/Provisioning/functions.php' );
-require_once( CC_CLIENT_BASE_DIR . 'src/Search/Provisioning/incremental_provisioning.php' );
+
+require_once( CC_CLIENT_BASE_DIR . 'src/Search/Provisioning/bulk_provisioning.php' );
+require_once( CC_CLIENT_BASE_DIR . 'src/Search/Provisioning/incremental_provisioner_functions.php' );
+require_once( CC_CLIENT_BASE_DIR . 'src/Search/Provisioning/provisionable_functions.php' );
+require_once( CC_CLIENT_BASE_DIR . 'src/Search/Provisioning/provisioning_helper_functions.php' );

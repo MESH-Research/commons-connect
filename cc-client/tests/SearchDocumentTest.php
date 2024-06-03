@@ -32,6 +32,9 @@ class SearchDocumentTest extends \WP_UnitTestCase
 					$this->assertInstanceOf( SearchPerson::class, $document->contributors[$index] );
 					$this->assertEquals( $other->name, $document->contributors[$index]->name );
 				}
+			} elseif ( $key === 'publication_date' || $key === 'modified_date' ) {
+				$this->assertInstanceOf( \DateTime::class, $document->$key );
+				$this->assertEquals( $value, $document->$key->format('Y-m-d') );
 			} else {
 				$this->assertEquals( $value, $document->$key );
 			}

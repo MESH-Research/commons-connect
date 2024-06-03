@@ -10,8 +10,6 @@ namespace MeshResearch\CCClient\Search\Provisioning;
 use MeshResearch\CCClient\Search\SearchDocument;
 use MeshResearch\CCClient\Search\SearchPerson;
 
-require_once __DIR__ . '/functions.php';
-
 class ProvisionableGroup implements ProvisionableInterface {
 	public function __construct(
 		public \BP_Groups_Group $group,
@@ -75,16 +73,12 @@ class ProvisionableGroup implements ProvisionableInterface {
 		if ( $search_id === false ) {
 			$search_id = '';
 		}
+		$this->search_id = $search_id;
 		return $search_id;
 	}
 
 	public function setSearchID(string $search_id): void {
 		groups_update_groupmeta( $this->group->id, 'cc_search_id', $search_id );
-	}
-
-	public function updateSearchID() : void {
-		$search_id = $this->getSearchID();
-		$this->search_id = $search_id;
 	}
 
 	public static function getAll(): array {

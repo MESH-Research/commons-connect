@@ -10,13 +10,13 @@ namespace MeshResearch\CCClient\Search\Provisioning;
 use MeshResearch\CCClient\Search\SearchDocument;
 use MeshResearch\CCClient\Search\SearchPerson;
 
-require_once __DIR__ . '/functions.php';
-
 class ProvisionableSite implements ProvisionableInterface {
 	public function __construct(
 		public \WP_Site $site,
 		public string $search_id = ''
-	) {}
+	) {
+		$this->getSearchID();
+	}
 
 	public function toDocument(): SearchDocument {
 		switch_to_blog( $this->site->id );
@@ -61,20 +61,16 @@ class ProvisionableSite implements ProvisionableInterface {
 	}
 
 	public function getSearchID(): string {
-		$search_id = get_blog_option( $this->site->id, 'cc_search_id' );
+		$search_id = get_blog_option( $this->site->blog_id, 'cc_search_id' );
 		if ( $search_id === false ) {
 			$search_id = '';
 		}
+		$this->search_id = $search_id;
 		return $search_id;
 	}
 
 	public function setSearchID( string $search_id ): void {
-		update_blog_option( $this->site->id, 'cc_search_id', $search_id );
-	}
-
-	public function updateSearchID(): void {
-		$search_id = $this->getSearchID();
-		$this->search_id = $search_id;
+		$success = update_blog_option( $this->site->blog_id, 'cc_search_id', $search_id );
 	}
 
 	public static function getAll(): array {

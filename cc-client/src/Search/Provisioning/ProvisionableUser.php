@@ -10,13 +10,13 @@ namespace MeshResearch\CCClient\Search\Provisioning;
 use MeshResearch\CCClient\Search\SearchDocument;
 use MeshResearch\CCClient\Search\SearchPerson;
 
-require_once __DIR__ . '/functions.php';
-
 class ProvisionableUser implements ProvisionableInterface {
 	public function __construct(
 		public \WP_User $user,
 		public string $search_id = ''
-	) {}
+	) {
+		$this->getSearchID();
+	}
 
 	public function toDocument(): SearchDocument {
 		$network_node = get_current_network_node();
@@ -46,7 +46,7 @@ class ProvisionableUser implements ProvisionableInterface {
 			content: '',
 			publication_date: $this->user->user_registered ? new \DateTime( $this->user->user_registered ) : null,
 			modified_date: null,
-			content_type: 'user',
+			content_type: 'profile',
 			network_node: $network_node
 		);
 
@@ -62,16 +62,12 @@ class ProvisionableUser implements ProvisionableInterface {
 		if ( $search_id === false ) {
 			$search_id = '';
 		}
+		$this->search_id = $search_id;
 		return $search_id;
 	}
 
 	public function setSearchID( string $search_id ): void {
-		update_user_meta( $this->user->ID, 'cc_search_id', $search_id );
-	}
-
-	public function updateSearchID(): void {
-		$search_id = $this->getSearchID();
-		$this->search_id = $search_id;
+		$success = update_user_meta( $this->user->ID, 'cc_search_id', $search_id );
 	}
 
 	public static function getAll(): array {

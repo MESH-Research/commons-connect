@@ -8,25 +8,33 @@
 namespace MeshResearch\CCClient\Search;
 
 use MeshResearch\CCClient\Search\SearchAPI;
+use MeshResearch\CCClient\CCClientOptions;
 
-use function MeshResearch\CCClient\get_ccc_options;
+use MeshResearch\CCClient\Search\Provisioning\ProvisionableGroup;
+use MeshResearch\CCClient\Search\Provisioning\ProvisionablePost;
+use MeshResearch\CCClient\Search\Provisioning\ProvisionableSite;
+use MeshResearch\CCClient\Search\Provisioning\ProvisionableUser;
+
 use function MeshResearch\CCClient\Search\Provisioning\get_network_nodes;
-use function MeshResearch\CCClient\Search\Provisioning\get_provisioner_by_type;
+use function MeshResearch\CCClient\Search\Provisioning\get_provisionable;
 use function MeshResearch\CCClient\Search\Provisioning\bulk_provision;
 
 class SearchCommand {
+	private SearchAPI $search_api;
+	private CCClientOptions $options;
+
+	public function __construct() {
+		$this->options = new CCClientOptions( incremental_provisioning_enabled: false);
+		$this->search_api = new SearchAPI( $this->options );
+	}
+	
 	/**
 	 * Ping the search service
 	 */
 	public function ping() {
 		\WP_CLI::line( 'Pinging the search service...' );
 		try {
-			$search_api = new SearchAPI();
-		} catch ( \Exception $e ) {
-			\WP_CLI::error( $e->getMessage() );
-		}
-		try {
-			$response = $search_api->ping();
+			$response = $this->search_api->ping();
 		} catch ( \Exception $e ) {
 			$response = false;
 		}
@@ -41,44 +49,37 @@ class SearchCommand {
 	 * Output some status information about the search service
 	 */
 	public function status() {
-		$options = get_ccc_options();
-		if ( empty( $options['cc_search_key'] ) ) {
+		if ( empty( $this->options->cc_search_key ) ) {
 			\WP_CLI::warning( 'Search service API key is not configured.' );
 		} else {
 			\WP_CLI::success( 'Search service API key is configured.' );
 		}
-		if ( empty( $options['cc_search_admin_key'] ) ) {
+		if ( empty( $this->options->cc_search_admin_key ) ) {
 			\WP_CLI::warning( 'Search service admin API key is not configured.' );
 		} else {
 			\WP_CLI::success( 'Search service admin API key is configured.' );
 		}
-		if ( empty( $options['cc_search_endpoint'] ) ) {
+		if ( empty( $this->options->cc_search_endpoint ) ) {
 			\WP_CLI::warning( 'Search service endpoint is not configured.' );
 		} else {
-			\WP_CLI::success( 'Search service endpoint: ' . $options['cc_search_endpoint'] );
-		}
-		try {
-			$search_api = new SearchAPI();
-			\WP_CLI::success( 'Search service is configured.' );
-		} catch ( \Exception $e ) {
-			\WP_CLI::error( 'Search service is not configured: ' . $e->getMessage() );
+			\WP_CLI::success( 'Search service endpoint: ' . $this->options->cc_search_endpoint );
 		}
 
-		$response = $search_api->ping();
+		$response = $this->search_api->ping();
 		if ( $response === true ) {
 			\WP_CLI::success( 'Search service is up and running.' );
 		} else {
 			\WP_CLI::warning( 'Search service is not responding.' );
 		}
 
-		$response = $search_api->check_api_key();
+		$response = $this->search_api->check_api_key();
 		if ( $response === true ) {
 			\WP_CLI::success( 'Search service API key is valid.' );
 		} else {
 			\WP_CLI::warning( 'Search service API key is not valid.' );
 		}
 
-		$response = $search_api->check_admin_api_key();
+		$response = $this->search_api->check_admin_api_key();
 		if ( $response === true ) {
 			\WP_CLI::success( 'Search service admin API key is valid.' );
 		} else {
@@ -118,11 +119,17 @@ class SearchCommand {
 	 *
 	 * ## OPTIONS
 	 *
-	 * <id>
+	 * [<id>]
 	 * : The ID of the document to retrieve.
 	 * 
 	 * [--id=<id>]
 	 * : The ID of the document to retrieve.
+	 * 
+	 * [--internal_id=<internal_id>]
+	 * : The internal ID of the document to retrieve. (Requires --type option.)
+	 * 
+	 * [--type=<type>]
+	 * : The type of document to retrieve.
 	 *
 	 * ## EXAMPLES
 	 *
@@ -134,13 +141,53 @@ class SearchCommand {
 			$doc_id = $args[0];
 		} elseif ( ! empty( $assoc_args['id'] ) ) {
 			$doc_id = $assoc_args['id'];
-		} else {
+		} elseif ( ! empty( $assoc_args['internal_id'] ) && ! empty( $assoc_args['type'] ) ) {
+			$type = $assoc_args['type'];
+			$internal_id = $assoc_args['internal_id'];
+			\WP_CLI::line( 'Getting document by internal ID...' );
+			switch ( $type ) {
+				case 'user':
+					$item = get_user_by( 'ID', $internal_id );
+					if ( ! $item ) {
+						\WP_CLI::error( 'Invalid user ID' );
+					}
+					$provisioner = new ProvisionableUser( $item );
+					break;
+				case 'group':
+					$item = new \BP_Groups_Group( $internal_id );
+					if ( ! $item->id ) {
+						\WP_CLI::error( 'Invalid group ID' );
+					}
+					$provisioner = new ProvisionableGroup( $item );
+					break;
+				case 'site':
+					$item = get_site( $internal_id );
+					if ( ! $item ) {
+						\WP_CLI::error( 'Invalid site ID' );
+					}
+					$provisioner = new ProvisionableSite( $item );
+					break;
+				case 'post':
+					$item = get_post( $internal_id );
+					if ( ! $item ) {
+						\WP_CLI::error( 'Invalid post ID' );
+					}
+					$provisioner = new ProvisionablePost( $item );
+					break;
+				default:
+					\WP_CLI::error( 'Invalid document type' );
+			}
+			$doc_id = $provisioner->getSearchID();
+			if ( empty( $doc_id ) ) {
+				\WP_CLI::error( 'Document not found.' );
+			}
+		}
+		else {
 			\WP_CLI::error( 'Document ID is required.' );
 		}
 		\WP_CLI::line( 'Getting document...' );
-		$search_api = new SearchAPI();
 		try {
-			$response = $search_api->get_document( $doc_id );
+			$response = $this->search_api->get_document( $doc_id );
 		} catch ( \Exception $e ) {
 			\WP_CLI::error( $e->getMessage() );
 		}
@@ -169,7 +216,7 @@ class SearchCommand {
 		$wpid = $assoc_args['wpid'];
 		\WP_CLI::line( 'Getting status of ' . $type . ' ' . $wpid . '...' );
 		try {
-			$provisionable_item = get_provisioner_by_type( $type, $wpid );
+			$provisionable_item = get_provisionable( $type, $wpid );
 		} catch ( \Exception $e ) {
 			\WP_CLI::error( $e->getMessage() );
 		}
@@ -199,14 +246,13 @@ class SearchCommand {
 		$wpid = $assoc_args['wpid'];
 		\WP_CLI::line( 'Provisioning ' . $type . ' ' . $wpid . '...' );
 		try {
-			$provisionable_item = get_provisioner_by_type( $type, $wpid );
+			$provisionable_item = get_provisionable( $type, $wpid );
 		} catch ( \Exception $e ) {
 			\WP_CLI::error( $e->getMessage() );
 		}
-		$search_api = new SearchAPI();
 		$document = $provisionable_item->toDocument();
 		try {
-			$indexed_document = $search_api->index_or_update( $document );
+			$indexed_document = $this->search_api->index_or_update( $document );
 		} catch ( \Exception $e ) {
 			\WP_CLI::error( $e->getMessage() );
 		}
@@ -232,12 +278,11 @@ class SearchCommand {
 		if ( ! $on_base_site ) {
 			\WP_CLI::error( 'This command must be run on a base site.' );
 		}
-		$search_api = new SearchAPI();
 
-		if ( ! $search_api->check_api_key() ) {
+		if ( ! $this->search_api->check_api_key() ) {
 			\WP_CLI::error( 'Search service API key is not valid.' );
 		}
-		if ( ! $search_api->check_admin_api_key() ) {
+		if ( ! $this->search_api->check_admin_api_key() ) {
 			\WP_CLI::error( 'Search service admin API key is not valid.' );
 		}
 		
@@ -245,7 +290,7 @@ class SearchCommand {
 		$network_nodes = get_network_nodes();
 		foreach ( $network_nodes as $node ) {
 			try {
-				$deleted = $search_api->delete_node( $node );
+				$deleted = $this->search_api->delete_node( $node );
 				if ( ! $deleted ) {
 					\WP_CLI::warning( 'Failed to delete documents from node: ' . $node );
 				}

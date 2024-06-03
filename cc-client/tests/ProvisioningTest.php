@@ -10,25 +10,13 @@ namespace MeshResearch\CCClient\Tests;
 use MeshResearch\CCClient\Search;
 
 use function MeshResearch\CCClient\Search\Provisioning\bulk_provision;
+use MeshResearch\CCClient\Tests\CCCTestCase;
 
-class ProvisioningTest extends \WP_UnitTestCase {
-	private string $api_key;
-	private string $api_url;
-
-	/**
-	 * Set up the test case
-	 */
-	protected function setUp(): void {
-		$this->api_key = '12345';
-		$this->api_url = 'http://commonsconnect-search.lndo.site/v1';
-		parent::setUp();
-	}
-	
+class ProvisioningTest extends CCCTestCase {
 	public function testBulkPostProvisioning(): void {
 		$author = $this->factory->user->create_and_get();
 		$post_ids = $this->factory->post->create_many( 10, [ 'post_author' => $author->ID ] );
-		$search_api = new Search\SearchAPI( $this->api_key, $this->api_url );
-		bulk_provision( ['post'], $search_api );
+		bulk_provision( ['post'], $this->search_api );
 		foreach ( $post_ids as $post_id ) {
 			$cc_search_id = get_post_meta( $post_id, 'cc_search_id', true );
 			$this->assertNotEmpty( $cc_search_id );
