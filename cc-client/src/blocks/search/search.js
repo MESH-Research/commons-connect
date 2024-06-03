@@ -1,4 +1,4 @@
-import { useEffect, useState } from "@wordpress/element";
+import { useRef, useEffect, useState } from "@wordpress/element";
 
 function useFormInput(initialValue) {
     const [value, setValue] = useState(initialValue);
@@ -28,12 +28,13 @@ function CustomDateRange({ dateRangeValue, startDate, endDate }) {
         )
     );
 }
-function Paginator() {
+function Paginator({ currentPage, totalPages, perPage }) {
     let [pageData, setPageData] = useState({
-        currentPage: 1,
-        totalPages: 9,
-        perPage: 5,
+        currentPage: currentPage,
+        totalPages: totalPages.current,
+        perPage: perPage.current,
     });
+    console.log(pageData)
     let exceedsMaxDisplay = pageData.totalPages > 7;
     let slots = [];
     function makeSlot(data) {
@@ -307,6 +308,7 @@ function generateSampleJson(options) {
     };
     return { ...record, ...options };
 }
+console.log(generateSampleJson)
 function pushResults(data) {
     data.forEach((result) => {
         resultsData.push(generateSampleJson(result));
@@ -420,7 +422,6 @@ function getSearchTermFromUrl() {
 }
 
 export default function CCSearch() {
-    let [fetchResponse, setFetchResponse] = useState(null);
 
     const defaultEndDate = new Date().toISOString().split("T")[0];
     const searchTerm = useFormInput(getSearchTermFromUrl());
@@ -429,12 +430,14 @@ export default function CCSearch() {
     const dateRange = useFormInput("anytime");
     const endDate = useFormInput(defaultEndDate);
     const startDate = useFormInput("");
+    const currentPage = useRef(1);
+    const totalPages = useRef(1);
+    const perPage = useRef(20);
 
     function performSearch(event) {
         if (event !== null) {
             event.preventDefault();
         }
-        console.log("performSearch");
         const params = {
             sort_by: sortBy.value,
             content_type: searchType.value,
@@ -457,8 +460,10 @@ export default function CCSearch() {
         fetch(url)
             .then((response) => response.json())
             .then((data) => {
-                setFetchResponse(JSON.parse(data));
+                const parsed = JSON.parse(data);
+                console.log(parsed)
                 pushResults(JSON.parse(data).hits);
+                totalPages.value =
             });
     }
 
@@ -565,8 +570,12 @@ export default function CCSearch() {
             </article>
             <article>
                 <SearchResultSection searchTerm={searchTerm} />
-                {resultsData.length > 0 && searchTerm.value != "" && (
-                    <Paginator />
+                {resultsData.length > 0 && (
+                    <Paginator
+                        totalPages={totalPages}
+                        currentPage={currentPage}
+                        perPage={perPage}
+                    />
                 )}
             </article>
         </main>
