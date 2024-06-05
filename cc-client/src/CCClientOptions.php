@@ -27,6 +27,19 @@ class CCClientOptions {
 				$this->$key = $value;
 			}
 		}
+		// Environment variables override saved options
+		if ( getenv( 'CC_SEARCH_KEY' ) ) {
+			$this->cc_search_key = getenv( 'CC_SEARCH_KEY' );
+		}
+		if ( getenv( 'CC_SEARCH_ENDPOINT' ) ) {
+			$this->cc_search_endpoint = getenv( 'CC_SEARCH_ENDPOINT' );
+		}
+		if ( getenv( 'CC_SEARCH_ADMIN_KEY' ) ) {
+			$this->cc_search_admin_key = getenv( 'CC_SEARCH_ADMIN_KEY' );
+		}
+		if ( getenv( 'CC_INCREMENTAL_PROVISIONING_ENABLED' ) ) {
+			$this->incremental_provisioning_enabled = (bool) getenv( 'CC_INCREMENTAL_PROVISIONING_ENABLED' );
+		}
 	}
 
 	public function saveOptions() : void {

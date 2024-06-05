@@ -11,17 +11,34 @@ function register_incremental_provisioners(): void {
 	if ( CC_CLIENT_DOING_TESTING ) {
 		return;
 	}
+
+	$config = new \MeshResearch\CCClient\CCClientOptions();
+
+	if ( ! $config->incremental_provisioning_enabled ) {
+		return;
+	}
 	
+	try {
+		$search_api = new \MeshResearch\CCClient\Search\SearchAPI( $config );
+	} catch ( \Exception $e ) {
+		trigger_error( 'Failed to initialize search API: ' . $e->getMessage(), E_USER_WARNING );
+		return;
+	}
+
 	$provisioners = [
-		'CCClient\Search\Provisioning\IncrementalDiscussionsProvisioner',
-		'CCClient\Search\Provisioning\IncrementalPostsProvisioner',
-		'CCClient\Search\Provisioning\IncrementalUsersProvisioner',
-		'CCClient\Search\Provisioning\IncrementalGroupsProvisioner',
-		'CCClient\Search\Provisioning\IncrementalSitesProvisioner',
+		'MeshResearch\CCClient\Search\Provisioning\IncrementalDiscussionsProvisioner',
+		'MeshResearch\CCClient\Search\Provisioning\IncrementalPostsProvisioner',
+		'MeshResearch\CCClient\Search\Provisioning\IncrementalUsersProvisioner',
+		'MeshResearch\CCClient\Search\Provisioning\IncrementalGroupsProvisioner',
+		'MeshResearch\CCClient\Search\Provisioning\IncrementalSitesProvisioner',
 	];
 
 	foreach ( $provisioners as $provisioner ) {
-		$provisioner = new $provisioner();
+		try {
+			$provisioner = new $provisioner( $search_api );
+		} catch ( \Exception $e ) {
+			trigger_error( 'Failed to initialize incremental provisioner: ' . $e->getMessage(), E_USER_WARNING );
+		}
 	}
 }
 add_action( 'plugins_loaded', __NAMESPACE__ . '\register_incremental_provisioners' );
