@@ -26,11 +26,11 @@ function register_incremental_provisioners(): void {
 	}
 
 	$provisioners = [
-		'MeshResearch\CCClient\Search\Provisioning\IncrementalDiscussionsProvisioner',
-		'MeshResearch\CCClient\Search\Provisioning\IncrementalPostsProvisioner',
-		'MeshResearch\CCClient\Search\Provisioning\IncrementalUsersProvisioner',
-		'MeshResearch\CCClient\Search\Provisioning\IncrementalGroupsProvisioner',
-		'MeshResearch\CCClient\Search\Provisioning\IncrementalSitesProvisioner',
+		'\MeshResearch\CCClient\Search\Provisioning\IncrementalDiscussionsProvisioner',
+		'\MeshResearch\CCClient\Search\Provisioning\IncrementalPostsProvisioner',
+		'\MeshResearch\CCClient\Search\Provisioning\IncrementalUsersProvisioner',
+		'\MeshResearch\CCClient\Search\Provisioning\IncrementalGroupsProvisioner',
+		'\MeshResearch\CCClient\Search\Provisioning\IncrementalSitesProvisioner',
 	];
 
 	foreach ( $provisioners as $provisioner ) {
