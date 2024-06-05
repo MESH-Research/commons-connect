@@ -20,6 +20,8 @@ services:
         WP_CLI_CONFIG_PATH: /wordpress/wp-cli.yml
         CC_SEARCH_KEY: 12345
         CC_SEARCH_ENDPOINT: http://commonsconnect-search.lndo.site/v1
+        CC_SEARCH_ADMIN_KEY: 12345
+        CC_INCREMENTAL_PROVISIONING_ENABLED: 1
   appserver_nginx:
     overrides:
       volumes:
