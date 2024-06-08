@@ -22,8 +22,8 @@ services:
         CC_SEARCH_ENDPOINT: http://commonsconnect-search.lndo.site/v1
         CC_SEARCH_ADMIN_KEY: 12345
         CC_INCREMENTAL_PROVISIONING_ENABLED: 1
-        WP_HOME: https://commonsconnect-client.lndo.site
-        WP_SITEURL: https://commonsconnect-client.lndo.site
+        WP_HOME: https://commons-connect-client.lndo.site
+        WP_SITEURL: https://commons-connect-client.lndo.site
 config:
   php: 8.2
   database: mariadb
