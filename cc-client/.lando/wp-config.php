@@ -18,6 +18,14 @@
  * @package WordPress
  */
 
+if ( getenv('WP_HOME') ) {
+	define('WP_HOME', getenv('WP_HOME'));
+}
+
+if ( getenv('WP_SITEURL') ) {
+	define('WP_SITEURL', getenv('WP_SITEURL'));
+}
+
 /** This will ensure these are only loaded on Lando */
 if (getenv('LANDO_INFO')) {
 	/**  Parse the LANDO INFO  */
@@ -35,8 +43,12 @@ if (getenv('LANDO_INFO')) {
 	define('DB_HOST', $database_config->internal_connection->host);
 
 	/** URL routing (Optional, may not be necessary) */
-	define('WP_HOME', $lando_info->appserver_nginx->urls[3] );
-	define('WP_SITEURL', $lando_info->appserver_nginx->urls[3] );
+	if ( ! defined('WP_HOME') && isset($lando_info->appserver_nginx->urls[0]) ) {
+		define('WP_HOME', $lando_info->appserver_nginx->urls[0] );
+	}
+	if ( ! defined('WP_SITEURL') && isset($lando_info->appserver_nginx->urls[0]) ) {
+		define('WP_SITEURL', $lando_info->appserver_nginx->urls[0] );
+	}
   }
 
 /** Database charset to use in creating database tables. */

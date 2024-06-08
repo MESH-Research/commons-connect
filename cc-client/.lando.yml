@@ -11,21 +11,19 @@ services:
       - curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs
     run:
       - /app/.lando/install-wordpress.sh
-      - /app/bin/install-wp-tests.sh lemp lemp lemp database:3306
+      - /app/bin/install-wp-tests.sh test lemp lemp database:3306
       - sed -i "s|// define( 'WP_TESTS_MULTISITE', true );|define( 'WP_TESTS_MULTISITE', true );|g" /tmp/wordpress-tests-lib/wp-tests-config.php
+      - cd /app/ && npm install
+      - cd /app/ && npm run build
     overrides:
-      volumes:
-        - .lando/wordpress:/wordpress
       environment:
         WP_CLI_CONFIG_PATH: /wordpress/wp-cli.yml
         CC_SEARCH_KEY: 12345
         CC_SEARCH_ENDPOINT: http://commonsconnect-search.lndo.site/v1
         CC_SEARCH_ADMIN_KEY: 12345
         CC_INCREMENTAL_PROVISIONING_ENABLED: 1
-  appserver_nginx:
-    overrides:
-      volumes:
-        - .lando/wordpress:/wordpress
+        WP_HOME: https://commons-connect-client.lndo.site
+        WP_SITEURL: https://commons-connect-client.lndo.site
 config:
     php: 8.2
     database: mariadb
@@ -33,25 +31,25 @@ config:
     config:
         vhosts: .lando/nginx.conf
 tooling:
-    wp:
-        service: appserver
-        description: Runs WP-CLI commands
-        cmd: wp
-    wpd:
-        service: appserver
-        description: Runs WP-CLI commands with xdebug
-        cmd: php -d xdebug.start_with_request=yes /usr/local/bin/wp
-    phpunit:
-        service: appserver
-        description: Runs local tests
-        dir: /app
-        cmd: vendor/bin/phpunit /app/tests
-    phpunit-debug:
-        service: appserver
-        description: Runs local tests with xdebug
-        dir: /app
-        cmd: php -d xdebug.start_with_request=yes vendor/bin/phpunit /app/tests
-    npm:
-        service: appserver
-        description: Runs npm commands
-        cmd: npm
+  wp:
+    service: appserver
+    description: Runs WP-CLI commands
+    cmd: wp --path=/app/.lando/wordpress
+  wpd:
+    service: appserver
+    description: Runs WP-CLI commands with xdebug
+    cmd: php -d xdebug.start_with_request=yes /usr/local/bin/wp --path=/app/.lando/wordpress
+  phpunit:
+    service: appserver
+    description: Runs local tests
+    dir: /app
+    cmd: vendor/bin/phpunit /app/tests
+  phpunit-debug:
+    service: appserver
+    description: Runs local tests with xdebug
+    dir: /app
+    cmd: php -d xdebug.start_with_request=yes vendor/bin/phpunit /app/tests
+  npm:
+    service: appserver
+    description: Runs npm commands
+    cmd: npm
