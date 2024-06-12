@@ -36,3 +36,5 @@ vendor/
 !.vscode/launch.json
 !.editorconfig
 
+# Local landofile overrides
+.lando.local.yml
