@@ -31,9 +31,9 @@ function CustomDateRange({ dateRangeValue, startDate, endDate }) {
 }
 function Paginator({ currentPage, totalPages, perPage }) {
     let [pageData, setPageData] = useState({
-        currentPage: currentPage.current,
-        totalPages: totalPages.current,
-        perPage: perPage.current,
+        currentPage: currentPage,
+        totalPages: totalPages,
+        perPage: perPage,
     });
     let exceedsMaxDisplay = pageData.totalPages > 7;
     let slots = [];
