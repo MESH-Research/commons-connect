@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "@wordpress/element";
+import { useEffect, useState } from "@wordpress/element";
 import sampleJson from "./sample.json";
 
 function useFormInput(initialValue) {
@@ -314,21 +314,21 @@ function NoData() {
     );
 }
 function SearchResultSection(data) {
-    console.log(data);
+    console.log(data.searchPerformed);
     if (
-        data.searchPerformed.current === true &&
-        data.searchResults.current.length === 0 &&
-        data.searchTerm.value !== ""
+        data.searchPerformed === true &&
+        data.searchResults === 0 &&
+        data.searchTerm !== ""
     ) {
         return <NoData />;
     } else if (
-        data.searchPerformed.current === true &&
-        data.searchResults.current.length > 0 &&
-        data.searchTerm.value !== ""
+        data.searchPerformed === true &&
+        data.searchResults.length > 0 &&
+        data.searchTerm !== ""
     ) {
         return (
             <div>
-                {data.searchResults.current.map(function (result, i) {
+                {data.searchResults.map(function (result, i) {
                     return <SearchResult key={i} data={result} />;
                 })}
                 <Paginator
@@ -357,26 +357,26 @@ export default function CCSearch() {
     const dateRange = useFormInput("anytime");
     const endDate = useFormInput(getDefaultEndDate());
     const startDate = useFormInput("");
-    const currentPage = useRef(1);
-    const totalPages = useRef(1);
-    const perPage = useRef(20);
-    const searchPerformed = useRef(false);
-    const searchResults = useRef([]);
+    const [currentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [perPage] = useState(20);
+    const [searchPerformed, setSearchPerformed] = useState(false);
+    const [searchResults, setSearchResults] = useState([]);
 
     function performSearch(event) {
         if (event !== null) {
             event.preventDefault();
         }
-        // if (searchTerm.value === "") {
-        //     return;
-        // }
+        if (searchTerm.value === "") {
+            return;
+        }
         console.log(`performing search`);
 
         const params = {
             sort_by: sortBy.value,
             content_type: searchType.value,
-            page: currentPage.current,
-            per_page: perPage.current,
+            page: currentPage,
+            per_page: perPage,
             q: searchTerm.value,
         };
         if (dateRange.value === "custom") {
@@ -384,9 +384,9 @@ export default function CCSearch() {
             params.end_date = endDate.value;
         }
 
-        searchPerformed.current = true;
-        searchResults.current = processResults(sampleJson.hits);
-        totalPages.current = sampleJson.total_pages;
+        setSearchPerformed(true);
+        setSearchResults(processResults(sampleJson.hits));
+        setTotalPages(sampleJson.total_pages);
 
         // const url = new URL(
         //     "https://commons-connect-client.lndo.site/v1/search",
