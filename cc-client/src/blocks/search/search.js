@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "@wordpress/element";
+import sampleJson from "./sample.json";
 
 function useFormInput(initialValue) {
     const [value, setValue] = useState(initialValue);
@@ -30,11 +31,10 @@ function CustomDateRange({ dateRangeValue, startDate, endDate }) {
 }
 function Paginator({ currentPage, totalPages, perPage }) {
     let [pageData, setPageData] = useState({
-        currentPage: currentPage,
+        currentPage: currentPage.current,
         totalPages: totalPages.current,
         perPage: perPage.current,
     });
-    console.log(pageData)
     let exceedsMaxDisplay = pageData.totalPages > 7;
     let slots = [];
     function makeSlot(data) {
@@ -196,98 +196,6 @@ function Paginator({ currentPage, totalPages, perPage }) {
         </footer>
     );
 }
-const sampleResults = [
-    {
-        title: "Result 1",
-        description:
-            "Cheesecake lemon drops tart macaroon jujubes pie. Bear claw tart lollipop oat cake marshmallow jujubes chocolate bar carrot cake. Candy  canes gummies dragée jelly beans chocolate cake...",
-        owner: {
-            name: "Administrator",
-            username: "reginald",
-            url: "http://profiles.kcommons.org/reginald",
-        },
-        thumbnail_url: "https://placehold.co/200x75/000000/FFF",
-        publication_date: "2023-11-21",
-        language: "en",
-        content_type: "site",
-    },
-    {
-        title: "Result 2",
-        description:
-            "Cheesecake lemon drops tart macaroon jujubes pie. Bear claw tart lollipop oat cake marshmallow jujubes chocolate bar carrot cake. Candy  canes gummies dragée jelly beans chocolate cake...",
-        language: "en",
-        content_type: "group",
-    },
-    {
-        title: "Result 3",
-        description:
-            "Cheesecake lemon drops tart macaroon jujubes pie. Bear claw tart lollipop oat cake marshmallow jujubes chocolate bar carrot cake. Candy  canes gummies dragée jelly beans chocolate cake...",
-        language: "en",
-        content_type: "profile",
-    },
-    {
-        title: "Deposit 1",
-        description:
-            "Cheesecake lemon drops tart macaroon jujubes pie. Bear claw tart lollipop oat cake marshmallow jujubes chocolate bar carrot cake. Candy  canes gummies dragée jelly beans chocolate cake...",
-        owner: {
-            name: "Author",
-            url: "",
-        },
-        publication_date: "2023-11-21",
-        language: "en",
-        content_type: "deposit",
-    },
-    {
-        title: "On Open Scholarship",
-        description:
-            "An essay on the nature of open scholarship and the role of the library in supporting it.",
-        owner: {
-            name: "Reginald Gibbons",
-            username: "reginald",
-            url: "http://profiles.kcommons.org/reginald",
-        },
-        contributors: [
-            {
-                name: "Reginald Gibbons",
-                username: "reginald",
-                url: "http://profiles.kcommons.org/reginald",
-                role: "first author",
-                network_node: "mla",
-            },
-            {
-                name: "Edwina Gibbons",
-                username: "edwina",
-                url: "http://profiles.kcommons.org/edwina",
-                role: "author",
-                network_node: "hc",
-            },
-            {
-                name: "Obadiah Gibbons",
-                username: "obadiah",
-            },
-            {
-                name: "Lila Gibbons",
-                username: "lila",
-            },
-        ],
-        primary_url: "http://works.kcommons.org/records/1234",
-        other_urls: [
-            "http://works.hcommons.org/records/1234",
-            "http://works.mla.kcommons.org/records/1234",
-            "http://works.hastac.kcommons.org/records/1234",
-        ],
-        thumbnail_url: "https://placehold.co/75x200/000000/FFF",
-        content:
-            "This is the content of the essay. It is a long essay, and it is very interesting. It is also very well-written and well-argued and well-researched and well-documented and well-cited",
-        publication_date: "2018-01-01",
-        modified_date: "2018-01-02",
-        language: "en",
-        content_type: "deposit",
-        network_node: "works",
-    },
-];
-console.log(sampleResults);
-const resultsData = [];
 function generateSampleJson(options) {
     const record = {
         title: "",
@@ -308,11 +216,12 @@ function generateSampleJson(options) {
     };
     return { ...record, ...options };
 }
-console.log(generateSampleJson)
-function pushResults(data) {
+function processResults(data) {
+    const a = [];
     data.forEach((result) => {
-        resultsData.push(generateSampleJson(result));
+        a.push(generateSampleJson(result));
     });
+    return a;
 }
 function getContentTypeLabel(type) {
     const labels = {
@@ -399,45 +308,70 @@ function SearchResult({ data }) {
 }
 function NoData() {
     return (
-        <section>
-            <p>No results found.</p>
+        <section className="ccs-no-results">
+            <p>No results.</p>
         </section>
     );
 }
-function SearchResultSection(searchTerm) {
-    if (resultsData.length === 0 && searchTerm.value !== "") {
+function SearchResultSection(data) {
+    console.log(data);
+    if (
+        data.searchPerformed.current === true &&
+        data.searchResults.current.length === 0 &&
+        data.searchTerm.value !== ""
+    ) {
         return <NoData />;
-    } else if (resultsData.length > 0 && searchTerm.value !== "") {
-        return resultsData.map(function (result, i) {
-            return <SearchResult key={i} data={result} />;
-        });
+    } else if (
+        data.searchPerformed.current === true &&
+        data.searchResults.current.length > 0 &&
+        data.searchTerm.value !== ""
+    ) {
+        return (
+            <div>
+                {data.searchResults.current.map(function (result, i) {
+                    return <SearchResult key={i} data={result} />;
+                })}
+                <Paginator
+                    totalPages={data.totalPages}
+                    currentPage={data.currentPage}
+                    perPage={data.perPage}
+                />
+            </div>
+        );
     } else {
         return "";
     }
 }
-
 function getSearchTermFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get("search") ?? "";
 }
+function getDefaultEndDate() {
+    return new Date().toISOString().split("T")[0];
+}
 
 export default function CCSearch() {
-
-    const defaultEndDate = new Date().toISOString().split("T")[0];
     const searchTerm = useFormInput(getSearchTermFromUrl());
     const searchType = useFormInput("all");
     const sortBy = useFormInput("relevance");
     const dateRange = useFormInput("anytime");
-    const endDate = useFormInput(defaultEndDate);
+    const endDate = useFormInput(getDefaultEndDate());
     const startDate = useFormInput("");
     const currentPage = useRef(1);
     const totalPages = useRef(1);
     const perPage = useRef(20);
+    const searchPerformed = useRef(false);
+    const searchResults = useRef([]);
 
     function performSearch(event) {
         if (event !== null) {
             event.preventDefault();
         }
+        // if (searchTerm.value === "") {
+        //     return;
+        // }
+        console.log(`performing search`);
+
         const params = {
             sort_by: sortBy.value,
             content_type: searchType.value,
@@ -450,21 +384,25 @@ export default function CCSearch() {
             params.end_date = endDate.value;
         }
 
-        const url = new URL(
-            "https://commons-connect-client.lndo.site/wp-json/cc-client/v1/search",
-        );
-        Object.keys(params).forEach((key) =>
-            url.searchParams.append(key, params[key]),
-        );
+        searchPerformed.current = true;
+        searchResults.current = processResults(sampleJson.hits);
+        totalPages.current = sampleJson.total_pages;
 
-        fetch(url)
-            .then((response) => response.json())
-            .then((data) => {
-                const parsed = JSON.parse(data);
-                console.log(parsed)
-                pushResults(JSON.parse(data).hits);
-                totalPages.current = JSON.parse(data).total_pages;
-            });
+        // const url = new URL(
+        //     "https://commons-connect-client.lndo.site/v1/search",
+        // );
+        // Object.keys(params).forEach((key) =>
+        //     url.searchParams.append(key, params[key]),
+        // );
+
+        // fetch(url)
+        //     .then((response) => response.json())
+        //     .then((data) => {
+        //         const parsed = JSON.parse(data);
+        //         console.log("parsed", parsed);
+        //         pushResults(JSON.parse(data).hits);
+        //         totalPages.current = JSON.parse(data).total_pages;
+        //     });
     }
 
     useEffect(() => {
@@ -568,15 +506,15 @@ export default function CCSearch() {
                     <a href="#">KC Works</a>
                 </aside>
             </article>
-            <article>
-                <SearchResultSection searchTerm={searchTerm} />
-                {resultsData.length > 0 && (
-                    <Paginator
-                        totalPages={totalPages}
-                        currentPage={currentPage}
-                        perPage={perPage}
-                    />
-                )}
+            <article role="region" aria-live="polite">
+                <SearchResultSection
+                    searchTerm={searchTerm}
+                    searchPerformed={searchPerformed}
+                    searchResults={searchResults}
+                    totalPages={totalPages}
+                    currentPage={currentPage}
+                    perPage={perPage}
+                />
             </article>
         </main>
     );
