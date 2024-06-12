@@ -314,7 +314,6 @@ function NoData() {
     );
 }
 function SearchResultSection(data) {
-    console.log(data.searchPerformed);
     if (
         data.searchPerformed === true &&
         data.searchResults === 0 &&
@@ -370,7 +369,6 @@ export default function CCSearch() {
         if (searchTerm.value === "") {
             return;
         }
-        console.log(`performing search`);
 
         const params = {
             sort_by: sortBy.value,
@@ -399,9 +397,8 @@ export default function CCSearch() {
         //     .then((response) => response.json())
         //     .then((data) => {
         //         const parsed = JSON.parse(data);
-        //         console.log("parsed", parsed);
-        //         pushResults(JSON.parse(data).hits);
-        //         totalPages.current = JSON.parse(data).total_pages;
+        //         setSearchResults(processResults(parsed.hits));
+        //         setTotalPages(parsed.total_pages);
         //     });
     }
 
