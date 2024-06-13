@@ -29,13 +29,8 @@ function CustomDateRange({ dateRangeValue, startDate, endDate }) {
         )
     );
 }
-function Paginator({ currentPage, totalPages, perPage }) {
-    let [pageData, setPageData] = useState({
-        currentPage: currentPage,
-        totalPages: totalPages,
-        perPage: perPage,
-    });
-    let exceedsMaxDisplay = pageData.totalPages > 7;
+function Paginator(data) {
+    let exceedsMaxDisplay = data.totalPages > 7;
     let slots = [];
     function makeSlot(data) {
         data.clickable != undefined ? data.clickable : true;
@@ -47,7 +42,7 @@ function Paginator({ currentPage, totalPages, perPage }) {
         });
     }
     if (exceedsMaxDisplay) {
-        if (pageData.currentPage <= 4) {
+        if (data.currentPage <= 4) {
             setSlots([
                 { label: 1, value: 1 },
                 { label: 2, value: 2 },
@@ -55,56 +50,56 @@ function Paginator({ currentPage, totalPages, perPage }) {
                 { label: 4, value: 4 },
                 { label: 5, value: 5 },
                 { label: "...", value: null, clickable: false },
-                { label: pageData.totalPages, value: pageData.totalPages },
+                { label: data.totalPages, value: data.totalPages },
             ]);
         } else if (
-            pageData.currentPage > 4 &&
-            pageData.currentPage < pageData.totalPages - 4
+            data.currentPage > 4 &&
+            data.currentPage < data.totalPages - 4
         ) {
             setSlots([
                 { label: 1, value: 1 },
                 { label: "...", value: null, clickable: false },
                 {
-                    label: pageData.currentPage - 1,
-                    value: pageData.currentPage - 1,
+                    label: data.currentPage - 1,
+                    value: data.currentPage - 1,
                 },
-                { label: pageData.currentPage, value: pageData.currentPage },
+                { label: data.currentPage, value: data.currentPage },
                 {
-                    label: pageData.currentPage + 1,
-                    value: pageData.currentPage + 1,
+                    label: data.currentPage + 1,
+                    value: data.currentPage + 1,
                 },
                 { label: "...", value: null, clickable: false },
-                { label: pageData.totalPages, value: pageData.totalPages },
+                { label: data.totalPages, value: data.totalPages },
             ]);
         } else if (
-            pageData.currentPage > 4 &&
-            pageData.currentPage >= pageData.totalPages - 4
+            data.currentPage > 4 &&
+            data.currentPage >= data.totalPages - 4
         ) {
             setSlots([
                 { label: 1, value: 1 },
                 { label: "...", value: null, clickable: false },
                 {
-                    label: pageData.totalPages - 4,
-                    value: pageData.totalPages - 4,
+                    label: data.totalPages - 4,
+                    value: data.totalPages - 4,
                 },
                 {
-                    label: pageData.totalPages - 3,
-                    value: pageData.totalPages - 3,
+                    label: data.totalPages - 3,
+                    value: data.totalPages - 3,
                 },
                 {
-                    label: pageData.totalPages - 2,
-                    value: pageData.totalPages - 2,
+                    label: data.totalPages - 2,
+                    value: data.totalPages - 2,
                 },
                 {
-                    label: pageData.totalPages - 1,
-                    value: pageData.totalPages - 1,
+                    label: data.totalPages - 1,
+                    value: data.totalPages - 1,
                 },
-                { label: pageData.totalPages, value: pageData.totalPages },
+                { label: data.totalPages, value: data.totalPages },
             ]);
         }
     } else {
         slots = [];
-        for (let i = 1; i <= pageData.totalPages; i++) {
+        for (let i = 1; i <= data.totalPages; i++) {
             slots.push(
                 makeSlot({
                     label: i,
@@ -127,13 +122,11 @@ function Paginator({ currentPage, totalPages, perPage }) {
                 href="#"
                 onClick={(e) => setPage(e, slot.value)}
                 style={
-                    pageData.currentPage == slot.value
-                        ? { fontWeight: "bold" }
-                        : {}
+                    data.currentPage == slot.value ? { fontWeight: "bold" } : {}
                 }
                 className="ccs-page-link"
-                aria-current={pageData.currentPage == slot.value ? true : null}
-                aria-label={"Page " + slot.value + " of " + pageData.totalPages}
+                aria-current={data.currentPage == slot.value ? true : null}
+                aria-label={"Page " + slot.value + " of " + data.totalPages}
             >
                 {slot.label}
             </a>
@@ -141,22 +134,16 @@ function Paginator({ currentPage, totalPages, perPage }) {
     });
     function setPage(e, page) {
         e.preventDefault();
-        setPageData({ ...pageData, currentPage: page });
+        data.setCurrentPage(page);
     }
     function decrementPage() {
-        if (pageData.currentPage > 1) {
-            setPageData({
-                ...pageData,
-                currentPage: (pageData.currentPage -= 1),
-            });
+        if (data.currentPage > 1) {
+            data.setCurrentPage(data.currentPage - 1);
         }
     }
     function incrementPage() {
-        if (pageData.currentPage != pageData.totalPages) {
-            setPageData({
-                ...pageData,
-                currentPage: (pageData.currentPage += 1),
-            });
+        if (data.currentPage != data.totalPages) {
+            data.setCurrentPage(data.currentPage + 1);
         }
     }
     return (
@@ -164,17 +151,17 @@ function Paginator({ currentPage, totalPages, perPage }) {
             <nav
                 aria-label={
                     "Select a page of " +
-                    pageData.totalPages +
+                    data.totalPages +
                     " pages of search results"
                 }
                 className="ccs-footer-nav"
             >
                 <button
                     onClick={decrementPage}
-                    disabled={pageData.currentPage === 1}
+                    disabled={data.currentPage === 1}
                     aria-label={
-                        pageData.currentPage !== 1
-                            ? "Previous Page " + (pageData.currentPage - 1)
+                        data.currentPage !== 1
+                            ? "Previous Page " + (data.currentPage - 1)
                             : null
                     }
                 >
@@ -183,10 +170,10 @@ function Paginator({ currentPage, totalPages, perPage }) {
                 {slotMarkup}
                 <button
                     onClick={incrementPage}
-                    disabled={pageData.currentPage === pageData.totalPages}
+                    disabled={data.currentPage === data.totalPages}
                     aria-label={
-                        pageData.currentPage !== pageData.totalPages
-                            ? "Next Page " + (pageData.currentPage + 1)
+                        data.currentPage !== data.totalPages
+                            ? "Next Page " + (data.currentPage + 1)
                             : null
                     }
                 >
@@ -333,6 +320,7 @@ function SearchResultSection(data) {
                 <Paginator
                     totalPages={data.totalPages}
                     currentPage={data.currentPage}
+                    setCurrentPage={data.setCurrentPage}
                     perPage={data.perPage}
                 />
             </div>
@@ -356,7 +344,7 @@ export default function CCSearch() {
     const dateRange = useFormInput("anytime");
     const endDate = useFormInput(getDefaultEndDate());
     const startDate = useFormInput("");
-    const [currentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [perPage] = useState(20);
     const [searchPerformed, setSearchPerformed] = useState(false);
@@ -392,7 +380,6 @@ export default function CCSearch() {
         // Object.keys(params).forEach((key) =>
         //     url.searchParams.append(key, params[key]),
         // );
-
         // fetch(url)
         //     .then((response) => response.json())
         //     .then((data) => {
@@ -404,7 +391,7 @@ export default function CCSearch() {
 
     useEffect(() => {
         performSearch(null);
-    }, []);
+    }, [currentPage]);
 
     return (
         <main>
@@ -510,6 +497,7 @@ export default function CCSearch() {
                     searchResults={searchResults}
                     totalPages={totalPages}
                     currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
                     perPage={perPage}
                 />
             </article>
