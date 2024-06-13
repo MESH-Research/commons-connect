@@ -11,6 +11,10 @@ use WP_REST_Controller;
 use WP_REST_Response;
 use WP_REST_Request;
 
+use MeshResearch\CCClient\Search\SearchAPI;
+use MeshResearch\CCClient\CCClientOptions;
+use MeshResearch\CCClient\Search\SearchParams;
+
 /**
  * REST controller for search
  */
@@ -22,6 +26,8 @@ class SearchController extends WP_REST_Controller {
     public function __construct() {
         $this->namespace     = CC_CLIENT_REST_NAMESPACE;
         $this->resource_name = 'search';
+        $this->options = new CCClientOptions();
+        $this->search_api = new SearchAPI( $this->options );
     }
 
     public function register_routes() {
@@ -41,7 +47,9 @@ class SearchController extends WP_REST_Controller {
 
 	public function get_results( WP_REST_Request $request ) : WP_REST_Response {
 		$parameters = $request->get_query_params();
-		return new WP_REST_Response( $parameters );
+        $search_params = SearchParams::fromQueryParams( $parameters );
+        $results = $this->search_api->search( $search_params );
+		return new WP_REST_Response( $results );
 	}
 
     public function get_items_permission_check( WP_REST_Request $request ) : bool {

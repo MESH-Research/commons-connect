@@ -39,6 +39,20 @@ class SearchParams {
 		);
 	}
 
+	public static function fromQueryParams( array $query_params ): SearchParams {
+		return new SearchParams(
+			$query_params['q'] ?? '',
+			$query_params['exact_match'] ?? [],
+			$query_params['fields'] ?? [],
+			$query_params['start_date'] ?? '',
+			$query_params['end_date'] ?? '',
+			$query_params['sort_dir'] ?? '',
+			$query_params['sort_by'] ?? '',
+			$query_params['page'] ?? -1,
+			$query_params['per_page'] ?? -1
+		);
+	}
+
 	public function toQueryString(): string {
 		$query_terms = [];
 		if ( ! empty( $this->query ) ) {
