@@ -349,6 +349,7 @@ export default function CCSearch() {
     const [perPage] = useState(20);
     const [searchPerformed, setSearchPerformed] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
+    const [thisCommonsOnly, setThisCommonsOnly] = useState(false);
 
     function performSearch(event) {
         if (event !== null) {
@@ -364,6 +365,7 @@ export default function CCSearch() {
             page: currentPage,
             per_page: perPage,
             q: searchTerm.value,
+            this_commons: thisCommonsOnly
         };
         if (dateRange.value === "custom") {
             params.start_date = startDate.value;
@@ -475,6 +477,8 @@ export default function CCSearch() {
                                 <input
                                     type="checkbox"
                                     name="searchCommonsOnly"
+                                    checked={thisCommonsOnly}
+                                    onChange={() => setThisCommonsOnly(!thisCommonsOnly)}
                                 />
                                 <span>&nbsp;</span>
                                 <span>Search only this Commons</span>
