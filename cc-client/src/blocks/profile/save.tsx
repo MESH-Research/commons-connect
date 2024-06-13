@@ -1,4 +1,4 @@
-import { useBlockProps } from '@wordpress/block-editor';
+import { useBlockProps } from "@wordpress/block-editor";
 
 /**
  * The save function defines the way in which the different attributes should
@@ -9,14 +9,13 @@ import { useBlockProps } from '@wordpress/block-editor';
  *
  * @return {WPElement} Element to render.
  */
-export default function save( { attributes } : any ) {
-	
-	return ( 
-	<div 
-			{ ...useBlockProps.save() } 
-			data-attributes = { JSON.stringify( attributes ) }
-		>
-			Hello from the saved content!
-	</div>
-	);
+export default function save({ attributes }: any) {
+    return (
+        <div
+            {...useBlockProps.save()}
+            data-attributes={JSON.stringify(attributes)}
+        >
+            Hello from the saved content!
+        </div>
+    );
 }

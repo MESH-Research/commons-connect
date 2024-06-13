@@ -15,8 +15,8 @@
     ],
     "repositories": [
         {
-            "type":"composer",
-            "url":"https://wpackagist.org",
+            "type": "composer",
+            "url": "https://wpackagist.org",
             "only": [
                 "wpackagist-plugin/*",
                 "wpackagist-theme/*"
@@ -52,8 +52,12 @@
     },
     "extra": {
         "installer-paths": {
-            ".lando/wordpress/wp-content/plugins/{$name}/": ["type:wordpress-plugin"],
-            ".lando/wordpress/wp-content/themes/{$name}/": ["type:wordpress-theme"]
+            ".lando/wordpress/wp-content/plugins/{$name}/": [
+                "type:wordpress-plugin"
+            ],
+            ".lando/wordpress/wp-content/themes/{$name}/": [
+                "type:wordpress-theme"
+            ]
         }
     }
 }

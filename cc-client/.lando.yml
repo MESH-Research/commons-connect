@@ -25,11 +25,11 @@ services:
         WP_HOME: https://commons-connect-client.lndo.site
         WP_SITEURL: https://commons-connect-client.lndo.site
 config:
-  php: 8.2
-  database: mariadb
-  xdebug: debug
-  config:  
-    vhosts: .lando/nginx.conf
+    php: 8.2
+    database: mariadb
+    xdebug: debug
+    config:
+        vhosts: .lando/nginx.conf
 tooling:
   wp:
     service: appserver

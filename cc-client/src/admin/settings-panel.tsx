@@ -1,91 +1,93 @@
-import apiFetch from '@wordpress/api-fetch';
+import apiFetch from "@wordpress/api-fetch";
 
-import {
-	useState,
-	useEffect,
-} from '@wordpress/element';
+import { useState, useEffect } from "@wordpress/element";
 
-import {
-	Button
-} from '@wordpress/components';
-
+import { Button } from "@wordpress/components";
 
 type SiteOptions = {
-	cc_server_url: string;
-	cc_search_endpoint: string;
-	cc_search_key: string;
+    cc_server_url: string;
+    cc_search_endpoint: string;
+    cc_search_key: string;
 };
 
 export const SettingsPanel = () => {
-	const [ siteOptions, updateSiteOptions ] = useState( {
-		cc_server_url: '',
-		cc_search_endpoint: '',
-		cc_search_key: '',
-	} );
+    const [siteOptions, updateSiteOptions] = useState({
+        cc_server_url: "",
+        cc_search_endpoint: "",
+        cc_search_key: "",
+    });
 
-    const {
-        cc_server_url,
-		cc_search_endpoint,
-		cc_search_key,
-    } = siteOptions as SiteOptions;
+    const { cc_server_url, cc_search_endpoint, cc_search_key } =
+        siteOptions as SiteOptions;
 
-	useEffect( () => {
-		refreshSiteOptions();
-	}, [] );
+    useEffect(() => {
+        refreshSiteOptions();
+    }, []);
 
-	const refreshSiteOptions = () => {
-		apiFetch( {
-			path: '/cc-client/v1/options',
-		} ).then( ( options ) => {
-			updateSiteOptions( options as SiteOptions);
-		} );
-	};
+    const refreshSiteOptions = () => {
+        apiFetch({
+            path: "/cc-client/v1/options",
+        }).then((options) => {
+            updateSiteOptions(options as SiteOptions);
+        });
+    };
 
-	const doSave = () => {
-		apiFetch( {
-			path: '/cc-client/v1/options',
-			method: 'POST',
-			data: siteOptions,
-		} ).then( ( response ) => { console.log( response ) } );
-	};
+    const doSave = () => {
+        apiFetch({
+            path: "/cc-client/v1/options",
+            method: "POST",
+            data: siteOptions,
+        }).then((response) => {
+            console.log(response);
+        });
+    };
 
-	
-	return (
-		<div>
-			<h1>CommonsConnect Settings</h1>
-			<div id="settings-form">
+    return (
+        <div>
+            <h1>CommonsConnect Settings</h1>
+            <div id="settings-form">
+                <label>CommonsConnect server URL:</label>
+                <input
+                    type="text"
+                    value={cc_server_url}
+                    name="cc_server_url"
+                    onChange={(event) => {
+                        updateSiteOptions({
+                            ...siteOptions,
+                            cc_server_url: event.target.value,
+                        });
+                    }}
+                />
 
-					<label>CommonsConnect server URL:</label>
-					<input 
-						type = "text"
-						value = { cc_server_url }
-						name = "cc_server_url"
-						onChange = { ( event ) => { updateSiteOptions( { ...siteOptions, 'cc_server_url': event.target.value } ) } }
-					/>
+                <label>CommonsConnect search endpoint:</label>
+                <input
+                    type="text"
+                    value={cc_search_endpoint}
+                    name="cc_search_endpoint"
+                    onChange={(event) => {
+                        updateSiteOptions({
+                            ...siteOptions,
+                            cc_search_endpoint: event.target.value,
+                        });
+                    }}
+                />
 
-					<label>CommonsConnect search endpoint:</label>
-					<input
-						type = "text"
-						value = { cc_search_endpoint }
-						name = "cc_search_endpoint"
-						onChange = { ( event ) => { updateSiteOptions( { ...siteOptions, 'cc_search_endpoint': event.target.value } ) } }
-					/>
-
-					<label>CommonsConnect server API key:</label>
-					<input
-						type = "text"
-						value = { cc_search_key}
-						name = "cc_search_key"
-						onChange = { ( event ) => { updateSiteOptions( { ...siteOptions, 'cc_search_key': event.target.value } ) } }
-					/>
-	
-			</div>
-				<Button
-					variant = "primary"
-					onClick = { doSave }
-				>
-				Save
-			</Button>
-		</div>
-	);
-}
+                <label>CommonsConnect server API key:</label>
+                <input
+                    type="text"
+                    value={cc_search_key}
+                    name="cc_search_key"
+                    onChange={(event) => {
+                        updateSiteOptions({
+                            ...siteOptions,
+                            cc_search_key: event.target.value,
+                        });
+                    }}
+                />
+            </div>
+            <Button variant="primary" onClick={doSave}>
+                Save
+            </Button>
+        </div>
+    );
+};

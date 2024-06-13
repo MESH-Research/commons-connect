@@ -34,20 +34,26 @@ define( 'CCC_FEATURE_PROFILE_BLOCK', false );
  * Enqueue block editor frontend assets.
  */
 function enqueue_client_block_assets() {
-	$asset_file = include CC_CLIENT_BASE_DIR . 'build/profile/front.asset.php';
-	wp_enqueue_style(
-		'cc-client-profile',
-		CC_CLIENT_BASE_URL . 'build/profile/style-index.css',
-		[],
-		$asset_file['version']
-	);
+    $asset_file = include CC_CLIENT_BASE_DIR . 'build/profile/front.asset.php';
+    wp_enqueue_style(
+        'cc-client-profile',
+        CC_CLIENT_BASE_URL . 'build/profile/style-index.css',
+        [],
+        $asset_file['version']
+    );
 
-	// Search block style enqueue goes here.
+    $asset_file = include CC_CLIENT_BASE_DIR . 'build/search/view.asset.php';
+    wp_enqueue_style(
+        'cc-client-search',
+        CC_CLIENT_BASE_URL . 'build/search/style-view.css',
+        [],
+        $asset_file['version']
+    );
 
-	if ( is_admin() ) {
-		
-		// Enqueue editor only assets here
-	}
+    if ( is_admin() ) {
+
+        // Enqueue editor only assets here
+    }
 }
 add_action( 'enqueue_block_assets', __NAMESPACE__ . '\enqueue_client_block_assets' );
 

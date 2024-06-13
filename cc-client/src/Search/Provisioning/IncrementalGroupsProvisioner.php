@@ -18,7 +18,6 @@ class IncrementalGroupsProvisioner implements IncrementalProvisionerInterface {
 	}
 
 	public function registerHooks(): void {
-		add_action( 'groups_group_create_complete', [ $this, 'provisionNewOrUpdatedGroup' ] );
 		add_action( 'groups_group_after_save',  [ $this, 'provisionNewOrUpdatedGroup' ] );
 		add_action( 'groups_before_delete_group', [ $this, 'provisionDeletedGroup' ] );
 	}
@@ -42,8 +41,18 @@ class IncrementalGroupsProvisioner implements IncrementalProvisionerInterface {
 		$provisionable_group = new ProvisionableGroup( $group );
 		$provisionable_group->getSearchID();
 
-		$indexed_document = $this->search_api->index_or_update( $provisionable_group->toDocument() );
-		$provisionable_group->setSearchID( $indexed_document->_id );
+		if ( 'public' === $group->status ) {
+			$indexed_document = $this->search_api->index_or_update( $provisionable_group->toDocument() );
+			$provisionable_group->setSearchID( $indexed_document->_id );
+			return;
+		}
+
+		// If the group isn't public, delete the document if it exists.
+		if ( ! empty( $provisionable_group->getSearchID() ) ) {
+			$this->search_api->delete( $provisionable_group->getSearchID() );
+			$provisionable_group->setSearchID( '' );
+			return;
+		}
 	}
 
 	public function provisionDeletedGroup( int $group_id ) {

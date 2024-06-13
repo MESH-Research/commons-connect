@@ -30,7 +30,7 @@ if ( getenv('WP_SITEURL') ) {
 if (getenv('LANDO_INFO')) {
 	/**  Parse the LANDO INFO  */
 	$lando_info = json_decode(getenv('LANDO_INFO'));
-  
+
 	/** Get the database config */
 	$database_config = $lando_info->database;
 	/** The name of the database for WordPress */
@@ -41,7 +41,7 @@ if (getenv('LANDO_INFO')) {
 	define('DB_PASSWORD', $database_config->creds->password);
 	/** MySQL hostname */
 	define('DB_HOST', $database_config->internal_connection->host);
-  
+
 	/** URL routing (Optional, may not be necessary) */
 	if ( ! defined('WP_HOME') && isset($lando_info->appserver_nginx->urls[0]) ) {
 		define('WP_HOME', $lando_info->appserver_nginx->urls[0] );
