@@ -3,6 +3,6 @@ services:
     overrides:
       environment:
         CC_SEARCH_KEY: 12345ABCDE
-        CC_SEARCH_ENDPOINT: https://search.hcommons-dev.org
+        CC_SEARCH_ENDPOINT: https://search.hcommons-dev.org/v1
         CC_SEARCH_ADMIN_KEY: 54321EDCBA
         CC_INCREMENTAL_PROVISIONING_ENABLED: 1
