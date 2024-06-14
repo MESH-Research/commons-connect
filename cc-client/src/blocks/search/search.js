@@ -391,7 +391,7 @@ export default function CCSearch() {
             .then((data) => {
                 setSearchPerformed(true);
                 setSearchResults(processResults(data.hits));
-                setTotalPages(data.total_pages);
+                setTotalPages(data.total_pages | 1);
             });
     }
 
