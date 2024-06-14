@@ -1,5 +1,4 @@
 import { useEffect, useState } from "@wordpress/element";
-import sampleJson from "./sample.json";
 
 function useFormInput(initialValue) {
     const [value, setValue] = useState(initialValue);
@@ -365,30 +364,30 @@ export default function CCSearch() {
             page: currentPage,
             per_page: perPage,
             q: searchTerm.value,
-            this_commons: thisCommonsOnly
+            this_commons: thisCommonsOnly ? 1 : 0,
         };
         if (dateRange.value === "custom") {
             params.start_date = startDate.value;
             params.end_date = endDate.value;
         }
 
-        setSearchPerformed(true);
-        setSearchResults(processResults(sampleJson.hits));
-        setTotalPages(sampleJson.total_pages);
+        // setSearchPerformed(true);
+        // setSearchResults(processResults(sampleJson.hits));
+        // setTotalPages(sampleJson.total_pages);
 
-        // const url = new URL(
-        //     "https://commons-connect-client.lndo.site/v1/search",
-        // );
+        const url = new URL(
+            "https://commons-connect-client.lndo.site/?rest_route=/cc-client/v1/search",
+        );
         // Object.keys(params).forEach((key) =>
         //     url.searchParams.append(key, params[key]),
         // );
-        // fetch(url)
-        //     .then((response) => response.json())
-        //     .then((data) => {
-        //         const parsed = JSON.parse(data);
-        //         setSearchResults(processResults(parsed.hits));
-        //         setTotalPages(parsed.total_pages);
-        //     });
+        fetch(url)
+            .then((response) => response.json())
+            .then((data) => {
+                setSearchPerformed(true);
+                setSearchResults(processResults(data.hits));
+                setTotalPages(data.total_pages);
+            });
     }
 
     useEffect(() => {
@@ -478,7 +477,9 @@ export default function CCSearch() {
                                     type="checkbox"
                                     name="searchCommonsOnly"
                                     checked={thisCommonsOnly}
-                                    onChange={() => setThisCommonsOnly(!thisCommonsOnly)}
+                                    onChange={() =>
+                                        setThisCommonsOnly(!thisCommonsOnly)
+                                    }
                                 />
                                 <span>&nbsp;</span>
                                 <span>Search only this Commons</span>
