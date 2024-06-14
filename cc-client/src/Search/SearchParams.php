@@ -40,17 +40,22 @@ class SearchParams {
 	}
 
 	public static function fromQueryParams( array $query_params ): SearchParams {
-		return new SearchParams(
-			$query_params['q'] ?? '',
-			$query_params['exact_match'] ?? [],
-			$query_params['fields'] ?? [],
-			$query_params['start_date'] ?? '',
-			$query_params['end_date'] ?? '',
-			$query_params['sort_dir'] ?? '',
-			$query_params['sort_by'] ?? '',
-			$query_params['page'] ?? -1,
-			$query_params['per_page'] ?? -1
+		$params = new SearchParams(
+			query: $query_params['q'] ?? '',
+			return_fields: $query_params['fields'] ?? [],
+			start_date: $query_params['start_date'] ?? '',
+			end_date: $query_params['end_date'] ?? '',
+			sort_direction: $query_params['sort_dir'] ?? '',
+			sort_field: $query_params['sort_by'] ?? '',
+			page: $query_params['page'] ?? -1,
+			per_page: $query_params['per_page'] ?? -1
 		);
+		foreach ( get_class_vars( SearchDocument::class ) as $field => $default_value ) {
+			if ( isset( $query_params[ $field ] ) ) {
+				$params->exact_match[ $field ] = $query_params[ $field ];
+			}
+		}
+		return $params;
 	}
 
 	public function toQueryString(): string {
