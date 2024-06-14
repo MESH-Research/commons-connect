@@ -238,6 +238,11 @@ function getDateLabel(publication_date, modified_date) {
     return date;
 }
 function renderContributor(data) {
+    if (Object.hasOwn(data, "content_type")) {
+        if (data.content_type === "user") {
+            return null;
+        }
+    }
     if (Object.hasOwn(data, "owner")) {
         if (
             Object.hasOwn(data.owner, "url") &&
