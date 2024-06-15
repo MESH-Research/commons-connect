@@ -182,13 +182,20 @@ function Paginator(data) {
         </footer>
     );
 }
-function generateSampleJson(options) {
+const person = {
+    name: "",
+    username: "",
+    url: "",
+    network_node: "",
+    role: "",
+};
+function setResult(options) {
     const record = {
+        _internal_id: "",
+        _id: "",
         title: "",
         description: "",
-        owner: {
-            name: "",
-        },
+        owner: person,
         contributors: [],
         primary_url: "#",
         other_urls: [],
@@ -205,13 +212,20 @@ function generateSampleJson(options) {
 function processResults(data) {
     const a = [];
     data.forEach((result) => {
-        a.push(generateSampleJson(result));
+        let b = {};
+        b = setResult(result);
+        console.log(b);
+        // b.contributors = result.contributors.map((contributor) => {
+        //     return { ...contributor, ...person };
+        // });
+        a.push(b);
     });
     return a;
 }
 function getContentTypeLabel(type) {
     const labels = {
         deposit: "Work/Deposit",
+        work: "Work/Deposit",
         post: "Post",
         user: "Profile",
         profile: "Profile",
@@ -239,7 +253,7 @@ function getDateLabel(publication_date, modified_date) {
 }
 function renderContributor(data) {
     if (Object.hasOwn(data, "content_type")) {
-        if (data.content_type === "user") {
+        if (data.content_type === "user" || data.content_type === "profile") {
             return null;
         }
     }
@@ -269,6 +283,19 @@ function decodeHTMLElement(text) {
 }
 function SearchResult({ data }) {
     const dateLabel = getDateLabel(data.publication_date, data.modified_date);
+    let thumbnail = null;
+    if (
+        Object.hasOwn(data, "thumbnail_url") &&
+        (data.content_type === "user" || data.content_type === "profile")
+    ) {
+        thumbnail = (
+            <img
+                src={data.thumbnail_url}
+                alt=""
+                className="ccs-profile-thumbnail"
+            />
+        );
+    }
 
     return (
         <section className="ccs-result">
@@ -278,20 +305,23 @@ function SearchResult({ data }) {
                         {getContentTypeLabel(data.content_type)}
                     </span>
                 )}
+                {thumbnail}
                 <a href={data.primary_url} className="ccs-result-title">
-                    {data.title}
+                    {decodeHTMLElement(data.title)}
                 </a>
                 {renderContributor(data)}
                 {dateLabel && <span className="ccs-date">{dateLabel}</span>}
             </header>
             <div className="ccs-result-description">
-                {data.thumbnail_url && (
-                    <img
-                        src={data.thumbnail_url}
-                        alt=""
-                        className="ccs-result-thumbnail"
-                    />
-                )}
+                {data.thumbnail_url !== "" &&
+                    data.content_type !== "user" &&
+                    data.content_type !== "profile" && (
+                        <img
+                            src={data.thumbnail_url}
+                            alt=""
+                            className="ccs-result-thumbnail"
+                        />
+                    )}
                 <p>{decodeHTMLElement(data.description)}</p>
             </div>
         </section>
@@ -307,7 +337,7 @@ function NoData() {
 function SearchResultSection(data) {
     if (
         data.searchPerformed === true &&
-        data.searchResults === 0 &&
+        data.searchResults.length === 0 &&
         data.searchTerm !== ""
     ) {
         return <NoData />;
@@ -343,8 +373,8 @@ function getDefaultEndDate() {
 
 export default function CCSearch() {
     const searchTerm = useFormInput(getSearchTermFromUrl());
-    const searchType = useFormInput("all");
-    const sortBy = useFormInput("relevance");
+    const searchType = useFormInput("");
+    const sortBy = useFormInput("");
     const dateRange = useFormInput("anytime");
     const endDate = useFormInput(getDefaultEndDate());
     const startDate = useFormInput("");
@@ -362,15 +392,16 @@ export default function CCSearch() {
         if (searchTerm.value === "") {
             return;
         }
-
         const params = {
-            sort_by: sortBy.value,
-            content_type: searchType.value,
             page: currentPage,
             per_page: perPage,
             q: searchTerm.value,
+            sort_by: sortBy.value,
             this_commons: thisCommonsOnly ? 1 : 0,
         };
+        if (searchType.value !== "") {
+            params.content_type = searchType.value;
+        }
         if (dateRange.value === "custom") {
             params.start_date = startDate.value;
             params.end_date = endDate.value;
@@ -383,9 +414,9 @@ export default function CCSearch() {
         const url = new URL(
             "https://commons-connect-client.lndo.site/?rest_route=/cc-client/v1/search",
         );
-        // Object.keys(params).forEach((key) =>
-        //     url.searchParams.append(key, params[key]),
-        // );
+        Object.keys(params).forEach((key) =>
+            url.searchParams.append(key, params[key]),
+        );
         fetch(url)
             .then((response) => response.json())
             .then((data) => {
@@ -422,7 +453,7 @@ export default function CCSearch() {
                                     <span className="ccs-label">Type</span>
                                     <br />
                                     <select {...searchType}>
-                                        <option value="all">All Types</option>
+                                        <option value="">All Types</option>
                                         <option value="work">
                                             Deposit/Work
                                         </option>
@@ -441,9 +472,7 @@ export default function CCSearch() {
                                     <span className="ccs-label">Sort By</span>
                                     <br />
                                     <select {...sortBy}>
-                                        <option value="relevance">
-                                            Relevance
-                                        </option>
+                                        <option value="">Relevance</option>
                                         <option value="publication_date">
                                             Publication Date
                                         </option>
