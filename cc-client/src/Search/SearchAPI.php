@@ -52,7 +52,11 @@ class SearchAPI {
 	 * Ping the API to check if it is up
 	 */
 	public function ping(): bool {
-		$response = $this->client->request('GET', $this->api_url . '/ping');
+		try {
+			$response = $this->client->request('GET', $this->api_url . '/ping');
+		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+			return false;
+		}
 		return $response->getStatusCode() == 200;
 	}
 
@@ -93,16 +97,20 @@ class SearchAPI {
 	/**
 	 * Index a document
 	 */
-	public function index(SearchDocument $document): SearchDocument {
-		$response = $this->client->request('POST', $this->api_url . '/documents', [
-			'headers' => [
-				'Authorization' => 'Bearer ' . $this->api_key,
-				'Content-Type' => 'application/json'
-			],
-			'body' => $document->toJSON()
-		]);
+	public function index(SearchDocument $document): SearchDocument | false {
+		try {
+			$response = $this->client->request('POST', $this->api_url . '/documents', [
+				'headers' => [
+					'Authorization' => 'Bearer ' . $this->api_key,
+					'Content-Type' => 'application/json'
+				],
+				'body' => $document->toJSON()
+			]);
+		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+			return false;
+		}
 		if ( $response->getStatusCode() != 200 ) {
-			throw new \Exception('Failed to index document. Status code: ' . $response->getStatusCode());
+			return false;
 		}
 		$returned_document = SearchDocument::fromJSON($response->getBody());
 		return $returned_document;
@@ -123,15 +131,19 @@ class SearchAPI {
 
 		foreach ( $document_chunks as $chunk ) {
 			$documents_json = json_encode($chunk);
-			$response = $this->client->request('POST', $this->api_url . '/documents/bulk', [
-				'headers' => [
-					'Authorization' => 'Bearer ' . $this->api_key,
-					'Content-Type' => 'application/json'
-				],
-				'body' => $documents_json
-			]);
+			try {
+				$response = $this->client->request('POST', $this->api_url . '/documents/bulk', [
+					'headers' => [
+						'Authorization' => 'Bearer ' . $this->api_key,
+						'Content-Type' => 'application/json'
+					],
+					'body' => $documents_json
+				]);
+			} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+				return [];
+			}
 			if ( $response->getStatusCode() != 200 ) {
-				throw new \Exception('Failed to bulk index documents. Status code: ' . $response->getStatusCode());
+				return [];
 			}
 			$returned_documents = array_merge($returned_documents, SearchDocument::fromJSON($response->getBody()));
 		}
@@ -148,13 +160,17 @@ class SearchAPI {
 		if ( empty($document->_id) ) {
 			throw new \Exception('Document must have an _id to update');
 		}
-		$response = $this->client->request('PUT', $this->api_url . '/documents/' . $document->_id, [
-			'headers' => [
-				'Authorization' => 'Bearer ' . $this->api_key,
-				'Content-Type' => 'application/json'
-			],
-			'body' => $document->toJSON()
-		]);
+		try {
+			$response = $this->client->request('PUT', $this->api_url . '/documents/' . $document->_id, [
+				'headers' => [
+					'Authorization' => 'Bearer ' . $this->api_key,
+					'Content-Type' => 'application/json'
+				],
+				'body' => $document->toJSON()
+			]);
+		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+			return false;
+		}
 		if ( $response->getStatusCode() != 200 ) {
 			return false;
 		}
@@ -223,14 +239,18 @@ class SearchAPI {
 	/**
 	 * Get a document
 	 */
-	public function get_document(string $id, $fields = []): SearchDocument {
+	public function get_document(string $id, $fields = []): SearchDocument | false {
 		$field_query = '';
 		if ( ! empty($fields) ) {
 			$field_query = '?fields=' . implode(',', $fields);
 		}
-		$response = $this->client->request('GET', $this->api_url . '/documents/' . $id . $field_query);
+		try {
+			$response = $this->client->request('GET', $this->api_url . '/documents/' . $id . $field_query);
+		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+			return false;
+		}
 		if ( $response->getStatusCode() != 200 ) {
-			throw new \Exception('Failed to get document. Status code: ' . $response->getStatusCode());
+			return false;
 		}
 		$returned_document = SearchDocument::fromJSON($response->getBody());
 		return $returned_document;
@@ -239,16 +259,20 @@ class SearchAPI {
 	/**
 	 * Search for documents
 	 */
-	public function search(SearchParams $params): SearchResult {
+	public function search(SearchParams $params): SearchResult | false {
 		$request_url = $this->api_url . '/search?' . $params->toQueryString();
-		$response = $this->client->request('GET', $request_url, [
-			'headers' => [
-				'Authorization' => 'Bearer ' . $this->api_key,
-				'Content-Type' => 'application/json'
-			],
-		]);
+		try {
+			$response = $this->client->request('GET', $request_url, [
+				'headers' => [
+					'Authorization' => 'Bearer ' . $this->api_key,
+					'Content-Type' => 'application/json'
+				],
+			]);
+		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+			return false;
+		}
 		if ( $response->getStatusCode() != 200 ) {
-			throw new \Exception('Failed to search documents. Status code: ' . $response->getStatusCode());
+			return false;
 		}
 		$result = SearchResult::fromJSON($response->getBody());
 		return $result;
