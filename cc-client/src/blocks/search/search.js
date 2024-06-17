@@ -214,7 +214,6 @@ function processResults(data) {
     data.forEach((result) => {
         let b = {};
         b = setResult(result);
-        console.log(b);
         // b.contributors = result.contributors.map((contributor) => {
         //     return { ...contributor, ...person };
         // });
@@ -370,6 +369,9 @@ function getSearchTermFromUrl() {
 function getDefaultEndDate() {
     return new Date().toISOString().split("T")[0];
 }
+function calculateTotalPages(total, per_page) {
+    return Math.floor(total / per_page);
+}
 
 export default function CCSearch() {
     const searchTerm = useFormInput(getSearchTermFromUrl());
@@ -422,7 +424,7 @@ export default function CCSearch() {
             .then((data) => {
                 setSearchPerformed(true);
                 setSearchResults(processResults(data.hits));
-                setTotalPages(data.total_pages | 1);
+                setTotalPages(calculateTotalPages(data.total, data.per_page) | 1);
             });
     }
 
