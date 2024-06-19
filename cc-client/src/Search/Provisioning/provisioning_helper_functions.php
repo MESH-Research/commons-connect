@@ -18,7 +18,7 @@ function get_profile_url( \WP_User $user ): string {
 	
 	//See: bp-members-functions.php::bp_core_get_user_domain()
 	$username = bp_core_get_username( $user->ID );
-	$base_url = get_home_url( get_current_blog_id() );
+	$base_url = get_home_url( get_central_blog_id() );
 	$after_domain = bp_core_enable_root_profiles() ? $username : bp_get_members_root_slug() . '/' . $username;
 	return trailingslashit( $base_url ) . $after_domain;
 }
@@ -52,4 +52,44 @@ function get_network_nodes(): array {
 		}
 	}
 	return $nodes;
+}
+
+/**
+ * Get the blog ID of the central blog.
+ * 
+ * The central blog is the root blog of the main network.
+ * (On *.hcommons.org, this is hcommons.org itself.)
+ */
+function get_central_blog_id(): int {
+	$networks = get_networks();
+	
+	if ( defined( 'CENTRAL_BLOG_ID' ) ) {
+		return CENTRAL_BLOG_ID;
+	}
+
+	if ( defined( 'DOMAIN_NAME') ) {
+		$central_blog_domain = DOMAIN_NAME;
+	} elseif ( defined( 'WP_DOMAIN' ) ) {
+		$central_blog_domain = WP_DOMAIN;
+	} else {
+		$current_blog = get_blog_details();
+		$current_domain = $current_blog->domain;
+		foreach ( $networks as $network ) {
+			if ( 
+					strlen( $current_domain ) > strlen( $network->domain) && 
+					strpos( $current_domain, $network->domain ) !== false 
+				) {
+				$central_blog_domain = $network->domain;
+			}
+		}
+		$central_blog_domain = $current_domain;
+	}
+
+	foreach ( $networks as $network ) {
+		if ( $network->domain === $central_blog_domain ) {
+			return $network->blog_id;
+		}
+	}
+
+	return 1;
 }

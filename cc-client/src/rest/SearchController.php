@@ -60,8 +60,39 @@ class SearchController extends WP_REST_Controller {
 
         $search_params = SearchParams::fromQueryParams( $parameters );
         $results = $this->search_api->search( $search_params );
+        $results = $this->localize( $results );
 		return new WP_REST_Response( $results );
 	}
+
+    private function localize( array $results ) : array {
+        $localized = [];
+        $current_domain = get_site()->domain;
+        foreach ( $results as $result ) {
+            if ( $result->content_type == 'profile') {
+                $localized[] = $this->localize_profile( $result, $current_domain );
+            } else {
+                $localized[] = $result;
+            }
+        }
+        return $localized;
+    }
+
+    private function localize_profile( $profile, $domain ) {        
+        $url_parts = parse_url( $profile->primary_url );
+        if ( $url_parts['host'] == $domain ) {
+            return $profile;
+        }
+        
+        foreach ( $profile->other_urls as $url ) {
+            $url_parts = parse_url( $url );
+            if ( $url_parts['host'] == $domain ) {
+                $profile->primary_url = $url;
+                return $profile;
+            }
+        }
+
+        return $profile;
+    }      
 
     public function get_items_permission_check( WP_REST_Request $request ) : bool {
         return true;
