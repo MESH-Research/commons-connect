@@ -35,7 +35,7 @@ class SearchParams {
 			$data['sort_direction'] ?? '',
 			$data['sort_field'] ?? '',
 			$data['page'] ?? -1,
-			$data['per_page'] ?? -1
+			$data['per_page'] ?? -1,
 		);
 	}
 
@@ -88,5 +88,5 @@ class SearchParams {
 			$query_terms[] = 'per_page=' . $this->per_page;
 		}
 		return implode( '&', $query_terms );
-	}	
+	}
 }

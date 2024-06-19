@@ -86,6 +86,10 @@
     overflow: hidden;
     padding: 10px;
 }
+.ccs-profile-thumbnail {
+    max-width: 32px;
+    max-height: 32px;
+}
 .ccs-result-thumbnail {
     float: left;
     margin: 0 10px 10px 0;
