@@ -414,7 +414,8 @@ export default function CCSearch() {
         // setTotalPages(sampleJson.total_pages);
 
         const url = new URL(
-            "https://commons-connect-client.lndo.site/?rest_route=/cc-client/v1/search",
+            "/wp-json/cc-client/v1/search",
+            window.location.origin
         );
         Object.keys(params).forEach((key) =>
             url.searchParams.append(key, params[key]),
