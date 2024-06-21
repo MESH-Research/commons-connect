@@ -14,6 +14,7 @@ use WP_REST_Request;
 use MeshResearch\CCClient\Search\SearchAPI;
 use MeshResearch\CCClient\CCClientOptions;
 use MeshResearch\CCClient\Search\SearchParams;
+use MeshResearch\CCClient\Search\SearchResult;
 
 /**
  * REST controller for search
@@ -60,7 +61,7 @@ class SearchController extends WP_REST_Controller {
 
         $search_params = SearchParams::fromQueryParams( $parameters );
         $results = $this->search_api->search( $search_params );
-        $results = $this->localize( $results );
+        $results->hits = $this->localize( $results->hits );
 		return new WP_REST_Response( $results );
 	}
 
