@@ -9,6 +9,7 @@ namespace MeshResearch\CCClient\Search;
 
 use MeshResearch\CCClient\Search\SearchAPI;
 use MeshResearch\CCClient\CCClientOptions;
+use MeshResearch\CCClient\Search;
 
 use MeshResearch\CCClient\Search\Provisioning\ProvisionableGroup;
 use MeshResearch\CCClient\Search\Provisioning\ProvisionablePost;
@@ -65,25 +66,33 @@ class SearchCommand {
 			\WP_CLI::success( 'Search service endpoint: ' . $this->options->cc_search_endpoint );
 		}
 
-		$response = $this->search_api->ping();
+		try {
+			$response = $this->search_api->ping();
+			$search_up = true;
+		} catch ( \Exception $e ) {
+			$response = false;
+			$search_up = false;
+		}
 		if ( $response === true ) {
 			\WP_CLI::success( 'Search service is up and running.' );
 		} else {
 			\WP_CLI::warning( 'Search service is not responding.' );
 		}
 
-		$response = $this->search_api->check_api_key();
-		if ( $response === true ) {
-			\WP_CLI::success( 'Search service API key is valid.' );
-		} else {
-			\WP_CLI::warning( 'Search service API key is not valid.' );
-		}
-
-		$response = $this->search_api->check_admin_api_key();
-		if ( $response === true ) {
-			\WP_CLI::success( 'Search service admin API key is valid.' );
-		} else {
-			\WP_CLI::warning( 'Search service admin API key is not valid.' );
+		if ( $search_up ) {
+			$response = $this->search_api->check_api_key();
+			if ( $response === true ) {
+				\WP_CLI::success( 'Search service API key is valid.' );
+			} else {
+				\WP_CLI::warning( 'Search service API key is not valid.' );
+			}
+	
+			$response = $this->search_api->check_admin_api_key();
+			if ( $response === true ) {
+				\WP_CLI::success( 'Search service admin API key is valid.' );
+			} else {
+				\WP_CLI::warning( 'Search service admin API key is not valid.' );
+			}
 		}
 
 		if ( class_exists( 'BP_Groups_Group' ) ) {
@@ -261,6 +270,34 @@ class SearchCommand {
 		}
 		$provisionable_item->setSearchID( $indexed_document->_id );
 		\WP_CLI::success( 'Item provisioned with ID: ' . $indexed_document->_id );
+	}
+
+	/**
+	 * Provisions test documents to the search service.
+	 */
+	public function provision_test_docs() {
+		$test_data_dir = CC_CLIENT_BASE_DIR . 'tests/test-data/';
+		$files = scandir( $test_data_dir );
+		\WP_CLI::line( 'Provisioning from' . count($files) . ' test files...' );
+		foreach ( $files as $file ) {
+			if ( $file === '.' || $file === '..' ) {
+				continue;
+			}
+			\WP_CLI::line( 'Provisioning documents from file: ' . $file );
+			$file_path = $test_data_dir . $file;
+			if ( is_file( $file_path ) ) {
+				try {
+					$documents = SearchDocument::fromJSON( file_get_contents( $file_path ) );
+					if ( ! is_array( $documents ) ) {
+						$documents = [ $documents ];
+					}
+					$this->search_api->bulk_index( $documents );
+				} catch ( \Exception $e ) {
+					\WP_CLI::warning( 'Failed to index documents from file: ' . $file );
+				}
+			}
+		}
+		\WP_CLI::success( 'Test documents provisioned.' );
 	}
 
 	/**

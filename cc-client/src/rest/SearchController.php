@@ -66,6 +66,9 @@ class SearchController extends WP_REST_Controller {
 	}
 
     private function localize( array $results ) : array {
+        if ( ! is_multisite() ) {
+            return $results;
+        }
         $localized = [];
         $current_domain = get_site()->domain;
         foreach ( $results as $result ) {
