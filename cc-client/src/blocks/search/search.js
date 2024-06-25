@@ -366,7 +366,7 @@ function SearchResultSection(data) {
 }
 function getSearchTermFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get("search") ?? "";
+    return urlParams.get("search") ?? urlParams.get("q") ?? "";;
 }
 function getDefaultEndDate() {
     return new Date().toISOString().split("T")[0];
