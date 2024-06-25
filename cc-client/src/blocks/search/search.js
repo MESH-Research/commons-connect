@@ -1,4 +1,5 @@
 import { useEffect, useState } from "@wordpress/element";
+import useWindowDimensions from "./mediaqueries.js";
 
 function useFormInput(initialValue) {
     const [value, setValue] = useState(initialValue);
@@ -145,6 +146,7 @@ function Paginator(data) {
             data.setCurrentPage(data.currentPage + 1);
         }
     }
+    const { width } = useWindowDimensions();
     return (
         <footer>
             <nav
@@ -164,7 +166,7 @@ function Paginator(data) {
                             : null
                     }
                 >
-                    Previous
+                    { width > 500 ? 'Previous' : '◀' }
                 </button>
                 {slotMarkup}
                 <button
@@ -176,7 +178,7 @@ function Paginator(data) {
                             : null
                     }
                 >
-                    Next
+                    { width > 500 ? 'Next' : '▶' }
                 </button>
             </nav>
         </footer>
