@@ -414,7 +414,6 @@ export default function CCSearch() {
             q: searchTerm.value,
             page: currentPage,
             per_page: perPage,
-            q: searchTerm.value,
             sort_by: sortBy.value,
             this_commons: thisCommonsOnly ? 1 : 0,
         };
