@@ -1,5 +1,6 @@
 import { useEffect, useState } from "@wordpress/element";
 import useWindowDimensions from "./mediaqueries.js";
+import sampleJson from "./sample.json";
 
 function useFormInput(initialValue) {
     const [value, setValue] = useState(initialValue);
@@ -166,7 +167,7 @@ function Paginator(data) {
                             : null
                     }
                 >
-                    { width > 500 ? 'Previous' : '◀' }
+                    {width > 500 ? "Previous" : "◀"}
                 </button>
                 {slotMarkup}
                 <button
@@ -178,7 +179,7 @@ function Paginator(data) {
                             : null
                     }
                 >
-                    { width > 500 ? 'Next' : '▶' }
+                    {width > 500 ? "Next" : "▶"}
                 </button>
             </nav>
         </footer>
@@ -366,7 +367,7 @@ function SearchResultSection(data) {
 }
 function getSearchTermFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get("search") ?? urlParams.get("q") ?? "";;
+    return urlParams.get("search") ?? urlParams.get("q") ?? "";
 }
 function getDefaultEndDate() {
     return new Date().toISOString().split("T")[0];
@@ -378,10 +379,10 @@ function setUrl(params) {
     const url = new URL(window.location.href);
     Object.keys(params).forEach((key) => {
         if (params[key] === "") {
-            console.log(key, 'empty')
+            console.log(key, "empty");
             return url.searchParams.delete(key);
         } else {
-            console.log(key, 'setting')
+            console.log(key, "setting");
             return url.searchParams.set(key, params[key]);
         }
     });
@@ -431,7 +432,7 @@ export default function CCSearch() {
 
         const url = new URL(
             "/wp-json/cc-client/v1/search",
-            window.location.origin
+            window.location.origin,
         );
         Object.keys(params).forEach((key) =>
             url.searchParams.append(key, params[key]),
