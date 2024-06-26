@@ -7,14 +7,14 @@
 
 namespace MeshResearch\CCClient\Search\Provisioning;
 
-function get_provisionable( string $type, string $wpid ): ProvisionableUser | ProvisionableGroup | ProvisionableSite | ProvisionablePost {
+function get_provisionable( string $type, string $wpid ): ProvisionableProfile | ProvisionableGroup | ProvisionableSite | ProvisionablePost {
 	switch ( $type ) {
-		case 'user':
+		case 'profile':
 			$item = get_user_by( 'ID', $wpid );
 			if ( ! $item ) {
 				throw new \Exception( 'Invalid user ID' );
 			}
-			return new ProvisionableUser( $item );
+			return new ProvisionableProfile( $item );
 		case 'group':
 			$item = new \BP_Groups_Group( $wpid );
 			if ( ! $item->id ) {
@@ -50,8 +50,8 @@ function get_available_provisionables(): array {
 		$provisioners[] = 'post';
 		$provisioners[] = 'discussion';
 	}
-	if ( ProvisionableUser::isAvailable() ) {
-		$provisioners[] = 'user';
+	if ( ProvisionableProfile::isAvailable() ) {
+		$provisioners[] = 'profile';
 	}
 	if ( ProvisionableGroup::isAvailable() ) {
 		$provisioners[] = 'group';

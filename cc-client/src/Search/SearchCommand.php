@@ -14,7 +14,7 @@ use MeshResearch\CCClient\Search;
 use MeshResearch\CCClient\Search\Provisioning\ProvisionableGroup;
 use MeshResearch\CCClient\Search\Provisioning\ProvisionablePost;
 use MeshResearch\CCClient\Search\Provisioning\ProvisionableSite;
-use MeshResearch\CCClient\Search\Provisioning\ProvisionableUser;
+use MeshResearch\CCClient\Search\Provisioning\ProvisionableProfile;
 
 use function MeshResearch\CCClient\Search\Provisioning\get_network_nodes;
 use function MeshResearch\CCClient\Search\Provisioning\get_provisionable;
@@ -155,12 +155,12 @@ class SearchCommand {
 			$internal_id = $assoc_args['internal_id'];
 			\WP_CLI::line( 'Getting document by internal ID...' );
 			switch ( $type ) {
-				case 'user':
+				case 'profile':
 					$item = get_user_by( 'ID', $internal_id );
 					if ( ! $item ) {
 						\WP_CLI::error( 'Invalid user ID' );
 					}
-					$provisioner = new ProvisionableUser( $item );
+					$provisioner = new ProvisionableProfile( $item );
 					break;
 				case 'group':
 					$item = new \BP_Groups_Group( $internal_id );
@@ -336,11 +336,11 @@ class SearchCommand {
 			}
 		}
 
-		\WP_CLI::line( 'Provisioning users...' );
+		\WP_CLI::line( 'Provisioning profiles...' );
 		try {
 			bulk_provision(
-				document_types: [ 'user' ],
-				search_api: $search_api,
+				document_types: [ 'profile' ],
+				search_api: $this->search_api,
 				show_progress: true
 			);
 		} catch ( \Exception $e ) {
@@ -351,7 +351,7 @@ class SearchCommand {
 		try {
 			bulk_provision(
 				document_types: [ 'site' ],
-				search_api: $search_api,
+				search_api: $this->search_api,
 				show_progress: true
 			);
 		} catch ( \Exception $e ) {
@@ -362,7 +362,7 @@ class SearchCommand {
 		try {
 			bulk_provision(
 				document_types: [ 'group' ],
-				search_api: $search_api,
+				search_api: $this->search_api,
 				show_progress: true
 			);
 		} catch ( \Exception $e ) {
@@ -376,7 +376,7 @@ class SearchCommand {
 			try {
 				bulk_provision(
 					document_types: [ 'discussion' ],
-					search_api: $search_api,
+					search_api: $this->search_api,
 					show_progress: true
 				);
 			} catch ( \Exception $e ) {
@@ -386,7 +386,7 @@ class SearchCommand {
 		}
 
 		\WP_CLI::line( 'Provisioning posts...' );
-		$blogs = get_sites([ 'number' => 50000 ]);
+		$blogs = get_sites([ 'number' => 100000 ]);
 		\WP_CLI::line( 'Provisioning posts for ' . count( $blogs ) . ' blogs...' );
 		foreach ( $blogs as $blog ) {
 			\WP_CLI::line( 'Provisioning posts for ' . $blog->domain . '...' );
@@ -394,8 +394,8 @@ class SearchCommand {
 			try {
 				bulk_provision(
 					document_types: [ 'post' ],
-					search_api: $search_api,
-					show_progress: false
+					search_api: $this->search_api,
+					show_progress: true
 				);
 			} catch ( \Exception $e ) {
 				\WP_CLI::error( $e->getMessage() );

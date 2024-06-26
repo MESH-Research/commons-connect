@@ -128,8 +128,9 @@ class SearchAPI {
 		if ( $show_progress && class_exists('WP_CLI') ) {
 			\WP_CLI::line('Indexing ' . count($documents) . ' documents in ' . count($document_chunks) . ' chunks...');
 		}
-
+		$current_chunk = 0;
 		foreach ( $document_chunks as $chunk ) {
+			$current_chunk++;
 			$documents_json = json_encode($chunk);
 			try {
 				$response = $this->client->request('POST', $this->api_url . '/documents/bulk', [
@@ -140,12 +141,21 @@ class SearchAPI {
 					'body' => $documents_json
 				]);
 			} catch ( \GuzzleHttp\Exception\ClientException $e ) {
-				return [];
+				if ( $show_progress && class_exists('WP_CLI') ) {
+					\WP_CLI::warning("Failed to index document chunk: $current_chunk : " . $e->getMessage());
+				}
+				continue;
 			}
 			if ( $response->getStatusCode() != 200 ) {
-				return [];
+				if ( $show_progress && class_exists('WP_CLI') ) {
+					\WP_CLI::warning("Failed to index document chunk: $current_chunk . Received response code: " . $response->getStatusCode());
+				}
+				continue;
 			}
 			$returned_documents = array_merge($returned_documents, SearchDocument::fromJSON($response->getBody()));
+			if ( $show_progress && class_exists('WP_CLI') ) {
+				\WP_CLI::line('Indexed ' . count($returned_documents) . ' documents');
+			}
 		}
 		if ( $show_progress && class_exists('WP_CLI') ) {
 			\WP_CLI::line('Indexing complete');

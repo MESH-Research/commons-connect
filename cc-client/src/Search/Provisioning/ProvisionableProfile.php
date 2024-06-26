@@ -10,7 +10,7 @@ namespace MeshResearch\CCClient\Search\Provisioning;
 use MeshResearch\CCClient\Search\SearchDocument;
 use MeshResearch\CCClient\Search\SearchPerson;
 
-class ProvisionableUser implements ProvisionableInterface {
+class ProvisionableProfile implements ProvisionableInterface {
 	public function __construct(
 		public \WP_User $user,
 		public string $search_id = ''
@@ -68,24 +68,32 @@ class ProvisionableUser implements ProvisionableInterface {
 
 	public function setSearchID( string $search_id ): void {
 		$success = update_user_meta( $this->user->ID, 'cc_search_id', $search_id );
+		$this->search_id = $search_id;
 	}
 
-	public static function getAll(): array {
-		$users = get_users( [ 'blog_id' => 0 ] );
+	public static function getAll( bool $reset = false ): array {
+		$users = get_users( [
+			'number'  => -1,
+			'blog_id' => 0,
+		] );
 
-		$provisionable_users = [];
+		$provisionable_profiles = [];
 		foreach ( $users as $user ) {
-			$provisionable_users[] = new ProvisionableUser( $user );
+			$provisionable_profile = new ProvisionableProfile( $user );
+			if ( $reset ) {
+				$provisionable_profile->setSearchID( '' );
+			}
+			$provisionable_profiles[] = $provisionable_profile;
 		}
 
-		return $provisionable_users;
+		return $provisionable_profiles;
 	}
 
-	public static function getAllAsDocuments(): array {
-		$provisionable_users = self::getAll();
+	public static function getAllAsDocuments( bool $reset = false ): array {
+		$provisionable_profiles = self::getAll( $reset );
 		$documents = [];
-		foreach ( $provisionable_users as $provisionable_user ) {
-			$documents[] = $provisionable_user->toDocument();
+		foreach ( $provisionable_profiles as $provisionable_profile ) {
+			$documents[] = $provisionable_profile->toDocument();
 		}
 		return $documents;
 	}
