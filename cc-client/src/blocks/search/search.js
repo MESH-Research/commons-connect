@@ -374,6 +374,19 @@ function getDefaultEndDate() {
 function calculateTotalPages(total, per_page) {
     return Math.floor(total / per_page);
 }
+function setUrl(params) {
+    const url = new URL(window.location.href);
+    Object.keys(params).forEach((key) => {
+        if (params[key] === "") {
+            console.log(key, 'empty')
+            return url.searchParams.delete(key);
+        } else {
+            console.log(key, 'setting')
+            return url.searchParams.set(key, params[key]);
+        }
+    });
+    window.history.pushState({}, "", url);
+}
 
 export default function CCSearch() {
     const searchTerm = useFormInput(getSearchTermFromUrl());
@@ -397,6 +410,7 @@ export default function CCSearch() {
             return;
         }
         const params = {
+            q: searchTerm.value,
             page: currentPage,
             per_page: perPage,
             q: searchTerm.value,
@@ -429,6 +443,7 @@ export default function CCSearch() {
                 setSearchResults(processResults(data.hits));
                 setTotalPages(calculateTotalPages(data.total, data.per_page) | 1);
             });
+        setUrl(params);
     }
 
     useEffect(() => {
