@@ -79,9 +79,10 @@ class ProvisionableGroup implements ProvisionableInterface {
 
 	public function setSearchID(string $search_id): void {
 		groups_update_groupmeta( $this->group->id, 'cc_search_id', $search_id );
+		$this->search_id = $search_id;
 	}
 
-	public static function getAll(): array {
+	public static function getAll( bool $reset = false ): array {
 		$groups = \BP_Groups_Group::get( [
 			'per_page' => 0,
 			'page' => 1,
@@ -90,13 +91,17 @@ class ProvisionableGroup implements ProvisionableInterface {
 
 		$provisionable_groups = [];
 		foreach ( $groups['groups'] as $group ) {
-			$provisionable_groups[] = new ProvisionableGroup( $group );
+			$provisionable_group = new ProvisionableGroup( $group );
+			if ( $reset ) {
+				$provisionable_group->setSearchID( '' );
+			}
+			$provisionable_groups[] = $provisionable_group;
 		}
 
 		return $provisionable_groups;
 	}
 
-	public static function getAllAsDocuments(): array {
+	public static function getAllAsDocuments( bool $reset = false ): array {
 		$provisionable_groups = self::getAll();
 		$documents = [];
 		foreach ( $provisionable_groups as $provisionable_group ) {

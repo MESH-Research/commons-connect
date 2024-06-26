@@ -13,7 +13,7 @@ interface ProvisionableInterface {
 	public function toDocument(): SearchDocument;
 	public function getSearchID(): string;
 	public function setSearchID( string $search_id ): void;
-	public static function getAll(): array;
-	public static function getAllAsDocuments(): array;
+	public static function getAll( bool $reset = false ): array;
+	public static function getAllAsDocuments( bool $reset = false ): array;
 	public static function isAvailable(): bool;
 }

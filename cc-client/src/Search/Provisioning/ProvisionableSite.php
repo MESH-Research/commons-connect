@@ -71,20 +71,25 @@ class ProvisionableSite implements ProvisionableInterface {
 
 	public function setSearchID( string $search_id ): void {
 		$success = update_blog_option( $this->site->blog_id, 'cc_search_id', $search_id );
+		$this->search_id = $search_id;
 	}
 
-	public static function getAll(): array {
-		$sites = get_sites( [ 'number' => 50000 ] );
+	public static function getAll( bool $reset = false ): array {
+		$sites = get_sites( [ 'number' => 100000 ] );
 		$provisionable_sites = [];
 		foreach ( $sites as $site ) {
-			$provisionable_sites[] = new ProvisionableSite( $site );
+			$provisionable_site = new ProvisionableSite( $site );
+			if ( $reset ) {
+				$provisionable_site->setSearchID( '' );
+			}
+			$provisionable_sites[] = $provisionable_site;
 		}
 
 		return $provisionable_sites;
 	}
 
-	public static function getAllAsDocuments(): array {
-		$provisionable_sites = self::getAll();
+	public static function getAllAsDocuments( bool $reset = false ): array {
+		$provisionable_sites = self::getAll( $reset);
 		$documents = [];
 		foreach ( $provisionable_sites as $provisionable_site ) {
 			$documents[] = $provisionable_site->toDocument();

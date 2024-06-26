@@ -17,3 +17,4 @@ fi
 wp plugin activate commons-connect-client --path=/app/.lando/wordpress
 wp plugin delete akismet --quiet --path=/app/.lando/wordpress
 wp plugin delete hello --quiet --path=/app/.lando/wordpress
+wp rewrite structure '/%postname%/' --hard --path=/app/.lando/wordpress

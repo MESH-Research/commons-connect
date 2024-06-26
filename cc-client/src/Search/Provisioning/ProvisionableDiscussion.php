@@ -10,7 +10,7 @@ namespace MeshResearch\CCClient\Search\Provisioning;
 use MeshResearch\CCClient\Search\SearchDocument;
 
 class ProvisionableDiscussion extends ProvisionablePost {
-	public static function getAll( $post_types = [ 'topic', 'reply' ] ) : array {
+	public static function getAll( bool $reset = false, array $post_types = [ 'topic', 'reply' ] ) : array {
 		$posts = get_posts( [
 			'post_type' => $post_types,
 			'post_status' => 'publish',
@@ -20,6 +20,9 @@ class ProvisionableDiscussion extends ProvisionablePost {
 		$provisionable_posts = [];
 		foreach ( $posts as $post ) {
 			$discussion = new ProvisionableDiscussion( $post );
+			if ( $reset ) {
+				$discussion->setSearchID( '' );
+			}
 			if ( $discussion->is_public() ) {
 				$provisionable_posts[] = $discussion;
 			}

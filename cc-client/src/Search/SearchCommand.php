@@ -9,11 +9,12 @@ namespace MeshResearch\CCClient\Search;
 
 use MeshResearch\CCClient\Search\SearchAPI;
 use MeshResearch\CCClient\CCClientOptions;
+use MeshResearch\CCClient\Search;
 
 use MeshResearch\CCClient\Search\Provisioning\ProvisionableGroup;
 use MeshResearch\CCClient\Search\Provisioning\ProvisionablePost;
 use MeshResearch\CCClient\Search\Provisioning\ProvisionableSite;
-use MeshResearch\CCClient\Search\Provisioning\ProvisionableUser;
+use MeshResearch\CCClient\Search\Provisioning\ProvisionableProfile;
 
 use function MeshResearch\CCClient\Search\Provisioning\get_network_nodes;
 use function MeshResearch\CCClient\Search\Provisioning\get_provisionable;
@@ -65,25 +66,33 @@ class SearchCommand {
 			\WP_CLI::success( 'Search service endpoint: ' . $this->options->cc_search_endpoint );
 		}
 
-		$response = $this->search_api->ping();
+		try {
+			$response = $this->search_api->ping();
+			$search_up = true;
+		} catch ( \Exception $e ) {
+			$response = false;
+			$search_up = false;
+		}
 		if ( $response === true ) {
 			\WP_CLI::success( 'Search service is up and running.' );
 		} else {
 			\WP_CLI::warning( 'Search service is not responding.' );
 		}
 
-		$response = $this->search_api->check_api_key();
-		if ( $response === true ) {
-			\WP_CLI::success( 'Search service API key is valid.' );
-		} else {
-			\WP_CLI::warning( 'Search service API key is not valid.' );
-		}
-
-		$response = $this->search_api->check_admin_api_key();
-		if ( $response === true ) {
-			\WP_CLI::success( 'Search service admin API key is valid.' );
-		} else {
-			\WP_CLI::warning( 'Search service admin API key is not valid.' );
+		if ( $search_up ) {
+			$response = $this->search_api->check_api_key();
+			if ( $response === true ) {
+				\WP_CLI::success( 'Search service API key is valid.' );
+			} else {
+				\WP_CLI::warning( 'Search service API key is not valid.' );
+			}
+	
+			$response = $this->search_api->check_admin_api_key();
+			if ( $response === true ) {
+				\WP_CLI::success( 'Search service admin API key is valid.' );
+			} else {
+				\WP_CLI::warning( 'Search service admin API key is not valid.' );
+			}
 		}
 
 		if ( class_exists( 'BP_Groups_Group' ) ) {
@@ -146,12 +155,12 @@ class SearchCommand {
 			$internal_id = $assoc_args['internal_id'];
 			\WP_CLI::line( 'Getting document by internal ID...' );
 			switch ( $type ) {
-				case 'user':
+				case 'profile':
 					$item = get_user_by( 'ID', $internal_id );
 					if ( ! $item ) {
 						\WP_CLI::error( 'Invalid user ID' );
 					}
-					$provisioner = new ProvisionableUser( $item );
+					$provisioner = new ProvisionableProfile( $item );
 					break;
 				case 'group':
 					$item = new \BP_Groups_Group( $internal_id );
@@ -264,6 +273,34 @@ class SearchCommand {
 	}
 
 	/**
+	 * Provisions test documents to the search service.
+	 */
+	public function provision_test_docs() {
+		$test_data_dir = CC_CLIENT_BASE_DIR . 'tests/test-data/';
+		$files = scandir( $test_data_dir );
+		\WP_CLI::line( 'Provisioning from' . count($files) . ' test files...' );
+		foreach ( $files as $file ) {
+			if ( $file === '.' || $file === '..' ) {
+				continue;
+			}
+			\WP_CLI::line( 'Provisioning documents from file: ' . $file );
+			$file_path = $test_data_dir . $file;
+			if ( is_file( $file_path ) ) {
+				try {
+					$documents = SearchDocument::fromJSON( file_get_contents( $file_path ) );
+					if ( ! is_array( $documents ) ) {
+						$documents = [ $documents ];
+					}
+					$this->search_api->bulk_index( $documents );
+				} catch ( \Exception $e ) {
+					\WP_CLI::warning( 'Failed to index documents from file: ' . $file );
+				}
+			}
+		}
+		\WP_CLI::success( 'Test documents provisioned.' );
+	}
+
+	/**
 	 * Bulk provision items to the search service.
 	 */
 	public function provision_all( $args, $assoc_args ) {
@@ -299,11 +336,11 @@ class SearchCommand {
 			}
 		}
 
-		\WP_CLI::line( 'Provisioning users...' );
+		\WP_CLI::line( 'Provisioning profiles...' );
 		try {
 			bulk_provision(
-				document_types: [ 'user' ],
-				search_api: $search_api,
+				document_types: [ 'profile' ],
+				search_api: $this->search_api,
 				show_progress: true
 			);
 		} catch ( \Exception $e ) {
@@ -314,7 +351,7 @@ class SearchCommand {
 		try {
 			bulk_provision(
 				document_types: [ 'site' ],
-				search_api: $search_api,
+				search_api: $this->search_api,
 				show_progress: true
 			);
 		} catch ( \Exception $e ) {
@@ -325,7 +362,7 @@ class SearchCommand {
 		try {
 			bulk_provision(
 				document_types: [ 'group' ],
-				search_api: $search_api,
+				search_api: $this->search_api,
 				show_progress: true
 			);
 		} catch ( \Exception $e ) {
@@ -339,7 +376,7 @@ class SearchCommand {
 			try {
 				bulk_provision(
 					document_types: [ 'discussion' ],
-					search_api: $search_api,
+					search_api: $this->search_api,
 					show_progress: true
 				);
 			} catch ( \Exception $e ) {
@@ -349,7 +386,7 @@ class SearchCommand {
 		}
 
 		\WP_CLI::line( 'Provisioning posts...' );
-		$blogs = get_sites([ 'number' => 50000 ]);
+		$blogs = get_sites([ 'number' => 100000 ]);
 		\WP_CLI::line( 'Provisioning posts for ' . count( $blogs ) . ' blogs...' );
 		foreach ( $blogs as $blog ) {
 			\WP_CLI::line( 'Provisioning posts for ' . $blog->domain . '...' );
@@ -357,8 +394,8 @@ class SearchCommand {
 			try {
 				bulk_provision(
 					document_types: [ 'post' ],
-					search_api: $search_api,
-					show_progress: false
+					search_api: $this->search_api,
+					show_progress: true
 				);
 			} catch ( \Exception $e ) {
 				\WP_CLI::error( $e->getMessage() );
