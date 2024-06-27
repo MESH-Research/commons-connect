@@ -377,12 +377,11 @@ function calculateTotalPages(total, per_page) {
 }
 function setUrl(params) {
     const url = new URL(window.location.href);
+    url.searchParams.delete("search")
     Object.keys(params).forEach((key) => {
         if (params[key] === "") {
-            console.log(key, "empty");
             return url.searchParams.delete(key);
         } else {
-            console.log(key, "setting");
             return url.searchParams.set(key, params[key]);
         }
     });
