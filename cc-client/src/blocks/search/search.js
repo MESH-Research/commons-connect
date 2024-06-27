@@ -388,8 +388,33 @@ function setUrl(params) {
     });
     window.history.pushState({}, "", url);
 }
+/**
+ * Compare two objects for equality
+ * @param {Object} o1
+ * @param {Object} o2
+ * @returns boolean
+ */
+function isEqual(o1, o2) {
+    let result = true;
+    let o1keys = Object.keys(Object(o1));
+    let o2keys = Object.keys(Object(o2));
+    let index = o1keys.length;
+    if (o1keys.length !== o2keys.length) {
+        return false;
+    }
+    while (index--) {
+        if (!o1.hasOwnProperty(o2keys[index])) {
+            return false;
+        }
+        if (o1[o2keys[index]] !== o2[o2keys[index]]) {
+            return false;
+        }
+    }
+    return result;
+}
 
 export default function CCSearch() {
+    const [lastSearchParams, setLastSearchParams] = useState(null);
     const searchTerm = useFormInput(getSearchTermFromUrl());
     const searchType = useFormInput("");
     const sortBy = useFormInput("");
@@ -444,6 +469,16 @@ export default function CCSearch() {
                 setTotalPages(calculateTotalPages(data.total, data.per_page) | 1);
             });
         setUrl(params);
+        if (lastSearchParams !== null) {
+            delete lastSearchParams.page;
+        }
+        if (params !== null) {
+            delete params.page;
+        }
+        if (!isEqual(lastSearchParams, params)) {
+            setCurrentPage(1);
+        }
+        setLastSearchParams(params);
     }
 
     useEffect(() => {
