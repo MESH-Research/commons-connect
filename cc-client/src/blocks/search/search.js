@@ -1,6 +1,7 @@
 import { useEffect, useState } from "@wordpress/element";
 import useWindowDimensions from "./mediaqueries.js";
 import sampleJson from "./sample.json";
+import moment from 'moment'
 
 function useFormInput(initialValue) {
     const [value, setValue] = useState(initialValue);
@@ -370,7 +371,7 @@ function getSearchTermFromUrl() {
     return urlParams.get("search") ?? urlParams.get("q") ?? "";
 }
 function getDefaultEndDate() {
-    return new Date().toISOString().split("T")[0];
+    return moment().format("YYYY-MM-DD");
 }
 function calculateTotalPages(total, per_page) {
     return Math.floor(total / per_page);
@@ -445,8 +446,13 @@ export default function CCSearch() {
             params.content_type = searchType.value;
         }
         if (dateRange.value === "custom") {
-            params.start_date = startDate.value;
-            params.end_date = endDate.value;
+            if  (startDate.value !== "") {
+                params.start_date = startDate.value;
+                params.end_date = endDate.value;
+            }
+        } else if (dateRange.value !== "anytime") {
+            params.start_date = moment().subtract(1, dateRange.value).format('YYYY-MM-DD');
+            params.end_date = moment().format('YYYY-MM-DD');
         }
 
         // setSearchPerformed(true);
