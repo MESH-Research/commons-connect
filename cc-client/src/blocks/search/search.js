@@ -1,7 +1,7 @@
 import { useEffect, useState } from "@wordpress/element";
 import useWindowDimensions from "./mediaqueries.js";
 import sampleJson from "./sample.json";
-import moment from 'moment'
+import moment from "moment";
 
 function useFormInput(initialValue) {
     const [value, setValue] = useState(initialValue);
@@ -13,19 +13,29 @@ function useFormInput(initialValue) {
         onChange: handleChange,
     };
 }
-function CustomDateRange({ dateRangeValue, startDate, endDate }) {
+function CustomDateRange({ dateRangeValue, startDate, endDate, isLoading }) {
     return (
         dateRangeValue == "custom" && (
             <div className="ccs-row ccs-date-ranges">
                 <label>
                     <span>Start Date</span>
                     <br />
-                    <input type="date" name="customStartDate" {...startDate} />
+                    <input
+                        type="date"
+                        name="customStartDate"
+                        {...startDate}
+                        disabled={isLoading}
+                    />
                 </label>
                 <label>
                     <span>End Date</span>
                     <br />
-                    <input type="date" name="customEndDate" {...endDate} />
+                    <input
+                        type="date"
+                        name="customEndDate"
+                        {...endDate}
+                        disabled={isLoading}
+                    />
                 </label>
             </div>
         )
@@ -51,7 +61,7 @@ function Paginator(data) {
                 { label: 3, value: 3 },
                 { label: 4, value: 4 },
                 { label: 5, value: 5 },
-                { label: "...", value: null, clickable: false },
+                { label: "…", value: null, clickable: false },
                 { label: data.totalPages, value: data.totalPages },
             ]);
         } else if (
@@ -60,7 +70,7 @@ function Paginator(data) {
         ) {
             setSlots([
                 { label: 1, value: 1 },
-                { label: "...", value: null, clickable: false },
+                { label: "…", value: null, clickable: false },
                 {
                     label: data.currentPage - 1,
                     value: data.currentPage - 1,
@@ -70,7 +80,7 @@ function Paginator(data) {
                     label: data.currentPage + 1,
                     value: data.currentPage + 1,
                 },
-                { label: "...", value: null, clickable: false },
+                { label: "…", value: null, clickable: false },
                 { label: data.totalPages, value: data.totalPages },
             ]);
         } else if (
@@ -79,7 +89,7 @@ function Paginator(data) {
         ) {
             setSlots([
                 { label: 1, value: 1 },
-                { label: "...", value: null, clickable: false },
+                { label: "…", value: null, clickable: false },
                 {
                     label: data.totalPages - 4,
                     value: data.totalPages - 4,
@@ -119,9 +129,8 @@ function Paginator(data) {
             );
         }
         return (
-            <a
+            <button
                 key={index}
-                href="#"
                 onClick={(e) => setPage(e, slot.value)}
                 style={
                     data.currentPage == slot.value ? { fontWeight: "bold" } : {}
@@ -131,7 +140,7 @@ function Paginator(data) {
                 aria-label={"Page " + slot.value + " of " + data.totalPages}
             >
                 {slot.label}
-            </a>
+            </button>
         );
     });
     function setPage(e, page) {
@@ -161,7 +170,7 @@ function Paginator(data) {
             >
                 <button
                     onClick={decrementPage}
-                    disabled={data.currentPage === 1}
+                    disabled={data.currentPage === 1 || data.isLoading}
                     aria-label={
                         data.currentPage !== 1
                             ? "Previous Page " + (data.currentPage - 1)
@@ -173,7 +182,7 @@ function Paginator(data) {
                 {slotMarkup}
                 <button
                     onClick={incrementPage}
-                    disabled={data.currentPage === data.totalPages}
+                    disabled={data.currentPage === data.totalPages || data.isLoading}
                     aria-label={
                         data.currentPage !== data.totalPages
                             ? "Next Page " + (data.currentPage + 1)
@@ -359,6 +368,7 @@ function SearchResultSection(data) {
                     currentPage={data.currentPage}
                     setCurrentPage={data.setCurrentPage}
                     perPage={data.perPage}
+                    isLoading={data.isLoading}
                 />
             </div>
         );
@@ -378,7 +388,7 @@ function calculateTotalPages(total, per_page) {
 }
 function setUrl(params) {
     const url = new URL(window.location.href);
-    url.searchParams.delete("search")
+    url.searchParams.delete("search");
     Object.keys(params).forEach((key) => {
         if (params[key] === "") {
             return url.searchParams.delete(key);
@@ -414,6 +424,7 @@ function isEqual(o1, o2) {
 }
 
 export default function CCSearch() {
+    const [isLoading, setIsLoading] = useState(false);
     const [lastSearchParams, setLastSearchParams] = useState(null);
     const searchTerm = useFormInput(getSearchTermFromUrl());
     const searchType = useFormInput("");
@@ -429,6 +440,7 @@ export default function CCSearch() {
     const [thisCommonsOnly, setThisCommonsOnly] = useState(false);
 
     function performSearch(event) {
+        setIsLoading(true);
         if (event !== null) {
             event.preventDefault();
         }
@@ -446,13 +458,15 @@ export default function CCSearch() {
             params.content_type = searchType.value;
         }
         if (dateRange.value === "custom") {
-            if  (startDate.value !== "") {
+            if (startDate.value !== "") {
                 params.start_date = startDate.value;
                 params.end_date = endDate.value;
             }
         } else if (dateRange.value !== "anytime") {
-            params.start_date = moment().subtract(1, dateRange.value).format('YYYY-MM-DD');
-            params.end_date = moment().format('YYYY-MM-DD');
+            params.start_date = moment()
+                .subtract(1, dateRange.value)
+                .format("YYYY-MM-DD");
+            params.end_date = moment().format("YYYY-MM-DD");
         }
 
         // setSearchPerformed(true);
@@ -484,6 +498,9 @@ export default function CCSearch() {
             setCurrentPage(1);
         }
         setLastSearchParams(params);
+        setTimeout(() => {
+            setIsLoading(false);
+        }, 1000);
     }
 
     useEffect(() => {
@@ -491,7 +508,7 @@ export default function CCSearch() {
     }, [currentPage]);
 
     return (
-        <main>
+        <main className={isLoading ? "ccs-loading" : ""}>
             <article className="ccs-row ccs-top">
                 <search className="ccs-search">
                     <form onSubmit={performSearch}>
@@ -503,8 +520,14 @@ export default function CCSearch() {
                                     type="search"
                                     name="ccSearch"
                                     {...searchTerm}
+                                    disabled={isLoading}
                                 />
-                                <button aria-label="Search">🔍</button>
+                                <button
+                                    aria-label="Search"
+                                    disabled={isLoading}
+                                >
+                                    🔍
+                                </button>
                             </label>
                         </div>
                         <div className="ccs-row ccs-search-options">
@@ -512,7 +535,10 @@ export default function CCSearch() {
                                 <label>
                                     <span className="ccs-label">Type</span>
                                     <br />
-                                    <select {...searchType}>
+                                    <select
+                                        {...searchType}
+                                        disabled={isLoading}
+                                    >
                                         <option value="">All Types</option>
                                         <option value="work">
                                             Deposit/Work
@@ -531,7 +557,7 @@ export default function CCSearch() {
                                 <label>
                                     <span className="ccs-label">Sort By</span>
                                     <br />
-                                    <select {...sortBy}>
+                                    <select {...sortBy} disabled={isLoading}>
                                         <option value="">Relevance</option>
                                         <option value="publication_date">
                                             Publication Date
@@ -548,7 +574,7 @@ export default function CCSearch() {
                                         Date Range
                                     </span>
                                     <br />
-                                    <select {...dateRange}>
+                                    <select {...dateRange} disabled={isLoading}>
                                         <option value="anytime">Anytime</option>
                                         <option value="week">Past Week</option>
                                         <option value="month">
@@ -562,6 +588,7 @@ export default function CCSearch() {
                                     dateRangeValue={dateRange.value}
                                     startDate={startDate}
                                     endDate={endDate}
+                                    isLoading={isLoading}
                                 />
                             </div>
                         </div>
@@ -571,6 +598,7 @@ export default function CCSearch() {
                                     type="checkbox"
                                     name="searchCommonsOnly"
                                     checked={thisCommonsOnly}
+                                    disabled={isLoading}
                                     onChange={() =>
                                         setThisCommonsOnly(!thisCommonsOnly)
                                     }
@@ -580,7 +608,9 @@ export default function CCSearch() {
                             </label>
                         </div>
                         <div className="ccs-search-button">
-                            <button type="submit">Search</button>
+                            <button type="submit" disabled={isLoading}>
+                                Search
+                            </button>
                         </div>
                     </form>
                 </search>
@@ -598,6 +628,7 @@ export default function CCSearch() {
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
                     perPage={perPage}
+                    isLoading={isLoading}
                 />
             </article>
         </main>
