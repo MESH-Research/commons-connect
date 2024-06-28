@@ -66,7 +66,7 @@ function Paginator(data) {
             ]);
         } else if (
             data.currentPage > 4 &&
-            data.currentPage < data.totalPages - 4
+            data.currentPage < data.totalPages - 3
         ) {
             setSlots([
                 { label: 1, value: 1 },
@@ -85,7 +85,7 @@ function Paginator(data) {
             ]);
         } else if (
             data.currentPage > 4 &&
-            data.currentPage >= data.totalPages - 4
+            data.currentPage >= data.totalPages - 3
         ) {
             setSlots([
                 { label: 1, value: 1 },
@@ -131,7 +131,6 @@ function Paginator(data) {
                 style={
                     data.currentPage == slot.value ? { fontWeight: "bold" } : {}
                 }
-                disabled={data.isLoading && data.currentPage != slot.value}
                 className="ccs-page-button"
                 aria-current={data.currentPage == slot.value ? true : null}
                 aria-label={"Page " + slot.value + " of " + data.totalPages}
