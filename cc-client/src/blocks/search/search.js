@@ -122,11 +122,7 @@ function Paginator(data) {
     }
     const slotMarkup = slots.map((slot, index) => {
         if (slot.clickable === false) {
-            return (
-                <span key={index} className="ccs-page-link">
-                    {slot.label}
-                </span>
-            );
+            return <span key={index}>{slot.label}</span>;
         }
         return (
             <button
@@ -135,7 +131,8 @@ function Paginator(data) {
                 style={
                     data.currentPage == slot.value ? { fontWeight: "bold" } : {}
                 }
-                className="ccs-page-link"
+                disabled={data.isLoading && data.currentPage != slot.value}
+                className="ccs-page-button"
                 aria-current={data.currentPage == slot.value ? true : null}
                 aria-label={"Page " + slot.value + " of " + data.totalPages}
             >
@@ -169,6 +166,7 @@ function Paginator(data) {
                 className="ccs-footer-nav"
             >
                 <button
+                    className="ccs-page-prev"
                     onClick={decrementPage}
                     disabled={data.currentPage === 1 || data.isLoading}
                     aria-label={
@@ -181,8 +179,11 @@ function Paginator(data) {
                 </button>
                 {slotMarkup}
                 <button
+                    className="ccs-page-next"
                     onClick={incrementPage}
-                    disabled={data.currentPage === data.totalPages || data.isLoading}
+                    disabled={
+                        data.currentPage === data.totalPages || data.isLoading
+                    }
                     aria-label={
                         data.currentPage !== data.totalPages
                             ? "Next Page " + (data.currentPage + 1)
