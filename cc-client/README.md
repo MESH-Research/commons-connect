@@ -7,8 +7,8 @@ This plugin provides WordPress blocks that interface with the Commons Connect AP
 1. Install [Lando](https://lando.dev/).
 2. Clone the CommonsConnect repository.
 3. In the `cc-client` directory, run `lando start`.
-4. Open the test site at https://commons-connect-client.lndo.site/.
-5. You can login to the WordPress admin at https://commons-connect-client.lndo.site/wp-admin/ with the username `admin` and password `admin`.
+4. Open the test site at <https://commons-connect-client.lndo.site/>.
+5. You can login to the WordPress admin at <https://commons-connect-client.lndo.site/wp-admin/> with the username `admin` and password `admin`.
 
 ### Interacting with the Search API
 
