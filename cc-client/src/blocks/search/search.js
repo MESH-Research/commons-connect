@@ -438,7 +438,7 @@ export default function CCSearch() {
     const [searchResults, setSearchResults] = useState([]);
     const [thisCommonsOnly, setThisCommonsOnly] = useState(false);
 
-    function performSearch(event) {
+    async function performSearch(event) {
         setIsLoading(true);
         if (event !== null) {
             event.preventDefault();
@@ -482,13 +482,17 @@ export default function CCSearch() {
             url.searchParams.append(key, params[key]),
         );
         setUrl(params);
-        fetch(url)
-            .then((response) => response.json())
-            .then((data) => {
-                setSearchPerformed(true);
-                setSearchResults(processResults(data.hits));
-                setTotalPages(calculateTotalPages(data.total, data.per_page) | 1);
-            });
+        try {
+            await fetch(url)
+                .then((response) => response.json())
+                .then((data) => {
+                    setSearchPerformed(true);
+                    setSearchResults(processResults(data.hits));
+                    setTotalPages(calculateTotalPages(data.total, data.per_page) | 1);
+                });
+        } catch (error) {
+            console.log(error)
+        }
 
         if (lastSearchParams !== null) {
             delete lastSearchParams.page;
@@ -500,9 +504,7 @@ export default function CCSearch() {
             setCurrentPage(1);
         }
         setLastSearchParams(params);
-        setTimeout(() => {
-            setIsLoading(false);
-        }, 1000);
+        setIsLoading(false);
     }
 
     useEffect(() => {
