@@ -1,6 +1,5 @@
 import { useEffect, useState } from "@wordpress/element";
 import useWindowDimensions from "./mediaqueries.js";
-import sampleJson from "./sample.json";
 import moment from "moment";
 
 function useFormInput(initialValue) {
@@ -471,7 +470,9 @@ export default function CCSearch() {
 
         // setSearchPerformed(true);
         // setSearchResults(processResults(sampleJson.hits));
-        // setTotalPages(sampleJson.total_pages);
+        // setTotalPages(
+        //     calculateTotalPages(sampleJson.total, sampleJson.per_page) || 1,
+        // );
 
         const url = new URL(
             "/wp-json/cc-client/v1/search",
@@ -480,6 +481,7 @@ export default function CCSearch() {
         Object.keys(params).forEach((key) =>
             url.searchParams.append(key, params[key]),
         );
+        setUrl(params);
         fetch(url)
             .then((response) => response.json())
             .then((data) => {
@@ -487,7 +489,7 @@ export default function CCSearch() {
                 setSearchResults(processResults(data.hits));
                 setTotalPages(calculateTotalPages(data.total, data.per_page) | 1);
             });
-        setUrl(params);
+
         if (lastSearchParams !== null) {
             delete lastSearchParams.page;
         }
