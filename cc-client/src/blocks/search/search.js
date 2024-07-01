@@ -12,7 +12,7 @@ function useFormInput(initialValue) {
         onChange: handleChange,
     };
 }
-function CustomDateRange({ dateRangeValue, startDate, endDate, isLoading }) {
+function CustomDateRange({ dateRangeValue, startDate, endDate, isBusy }) {
     return (
         dateRangeValue == "custom" && (
             <div className="ccs-row ccs-date-ranges">
@@ -23,7 +23,7 @@ function CustomDateRange({ dateRangeValue, startDate, endDate, isLoading }) {
                         type="date"
                         name="customStartDate"
                         {...startDate}
-                        disabled={isLoading}
+                        disabled={isBusy}
                     />
                 </label>
                 <label>
@@ -33,7 +33,7 @@ function CustomDateRange({ dateRangeValue, startDate, endDate, isLoading }) {
                         type="date"
                         name="customEndDate"
                         {...endDate}
-                        disabled={isLoading}
+                        disabled={isBusy}
                     />
                 </label>
             </div>
@@ -166,7 +166,7 @@ function Paginator(data) {
                 <button
                     className="ccs-page-prev"
                     onClick={decrementPage}
-                    disabled={data.currentPage === 1 || data.isLoading}
+                    disabled={data.currentPage === 1 || data.isBusy}
                     aria-label={
                         data.currentPage !== 1
                             ? "Previous Page " + (data.currentPage - 1)
@@ -180,7 +180,7 @@ function Paginator(data) {
                     className="ccs-page-next"
                     onClick={incrementPage}
                     disabled={
-                        data.currentPage === data.totalPages || data.isLoading
+                        data.currentPage === data.totalPages || data.isBusy
                     }
                     aria-label={
                         data.currentPage !== data.totalPages
@@ -367,7 +367,7 @@ function SearchResultSection(data) {
                     currentPage={data.currentPage}
                     setCurrentPage={data.setCurrentPage}
                     perPage={data.perPage}
-                    isLoading={data.isLoading}
+                    isBusy={data.isBusy}
                 />
             </div>
         );
@@ -423,7 +423,7 @@ function isEqual(o1, o2) {
 }
 
 export default function CCSearch() {
-    const [isLoading, setIsLoading] = useState(false);
+    const [isBusy, setIsBusy] = useState(false);
     const [lastSearchParams, setLastSearchParams] = useState(null);
     const searchTerm = useFormInput(getSearchTermFromUrl());
     const searchType = useFormInput("");
@@ -439,13 +439,13 @@ export default function CCSearch() {
     const [thisCommonsOnly, setThisCommonsOnly] = useState(false);
 
     async function performSearch(event) {
-        setIsLoading(true);
         if (event !== null) {
             event.preventDefault();
         }
         if (searchTerm.value === "") {
             return;
         }
+        setIsBusy(true);
         const params = {
             q: searchTerm.value,
             page: currentPage,
@@ -504,7 +504,7 @@ export default function CCSearch() {
             setCurrentPage(1);
         }
         setLastSearchParams(params);
-        setIsLoading(false);
+        setIsBusy(false);
     }
 
     useEffect(() => {
@@ -512,7 +512,7 @@ export default function CCSearch() {
     }, [currentPage]);
 
     return (
-        <main className={isLoading ? "ccs-loading" : ""}>
+        <main className={isBusy ? "ccs-loading" : ""}>
             <article className="ccs-row ccs-top">
                 <search className="ccs-search">
                     <form onSubmit={performSearch}>
@@ -524,11 +524,11 @@ export default function CCSearch() {
                                     type="search"
                                     name="ccSearch"
                                     {...searchTerm}
-                                    disabled={isLoading}
+                                    disabled={isBusy}
                                 />
                                 <button
                                     aria-label="Search"
-                                    disabled={isLoading}
+                                    disabled={isBusy}
                                 >
                                     🔍
                                 </button>
@@ -541,7 +541,7 @@ export default function CCSearch() {
                                     <br />
                                     <select
                                         {...searchType}
-                                        disabled={isLoading}
+                                        disabled={isBusy}
                                     >
                                         <option value="">All Types</option>
                                         <option value="work">
@@ -561,7 +561,7 @@ export default function CCSearch() {
                                 <label>
                                     <span className="ccs-label">Sort By</span>
                                     <br />
-                                    <select {...sortBy} disabled={isLoading}>
+                                    <select {...sortBy} disabled={isBusy}>
                                         <option value="">Relevance</option>
                                         <option value="publication_date">
                                             Publication Date
@@ -578,7 +578,7 @@ export default function CCSearch() {
                                         Date Range
                                     </span>
                                     <br />
-                                    <select {...dateRange} disabled={isLoading}>
+                                    <select {...dateRange} disabled={isBusy}>
                                         <option value="anytime">Anytime</option>
                                         <option value="week">Past Week</option>
                                         <option value="month">
@@ -592,7 +592,7 @@ export default function CCSearch() {
                                     dateRangeValue={dateRange.value}
                                     startDate={startDate}
                                     endDate={endDate}
-                                    isLoading={isLoading}
+                                    isBusy={isBusy}
                                 />
                             </div>
                         </div>
@@ -602,7 +602,7 @@ export default function CCSearch() {
                                     type="checkbox"
                                     name="searchCommonsOnly"
                                     checked={thisCommonsOnly}
-                                    disabled={isLoading}
+                                    disabled={isBusy}
                                     onChange={() =>
                                         setThisCommonsOnly(!thisCommonsOnly)
                                     }
@@ -612,7 +612,7 @@ export default function CCSearch() {
                             </label>
                         </div>
                         <div className="ccs-search-button">
-                            <button type="submit" disabled={isLoading}>
+                            <button type="submit" disabled={isBusy}>
                                 Search
                             </button>
                         </div>
@@ -632,7 +632,7 @@ export default function CCSearch() {
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
                     perPage={perPage}
-                    isLoading={isLoading}
+                    isBusy={isBusy}
                 />
             </article>
         </main>
