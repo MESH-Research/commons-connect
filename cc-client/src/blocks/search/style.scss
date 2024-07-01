@@ -4,6 +4,28 @@
  *
  * Replace them with your own styles or remove the file completely.
  */
+.ccs-spinner {
+    animation: 0.4s linear infinite ccs-spin;
+    border-bottom-color: transparent;
+    border-left-color: #444;
+    border-radius: 50%;
+    border-right-color: transparent;
+    border-style: solid;
+    border-top-color: #444;
+    border-width: 4px;
+    display: inline-block;
+    font-size: 0;
+    height: 16px;
+    width: 16px;
+}
+@keyframes ccs-spin {
+    0% {
+        transform: rotate(0);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
 .ccs-top {
     justify-content: space-between;
     align-items: flex-start;
@@ -35,8 +57,10 @@
     padding: 16px;
 }
 .ccs-search-button {
+    align-items: center;
     display: flex;
     justify-content: flex-end;
+    gap: 8px;
 }
 .ccs-search-button button {
     cursor: pointer;

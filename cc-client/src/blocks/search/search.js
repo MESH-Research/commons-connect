@@ -347,6 +347,13 @@ function NoData() {
         </section>
     );
 }
+function Spinner() {
+    return (
+        <span className="ccs-spinner">
+            Loading<i aria-hidden="true">...</i>
+        </span>
+    );
+}
 function SearchResultSection(data) {
     if (
         data.searchPerformed === true &&
@@ -371,6 +378,9 @@ function SearchResultSection(data) {
                     perPage={data.perPage}
                     isBusy={data.isBusy}
                 />
+                <div style={{ textAlign: "center" }}>
+                    {data.isBusy && <Spinner />}
+                </div>
             </div>
         );
     } else {
@@ -490,10 +500,12 @@ export default function CCSearch() {
                 .then((data) => {
                     setSearchPerformed(true);
                     setSearchResults(processResults(data.hits));
-                    setTotalPages(calculateTotalPages(data.total, data.per_page) | 1);
+                    setTotalPages(
+                        calculateTotalPages(data.total, data.per_page) | 1,
+                    );
                 });
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
 
         if (lastSearchParams !== null) {
@@ -528,10 +540,7 @@ export default function CCSearch() {
                                     {...searchTerm}
                                     disabled={isBusy}
                                 />
-                                <button
-                                    aria-label="Search"
-                                    disabled={isBusy}
-                                >
+                                <button aria-label="Search" disabled={isBusy}>
                                     🔍
                                 </button>
                             </label>
@@ -541,10 +550,7 @@ export default function CCSearch() {
                                 <label>
                                     <span className="ccs-label">Type</span>
                                     <br />
-                                    <select
-                                        {...searchType}
-                                        disabled={isBusy}
-                                    >
+                                    <select {...searchType} disabled={isBusy}>
                                         <option value="">All Types</option>
                                         <option value="work">
                                             Deposit/Work
@@ -614,6 +620,7 @@ export default function CCSearch() {
                             </label>
                         </div>
                         <div className="ccs-search-button">
+                            {isBusy && <Spinner />}
                             <button type="submit" disabled={isBusy}>
                                 Search
                             </button>
