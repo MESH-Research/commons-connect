@@ -368,6 +368,13 @@ function SearchResultSection(data) {
     ) {
         return (
             <div>
+                <Paginator
+                    totalPages={data.totalPages}
+                    currentPage={data.currentPage}
+                    setCurrentPage={data.setCurrentPage}
+                    perPage={data.perPage}
+                    isBusy={data.isBusy}
+                />
                 {data.searchResults.map(function (result, i) {
                     return <SearchResult key={i} data={result} />;
                 })}
