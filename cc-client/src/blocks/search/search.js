@@ -320,6 +320,8 @@ function SearchResult({ data }) {
                 <a href={data.primary_url} className="ccs-result-title">
                     {decodeHTMLElement(data.title)}
                 </a>
+            </header>
+            <header className="ccs-row ccs-result-header">
                 {renderContributor(data)}
                 {dateLabel && <span className="ccs-date">{dateLabel}</span>}
             </header>

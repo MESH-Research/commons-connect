@@ -77,7 +77,8 @@
 .ccs-result-header {
     align-items: center;
     gap: 8px;
-    flex-wrap: wrap;
+    margin-top: 1px;
+    text-wrap: pretty;
 }
 .ccs-tag {
     background-color: #595959;
