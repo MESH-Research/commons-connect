@@ -398,6 +398,10 @@ function getSearchTermFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get("search") ?? urlParams.get("q") ?? "";
 }
+function getPageNumberFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get("s_page") ?? 1;
+}
 function getDefaultEndDate() {
     return moment().format("YYYY-MM-DD");
 }
@@ -410,6 +414,8 @@ function setUrl(params) {
     Object.keys(params).forEach((key) => {
         if (params[key] === "") {
             return url.searchParams.delete(key);
+        } else if (key === "page") {
+            return url.searchParams.set("s_page", params[key]);
         } else {
             return url.searchParams.set(key, params[key]);
         }
@@ -442,27 +448,27 @@ function isEqual(o1, o2) {
 }
 
 export default function CCSearch() {
+    const [currentPage, setCurrentPage] = useState(getPageNumberFromUrl());
     const [isBusy, setIsBusy] = useState(false);
     const [lastSearchParams, setLastSearchParams] = useState(null);
-    const searchTerm = useFormInput(getSearchTermFromUrl());
-    const searchType = useFormInput("");
-    const sortBy = useFormInput("");
-    const dateRange = useFormInput("anytime");
-    const endDate = useFormInput(getDefaultEndDate());
-    const startDate = useFormInput("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
     const [perPage] = useState(20);
     const [searchPerformed, setSearchPerformed] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
     const [thisCommonsOnly, setThisCommonsOnly] = useState(false);
+    const [totalPages, setTotalPages] = useState(1);
+    const dateRange = useFormInput("anytime");
+    const endDate = useFormInput(getDefaultEndDate());
+    const searchTerm = useFormInput(getSearchTermFromUrl());
+    const searchType = useFormInput("");
+    const sortBy = useFormInput("");
+    const startDate = useFormInput("");
 
     async function performSearch(event) {
-        if (event !== null) {
-            event.preventDefault();
-        }
         if (searchTerm.value === "") {
             return;
+        }
+        if (event !== null) {
+            event.preventDefault();
         }
         setIsBusy(true);
         const params = {
@@ -508,21 +514,23 @@ export default function CCSearch() {
                     setSearchPerformed(true);
                     setSearchResults(processResults(data.hits));
                     setTotalPages(
-                        calculateTotalPages(data.total, data.per_page) | 1,
+                        calculateTotalPages(data.total, data.per_page) || 1,
                     );
                 });
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
 
         if (lastSearchParams !== null) {
             delete lastSearchParams.page;
-        }
-        if (params !== null) {
-            delete params.page;
-        }
-        if (!isEqual(lastSearchParams, params)) {
-            setCurrentPage(1);
+            delete lastSearchParams.s_page;
+            if (params !== null) {
+                delete params.page;
+                delete params.s_page;
+            }
+            if (!isEqual(lastSearchParams, params)) {
+                setCurrentPage(1);
+            }
         }
         setLastSearchParams(params);
         setIsBusy(false);
