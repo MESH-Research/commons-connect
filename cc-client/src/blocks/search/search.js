@@ -400,7 +400,7 @@ function getSearchTermFromUrl() {
 }
 function getPageNumberFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get("s_page") ?? 1;
+    return parseInt(urlParams.get("s_page")) ?? 1;
 }
 function getDefaultEndDate() {
     return moment().format("YYYY-MM-DD");
@@ -446,6 +446,21 @@ function isEqual(o1, o2) {
     }
     return result;
 }
+function adjustPaginatorFocus(currentPage) {
+    const pageButtonNumber = parseInt(document.activeElement.textContent);
+    if (
+        document.activeElement.classList.contains("ccs-page-button") &&
+        document.activeElement.getAttribute("aria-current") === null &&
+        pageButtonNumber !== currentPage
+    ) {
+        if (pageButtonNumber < currentPage) {
+            document.activeElement.nextElementSibling.focus();
+        }
+        if (pageButtonNumber > currentPage) {
+            document.activeElement.previousElementSibling.focus();
+        }
+    }
+}
 
 export default function CCSearch() {
     const [currentPage, setCurrentPage] = useState(getPageNumberFromUrl());
@@ -464,6 +479,7 @@ export default function CCSearch() {
     const startDate = useFormInput("");
 
     async function performSearch(event) {
+        adjustPaginatorFocus(currentPage);
         if (searchTerm.value === "") {
             return;
         }
