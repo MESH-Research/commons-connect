@@ -1,4 +1,6 @@
 import { useEffect, useState } from "@wordpress/element";
+import useWindowDimensions from "./mediaqueries.js";
+import moment from "moment";
 
 function useFormInput(initialValue) {
     const [value, setValue] = useState(initialValue);
@@ -10,19 +12,29 @@ function useFormInput(initialValue) {
         onChange: handleChange,
     };
 }
-function CustomDateRange({ dateRangeValue, startDate, endDate }) {
+function CustomDateRange({ dateRangeValue, startDate, endDate, isBusy }) {
     return (
         dateRangeValue == "custom" && (
             <div className="ccs-row ccs-date-ranges">
                 <label>
                     <span>Start Date</span>
                     <br />
-                    <input type="date" name="customStartDate" {...startDate} />
+                    <input
+                        type="date"
+                        name="customStartDate"
+                        {...startDate}
+                        disabled={isBusy}
+                    />
                 </label>
                 <label>
                     <span>End Date</span>
                     <br />
-                    <input type="date" name="customEndDate" {...endDate} />
+                    <input
+                        type="date"
+                        name="customEndDate"
+                        {...endDate}
+                        disabled={isBusy}
+                    />
                 </label>
             </div>
         )
@@ -48,16 +60,16 @@ function Paginator(data) {
                 { label: 3, value: 3 },
                 { label: 4, value: 4 },
                 { label: 5, value: 5 },
-                { label: "...", value: null, clickable: false },
+                { label: "…", value: null, clickable: false },
                 { label: data.totalPages, value: data.totalPages },
             ]);
         } else if (
             data.currentPage > 4 &&
-            data.currentPage < data.totalPages - 4
+            data.currentPage < data.totalPages - 3
         ) {
             setSlots([
                 { label: 1, value: 1 },
-                { label: "...", value: null, clickable: false },
+                { label: "…", value: null, clickable: false },
                 {
                     label: data.currentPage - 1,
                     value: data.currentPage - 1,
@@ -67,16 +79,16 @@ function Paginator(data) {
                     label: data.currentPage + 1,
                     value: data.currentPage + 1,
                 },
-                { label: "...", value: null, clickable: false },
+                { label: "…", value: null, clickable: false },
                 { label: data.totalPages, value: data.totalPages },
             ]);
         } else if (
             data.currentPage > 4 &&
-            data.currentPage >= data.totalPages - 4
+            data.currentPage >= data.totalPages - 3
         ) {
             setSlots([
                 { label: 1, value: 1 },
-                { label: "...", value: null, clickable: false },
+                { label: "…", value: null, clickable: false },
                 {
                     label: data.totalPages - 4,
                     value: data.totalPages - 4,
@@ -109,26 +121,21 @@ function Paginator(data) {
     }
     const slotMarkup = slots.map((slot, index) => {
         if (slot.clickable === false) {
-            return (
-                <span key={index} className="ccs-page-link">
-                    {slot.label}
-                </span>
-            );
+            return <span key={index}>{slot.label}</span>;
         }
         return (
-            <a
+            <button
                 key={index}
-                href="#"
                 onClick={(e) => setPage(e, slot.value)}
                 style={
                     data.currentPage == slot.value ? { fontWeight: "bold" } : {}
                 }
-                className="ccs-page-link"
+                className="ccs-page-button"
                 aria-current={data.currentPage == slot.value ? true : null}
                 aria-label={"Page " + slot.value + " of " + data.totalPages}
             >
                 {slot.label}
-            </a>
+            </button>
         );
     });
     function setPage(e, page) {
@@ -145,6 +152,7 @@ function Paginator(data) {
             data.setCurrentPage(data.currentPage + 1);
         }
     }
+    const { width } = useWindowDimensions();
     return (
         <footer>
             <nav
@@ -156,27 +164,31 @@ function Paginator(data) {
                 className="ccs-footer-nav"
             >
                 <button
+                    className="ccs-page-prev"
                     onClick={decrementPage}
-                    disabled={data.currentPage === 1}
+                    disabled={data.currentPage === 1 || data.isBusy}
                     aria-label={
                         data.currentPage !== 1
                             ? "Previous Page " + (data.currentPage - 1)
                             : null
                     }
                 >
-                    Previous
+                    {width > 500 ? "Previous" : "◀"}
                 </button>
                 {slotMarkup}
                 <button
+                    className="ccs-page-next"
                     onClick={incrementPage}
-                    disabled={data.currentPage === data.totalPages}
+                    disabled={
+                        data.currentPage === data.totalPages || data.isBusy
+                    }
                     aria-label={
                         data.currentPage !== data.totalPages
                             ? "Next Page " + (data.currentPage + 1)
                             : null
                     }
                 >
-                    Next
+                    {width > 500 ? "Next" : "▶"}
                 </button>
             </nav>
         </footer>
@@ -308,6 +320,8 @@ function SearchResult({ data }) {
                 <a href={data.primary_url} className="ccs-result-title">
                     {decodeHTMLElement(data.title)}
                 </a>
+            </header>
+            <header className="ccs-row ccs-result-header">
                 {renderContributor(data)}
                 {dateLabel && <span className="ccs-date">{dateLabel}</span>}
             </header>
@@ -333,6 +347,13 @@ function NoData() {
         </section>
     );
 }
+function Spinner() {
+    return (
+        <span className="ccs-spinner">
+            Loading<i aria-hidden="true">...</i>
+        </span>
+    );
+}
 function SearchResultSection(data) {
     if (
         data.searchPerformed === true &&
@@ -347,6 +368,13 @@ function SearchResultSection(data) {
     ) {
         return (
             <div>
+                <Paginator
+                    totalPages={data.totalPages}
+                    currentPage={data.currentPage}
+                    setCurrentPage={data.setCurrentPage}
+                    perPage={data.perPage}
+                    isBusy={data.isBusy}
+                />
                 {data.searchResults.map(function (result, i) {
                     return <SearchResult key={i} data={result} />;
                 })}
@@ -355,7 +383,11 @@ function SearchResultSection(data) {
                     currentPage={data.currentPage}
                     setCurrentPage={data.setCurrentPage}
                     perPage={data.perPage}
+                    isBusy={data.isBusy}
                 />
+                <div style={{ textAlign: "center" }}>
+                    {data.isBusy && <Spinner />}
+                </div>
             </div>
         );
     } else {
@@ -364,40 +396,102 @@ function SearchResultSection(data) {
 }
 function getSearchTermFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get("search") ?? "";
+    return urlParams.get("search") ?? urlParams.get("q") ?? "";
+}
+function getPageNumberFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const param = urlParams.get("s_page");
+    return param !== null ? parseInt(param) : 1;
 }
 function getDefaultEndDate() {
-    return new Date().toISOString().split("T")[0];
+    return moment().format("YYYY-MM-DD");
 }
 function calculateTotalPages(total, per_page) {
     return Math.floor(total / per_page);
 }
+function setUrl(params) {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("search");
+    Object.keys(params).forEach((key) => {
+        if (params[key] === "") {
+            return url.searchParams.delete(key);
+        } else if (key === "page") {
+            return url.searchParams.set("s_page", params[key]);
+        } else {
+            return url.searchParams.set(key, params[key]);
+        }
+    });
+    window.history.pushState({}, "", url);
+}
+/**
+ * Compare two objects for equality
+ * @param {Object} o1
+ * @param {Object} o2
+ * @returns boolean
+ */
+function isEqual(o1, o2) {
+    let result = true;
+    let o1keys = Object.keys(Object(o1));
+    let o2keys = Object.keys(Object(o2));
+    let index = o1keys.length;
+    if (o1keys.length !== o2keys.length) {
+        return false;
+    }
+    while (index--) {
+        if (!o1.hasOwnProperty(o2keys[index])) {
+            return false;
+        }
+        if (o1[o2keys[index]] !== o2[o2keys[index]]) {
+            return false;
+        }
+    }
+    return result;
+}
+function adjustPaginatorFocus(currentPage) {
+    const pageButtonNumber = parseInt(document.activeElement.textContent);
+    if (
+        document.activeElement.classList.contains("ccs-page-button") &&
+        document.activeElement.getAttribute("aria-current") === null &&
+        pageButtonNumber !== currentPage
+    ) {
+        if (pageButtonNumber < currentPage) {
+            document.activeElement.nextElementSibling.focus();
+        }
+        if (pageButtonNumber > currentPage) {
+            document.activeElement.previousElementSibling.focus();
+        }
+    }
+}
 
 export default function CCSearch() {
-    const searchTerm = useFormInput(getSearchTermFromUrl());
-    const searchType = useFormInput("");
-    const sortBy = useFormInput("");
-    const dateRange = useFormInput("anytime");
-    const endDate = useFormInput(getDefaultEndDate());
-    const startDate = useFormInput("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
+    const [currentPage, setCurrentPage] = useState(getPageNumberFromUrl());
+    const [isBusy, setIsBusy] = useState(false);
+    const [lastSearchParams, setLastSearchParams] = useState(null);
     const [perPage] = useState(20);
     const [searchPerformed, setSearchPerformed] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
     const [thisCommonsOnly, setThisCommonsOnly] = useState(false);
+    const [totalPages, setTotalPages] = useState(1);
+    const dateRange = useFormInput("anytime");
+    const endDate = useFormInput(getDefaultEndDate());
+    const searchTerm = useFormInput(getSearchTermFromUrl());
+    const searchType = useFormInput("");
+    const sortBy = useFormInput("");
+    const startDate = useFormInput("");
 
-    function performSearch(event) {
-        if (event !== null) {
-            event.preventDefault();
-        }
+    async function performSearch(event) {
+        adjustPaginatorFocus(currentPage);
         if (searchTerm.value === "") {
             return;
         }
+        if (event !== null) {
+            event.preventDefault();
+        }
+        setIsBusy(true);
         const params = {
+            q: searchTerm.value,
             page: currentPage,
             per_page: perPage,
-            q: searchTerm.value,
             sort_by: sortBy.value,
             this_commons: thisCommonsOnly ? 1 : 0,
         };
@@ -405,28 +499,58 @@ export default function CCSearch() {
             params.content_type = searchType.value;
         }
         if (dateRange.value === "custom") {
-            params.start_date = startDate.value;
-            params.end_date = endDate.value;
+            if (startDate.value !== "") {
+                params.start_date = startDate.value;
+                params.end_date = endDate.value;
+            }
+        } else if (dateRange.value !== "anytime") {
+            params.start_date = moment()
+                .subtract(1, dateRange.value)
+                .format("YYYY-MM-DD");
+            params.end_date = moment().format("YYYY-MM-DD");
         }
 
         // setSearchPerformed(true);
         // setSearchResults(processResults(sampleJson.hits));
-        // setTotalPages(sampleJson.total_pages);
+        // setTotalPages(
+        //     calculateTotalPages(sampleJson.total, sampleJson.per_page) || 1,
+        // );
 
         const url = new URL(
             "/wp-json/cc-client/v1/search",
-            window.location.origin
+            window.location.origin,
         );
         Object.keys(params).forEach((key) =>
             url.searchParams.append(key, params[key]),
         );
-        fetch(url)
-            .then((response) => response.json())
-            .then((data) => {
-                setSearchPerformed(true);
-                setSearchResults(processResults(data.hits));
-                setTotalPages(calculateTotalPages(data.total, data.per_page) | 1);
-            });
+        setUrl(params);
+        try {
+            await fetch(url)
+                .then((response) => response.json())
+                .then((data) => {
+                    setSearchPerformed(true);
+                    setSearchResults(processResults(data.hits));
+                    setTotalPages(
+                        calculateTotalPages(data.total, data.per_page) || 1,
+                    );
+                });
+        } catch (error) {
+            console.error(error);
+        }
+
+        if (lastSearchParams !== null) {
+            delete lastSearchParams.page;
+            delete lastSearchParams.s_page;
+            if (params !== null) {
+                delete params.page;
+                delete params.s_page;
+            }
+            if (!isEqual(lastSearchParams, params)) {
+                setCurrentPage(1);
+            }
+        }
+        setLastSearchParams(params);
+        setIsBusy(false);
     }
 
     useEffect(() => {
@@ -434,7 +558,7 @@ export default function CCSearch() {
     }, [currentPage]);
 
     return (
-        <main>
+        <main className={isBusy ? "ccs-loading" : ""}>
             <article className="ccs-row ccs-top">
                 <search className="ccs-search">
                     <form onSubmit={performSearch}>
@@ -446,8 +570,11 @@ export default function CCSearch() {
                                     type="search"
                                     name="ccSearch"
                                     {...searchTerm}
+                                    disabled={isBusy}
                                 />
-                                <button aria-label="Search">🔍</button>
+                                <button aria-label="Search" disabled={isBusy}>
+                                    🔍
+                                </button>
                             </label>
                         </div>
                         <div className="ccs-row ccs-search-options">
@@ -455,7 +582,7 @@ export default function CCSearch() {
                                 <label>
                                     <span className="ccs-label">Type</span>
                                     <br />
-                                    <select {...searchType}>
+                                    <select {...searchType} disabled={isBusy}>
                                         <option value="">All Types</option>
                                         <option value="work">
                                             Deposit/Work
@@ -474,7 +601,7 @@ export default function CCSearch() {
                                 <label>
                                     <span className="ccs-label">Sort By</span>
                                     <br />
-                                    <select {...sortBy}>
+                                    <select {...sortBy} disabled={isBusy}>
                                         <option value="">Relevance</option>
                                         <option value="publication_date">
                                             Publication Date
@@ -491,7 +618,7 @@ export default function CCSearch() {
                                         Date Range
                                     </span>
                                     <br />
-                                    <select {...dateRange}>
+                                    <select {...dateRange} disabled={isBusy}>
                                         <option value="anytime">Anytime</option>
                                         <option value="week">Past Week</option>
                                         <option value="month">
@@ -505,6 +632,7 @@ export default function CCSearch() {
                                     dateRangeValue={dateRange.value}
                                     startDate={startDate}
                                     endDate={endDate}
+                                    isBusy={isBusy}
                                 />
                             </div>
                         </div>
@@ -514,6 +642,7 @@ export default function CCSearch() {
                                     type="checkbox"
                                     name="searchCommonsOnly"
                                     checked={thisCommonsOnly}
+                                    disabled={isBusy}
                                     onChange={() =>
                                         setThisCommonsOnly(!thisCommonsOnly)
                                     }
@@ -523,7 +652,10 @@ export default function CCSearch() {
                             </label>
                         </div>
                         <div className="ccs-search-button">
-                            <button type="submit">Search</button>
+                            {isBusy && <Spinner />}
+                            <button type="submit" disabled={isBusy}>
+                                Search
+                            </button>
                         </div>
                     </form>
                 </search>
@@ -541,6 +673,7 @@ export default function CCSearch() {
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
                     perPage={perPage}
+                    isBusy={isBusy}
                 />
             </article>
         </main>

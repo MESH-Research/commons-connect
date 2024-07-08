@@ -36,10 +36,20 @@ class ProvisionablePost implements ProvisionableInterface {
 			);
 		}
 
+		// Try to get the excerpt, but don't fail if something goes wrong.
+		// There is currently a bug in wp-inclides/formatting.php::convert_smilies that
+		// can cause a TypeError to be thrown when calling get_the_excerpt.
+		// @see: https://core.trac.wordpress.org/ticket/59927
+		try {
+			$excerpt = \get_the_excerpt( $this->post );
+		} catch ( \Throwable $e ) {
+			$excerpt = '';
+		}
+
 		$document = new SearchDocument(
 			_internal_id: strval( $this->post->ID ),
 			title: \get_the_title( $this->post ),
-			description: \get_the_excerpt( $this->post ),
+			description: $excerpt,
 			owner: $author,
 			contributors: [ $author ],
 			primary_url: \get_permalink( $this->post ),
@@ -69,9 +79,10 @@ class ProvisionablePost implements ProvisionableInterface {
 
 	public function setSearchID( string $search_id ): void {
 		update_post_meta( $this->post->ID, 'cc_search_id', $search_id );
+		$this->search_id = $search_id;
 	}
 
-	public static function getAll( $post_types = [ 'post', 'page' ] ): array {
+	public static function getAll( bool $reset = false, array $post_types = [ 'post', 'page' ] ): array {
 		$posts = \get_posts( [
 			'post_type' => $post_types,
 			'numberposts' => -1,
@@ -80,14 +91,18 @@ class ProvisionablePost implements ProvisionableInterface {
 
 		$provisionable_posts = [];
 		foreach ( $posts as $post ) {
-			$provisionable_posts[] = new ProvisionablePost( $post );
+			$provisionable_post = new ProvisionablePost( $post );
+			if ( $reset ) {
+				$provisionable_post->setSearchID( '' );
+			}
+			$provisionable_posts[] = $provisionable_post;
 		}
 
 		return $provisionable_posts;
 	}
 
-	public static function getAllAsDocuments( $post_types = [ 'post', 'page' ] ): array {
-		$provisionable_posts = self::getAll( $post_types );
+	public static function getAllAsDocuments( bool $reset = false, array $post_types = [ 'post', 'page' ] ): array {
+		$provisionable_posts = self::getAll( $reset, $post_types );
 		$documents = [];
 		foreach ( $provisionable_posts as $provisionable_post ) {
 			$documents[] = $provisionable_post->toDocument();
