@@ -79,4 +79,18 @@ class SearchAPITest extends CCCTestCase
 		$this->assertIsArray($search_results->hits);
 		$this->assertGreaterThan(0, $search_results->total);
 	}
+
+	public function test_search_documents_time_range(): void {
+		$documents_json = file_get_contents(__DIR__ . '/test-data/small_test_doc_collection.json');
+		$documents = SearchDocument::fromJSON($documents_json);
+		$this->search_api->bulk_index($documents);
+		sleep(1);
+		$search_params = new SearchParams(query:'art', start_date:'2022-01-01', end_date:'2022-12-31');
+		$search_results = $this->search_api->search($search_params);
+		$this->assertIsArray($search_results->hits);
+		foreach ($search_results->hits as $hit) {
+			$this->assertLessThanOrEqual(new \DateTime('2022-12-31'), $hit->publication_date);
+			$this->assertLessThanOrEqual(new \DateTime('2022-12-31'), $hit->publication_date);
+		}
+	}
 }
