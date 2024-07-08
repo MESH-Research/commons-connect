@@ -8,6 +8,7 @@ type SiteOptions = {
     cc_server_url: string;
     cc_search_endpoint: string;
     cc_search_key: string;
+    search_page_id: number;
 };
 
 export const SettingsPanel = () => {
@@ -15,9 +16,10 @@ export const SettingsPanel = () => {
         cc_server_url: "",
         cc_search_endpoint: "",
         cc_search_key: "",
+        search_page_id: 0,
     });
 
-    const { cc_server_url, cc_search_endpoint, cc_search_key } =
+    const { cc_server_url, cc_search_endpoint, cc_search_key, search_page_id } =
         siteOptions as SiteOptions;
 
     useEffect(() => {
@@ -81,6 +83,19 @@ export const SettingsPanel = () => {
                         updateSiteOptions({
                             ...siteOptions,
                             cc_search_key: event.target.value,
+                        });
+                    }}
+                />
+
+                <label>Search Page ID:</label>
+                <input
+                    type="number"
+                    value={search_page_id}
+                    name="search_page_id"
+                    onChange={(event) => {
+                        updateSiteOptions({
+                            ...siteOptions,
+                            search_page_id: parseInt(event.target.value),
                         });
                     }}
                 />

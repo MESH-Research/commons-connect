@@ -71,3 +71,4 @@ require_once( CC_CLIENT_BASE_DIR . 'src/Search/Provisioning/bulk_provisioning.ph
 require_once( CC_CLIENT_BASE_DIR . 'src/Search/Provisioning/incremental_provisioner_functions.php' );
 require_once( CC_CLIENT_BASE_DIR . 'src/Search/Provisioning/provisionable_functions.php' );
 require_once( CC_CLIENT_BASE_DIR . 'src/Search/Provisioning/provisioning_helper_functions.php' );
+require_once( CC_CLIENT_BASE_DIR . 'src/Search/search_functions.php' );

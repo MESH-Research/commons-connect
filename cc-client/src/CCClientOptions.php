@@ -12,7 +12,8 @@ class CCClientOptions {
 		public string      $cc_search_key = '',
 		public string      $cc_search_endpoint = '',
 		public string      $cc_search_admin_key = '',
-		public bool | null $incremental_provisioning_enabled = null
+		public bool | null $incremental_provisioning_enabled = null,
+		public int | null  $search_page_id = null,
 	) {
 		$this->loadOptions(false);	
 	}
@@ -39,6 +40,9 @@ class CCClientOptions {
 		}
 		if ( getenv( 'CC_INCREMENTAL_PROVISIONING_ENABLED' ) ) {
 			$this->incremental_provisioning_enabled = (bool) getenv( 'CC_INCREMENTAL_PROVISIONING_ENABLED' );
+		}
+		if ( getenv( 'CC_SEARCH_PAGE_ID' ) ) {
+			$this->search_page_id = (int) getenv( 'CC_SEARCH_PAGE_ID' );
 		}
 	}
 
