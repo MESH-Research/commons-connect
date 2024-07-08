@@ -140,7 +140,7 @@ class SearchAPI {
 					],
 					'body' => $documents_json
 				]);
-			} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+			} catch ( \Exception $e ) {
 				if ( $show_progress && class_exists('WP_CLI') ) {
 					\WP_CLI::warning("Failed to index document chunk: $current_chunk : " . $e->getMessage());
 				}
@@ -178,7 +178,7 @@ class SearchAPI {
 				],
 				'body' => $document->toJSON()
 			]);
-		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+		} catch ( \Exception $e ) {
 			return false;
 		}
 		if ( $response->getStatusCode() != 200 ) {
@@ -208,7 +208,7 @@ class SearchAPI {
 					'Authorization' => 'Bearer ' . $this->api_key
 				]
 			]);
-		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+		} catch ( \Exception $e ) {
 			return false;
 		}
 		return $response->getStatusCode() == 200;
@@ -224,7 +224,7 @@ class SearchAPI {
 					'Authorization' => 'Bearer ' . $this->admin_api_key
 				]
 			]);
-		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+		} catch ( \Exception $e ) {
 			return false;
 		}
 		return $response->getStatusCode() == 200;
@@ -240,7 +240,7 @@ class SearchAPI {
 					'Authorization' => 'Bearer ' . $this->admin_api_key
 				]
 			]);
-		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+		} catch ( \Exception $e ) {
 			return false;
 		}
 		return $response->getStatusCode() == 200;
@@ -256,7 +256,7 @@ class SearchAPI {
 		}
 		try {
 			$response = $this->client->request('GET', $this->api_url . '/documents/' . $id . $field_query);
-		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+		} catch ( \Exception $e ) {
 			return false;
 		}
 		if ( $response->getStatusCode() != 200 ) {
@@ -278,7 +278,7 @@ class SearchAPI {
 					'Content-Type' => 'application/json'
 				],
 			]);
-		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+		} catch ( \Exception $e ) {
 			return false;
 		}
 		if ( $response->getStatusCode() != 200 ) {
