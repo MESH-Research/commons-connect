@@ -400,8 +400,8 @@ function getSearchTermFromUrl() {
 }
 function getPageNumberFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
-    const param  = urlParams.get("s_page");
-    return (param !== null) ? parseInt(param) : 1;
+    const param = urlParams.get("s_page");
+    return param !== null ? parseInt(param) : 1;
 }
 function getDefaultEndDate() {
     return moment().format("YYYY-MM-DD");
