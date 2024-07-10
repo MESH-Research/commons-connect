@@ -82,13 +82,15 @@ class ProvisionablePost implements ProvisionableInterface {
 		$this->search_id = $search_id;
 	}
 
-	public static function getAll( bool $reset = false, array $post_types = [ 'post', 'page' ] ): array {
+	public static function getAll( bool $reset = false, bool $show_progress = false, array $post_types = [ 'post', 'page' ] ): array {
 		$posts = \get_posts( [
 			'post_type' => $post_types,
 			'numberposts' => -1,
 			'post_status' => 'publish'
 		] );
-
+		if ( $show_progress && class_exists( 'WP_CLI' ) ) {
+			\WP_CLI::line( 'Provisioning ' . count( $posts ) . ' posts...' );
+		}
 		$provisionable_posts = [];
 		foreach ( $posts as $post ) {
 			$provisionable_post = new ProvisionablePost( $post );
@@ -101,8 +103,11 @@ class ProvisionablePost implements ProvisionableInterface {
 		return $provisionable_posts;
 	}
 
-	public static function getAllAsDocuments( bool $reset = false, array $post_types = [ 'post', 'page' ] ): array {
-		$provisionable_posts = self::getAll( $reset, $post_types );
+	public static function getAllAsDocuments( bool $reset = false, bool $show_progress = false, array $post_types = [ 'post', 'page' ] ): array {
+		$provisionable_posts = self::getAll( $reset, $show_progress, $post_types );
+		if ( $show_progress && class_exists( 'WP_CLI' ) ) {
+			\WP_CLI::line( 'Converting ' . count( $provisionable_posts ) . ' posts to documents...' );
+		}
 		$documents = [];
 		foreach ( $provisionable_posts as $provisionable_post ) {
 			$documents[] = $provisionable_post->toDocument();

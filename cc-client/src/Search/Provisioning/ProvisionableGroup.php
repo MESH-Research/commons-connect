@@ -82,12 +82,16 @@ class ProvisionableGroup implements ProvisionableInterface {
 		$this->search_id = $search_id;
 	}
 
-	public static function getAll( bool $reset = false ): array {
+	public static function getAll( bool $reset = false, bool $show_progress = false ): array {
 		$groups = \BP_Groups_Group::get( [
 			'per_page' => 0,
 			'page' => 1,
 			'populate_extras' => false
 		] );
+
+		if ( $show_progress && class_exists( 'WP_CLI' ) ) {
+			\WP_CLI::line( 'Provisioning ' . count( $groups['groups'] ) . ' groups...' );
+		}
 
 		$provisionable_groups = [];
 		foreach ( $groups['groups'] as $group ) {
@@ -101,8 +105,8 @@ class ProvisionableGroup implements ProvisionableInterface {
 		return $provisionable_groups;
 	}
 
-	public static function getAllAsDocuments( bool $reset = false ): array {
-		$provisionable_groups = self::getAll();
+	public static function getAllAsDocuments( bool $reset = false, bool $show_progress = false ): array {
+		$provisionable_groups = self::getAll( $reset, $show_progress );
 		$documents = [];
 		foreach ( $provisionable_groups as $provisionable_group ) {
 			$documents[] = $provisionable_group->toDocument();

@@ -71,14 +71,23 @@ class ProvisionableProfile implements ProvisionableInterface {
 		$this->search_id = $search_id;
 	}
 
-	public static function getAll( bool $reset = false ): array {
+	public static function getAll( bool $reset = false, bool $show_progress = false ): array {
 		$users = get_users( [
 			'number'  => -1,
 			'blog_id' => 0,
 		] );
 
+		if ( $show_progress && class_exists( 'WP_CLI' ) ) {
+			\WP_CLI::line( 'Provisioning ' . count( $users ) . ' users...' );
+		}
+
 		$provisionable_profiles = [];
+		$user_counter = 0;
 		foreach ( $users as $user ) {
+			$user_counter++;
+			if ( $show_progress && class_exists( 'WP_CLI' ) && $user_counter % (count( $users ) / 10) === 0 ) {
+				echo '.';
+			}
 			$provisionable_profile = new ProvisionableProfile( $user );
 			if ( $reset ) {
 				$provisionable_profile->setSearchID( '' );
@@ -89,9 +98,12 @@ class ProvisionableProfile implements ProvisionableInterface {
 		return $provisionable_profiles;
 	}
 
-	public static function getAllAsDocuments( bool $reset = false ): array {
-		$provisionable_profiles = self::getAll( $reset );
+	public static function getAllAsDocuments( bool $reset = false, bool $show_progress = false ): array {
+		$provisionable_profiles = self::getAll( $reset, $show_progress );
 		$documents = [];
+		if ( $show_progress && class_exists( 'WP_CLI' ) ) {
+			\WP_CLI::line( 'Converting ' . count( $provisionable_profiles ) . ' profiles to documents...' );
+		}
 		foreach ( $provisionable_profiles as $provisionable_profile ) {
 			$documents[] = $provisionable_profile->toDocument();
 		}

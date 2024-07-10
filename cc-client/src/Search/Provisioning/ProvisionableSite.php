@@ -74,9 +74,12 @@ class ProvisionableSite implements ProvisionableInterface {
 		$this->search_id = $search_id;
 	}
 
-	public static function getAll( bool $reset = false ): array {
+	public static function getAll( bool $reset = false, bool $show_progress = false ): array {
 		$sites = get_sites( [ 'number' => 100000 ] );
 		$provisionable_sites = [];
+		if ( $show_progress && class_exists( 'WP_CLI' ) ) {
+			\WP_CLI::line( 'Provisioning ' . count( $sites ) . ' sites...' );
+		}
 		foreach ( $sites as $site ) {
 			$provisionable_site = new ProvisionableSite( $site );
 			if ( $reset ) {
@@ -88,8 +91,11 @@ class ProvisionableSite implements ProvisionableInterface {
 		return $provisionable_sites;
 	}
 
-	public static function getAllAsDocuments( bool $reset = false ): array {
-		$provisionable_sites = self::getAll( $reset);
+	public static function getAllAsDocuments( bool $reset = false, bool $show_progress = false ): array {
+		$provisionable_sites = self::getAll( $reset, $show_progress );
+		if ( $show_progress && class_exists( 'WP_CLI' ) ) {
+			\WP_CLI::line( 'Converting ' . count( $provisionable_sites ) . ' sites to documents...' );
+		}
 		$documents = [];
 		foreach ( $provisionable_sites as $provisionable_site ) {
 			$documents[] = $provisionable_site->toDocument();

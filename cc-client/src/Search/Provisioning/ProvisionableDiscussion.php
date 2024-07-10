@@ -10,12 +10,16 @@ namespace MeshResearch\CCClient\Search\Provisioning;
 use MeshResearch\CCClient\Search\SearchDocument;
 
 class ProvisionableDiscussion extends ProvisionablePost {
-	public static function getAll( bool $reset = false, array $post_types = [ 'topic', 'reply' ] ) : array {
+	public static function getAll( bool $reset = false, bool $show_progress = false, array $post_types = [ 'topic', 'reply' ] ) : array {
 		$posts = get_posts( [
 			'post_type' => $post_types,
 			'post_status' => 'publish',
 			'posts_per_page' => -1,
 		] );
+
+		if ( $show_progress && class_exists( 'WP_CLI' ) ) {
+			\WP_CLI::line( 'Provisioning ' . count( $posts ) . ' discussions...' );
+		}
 		
 		$provisionable_posts = [];
 		foreach ( $posts as $post ) {
