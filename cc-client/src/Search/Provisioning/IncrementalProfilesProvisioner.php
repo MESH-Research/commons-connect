@@ -9,7 +9,7 @@ namespace MeshResearch\CCClient\Search\Provisioning;
 
 use MeshResearch\CCClient\Search\SearchAPI;
 
-class IncrementalUsersProvisioner implements IncrementalProvisionerInterface {
+class IncrementalProfilesProvisioner implements IncrementalProvisionerInterface {
 	public function __construct(
 		private SearchAPI $search_api,
 		private bool $enabled = true
@@ -43,7 +43,7 @@ class IncrementalUsersProvisioner implements IncrementalProvisionerInterface {
 			return;
 		}
 		$user = get_userdata( $user_id );
-		$provisionable_user = new ProvisionableUser( $user );
+		$provisionable_user = new ProvisionableProfile( $user );
 		$provisionable_user->getSearchID();
 
 		if ( 
@@ -65,7 +65,7 @@ class IncrementalUsersProvisioner implements IncrementalProvisionerInterface {
 			return;
 		}
 		$user = get_userdata( $user_id );
-		$provisionable_user = new ProvisionableUser( $user );
+		$provisionable_user = new ProvisionableProfile( $user );
 		$search_id = $provisionable_user->getSearchID();
 		if ( empty( $search_id ) ) {
 			return;

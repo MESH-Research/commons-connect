@@ -24,22 +24,40 @@ function get_profile_url( \WP_User $user ): string {
 }
 
 function get_current_network_node(): string {
-	return get_network_option( null, 'society_id', '' );
+	$current_network_node = wp_cache_get( __NAMESPACE__ . '_current_network_node' );
+	if ( $current_network_node ) {
+		return $current_network_node;
+	}
+	$current_network_node = get_network_option( null, 'society_id', '' );
+	wp_cache_set( __NAMESPACE__ . '_current_network_node', $current_network_node, '', 60 );
+	return $current_network_node;
 }
 
 function get_other_profile_urls( \WP_User $user ): array {
 	$primary_url = get_profile_url( $user );
-	$other_urls = [];
+	$site_url = get_site_url();
+	$profile_url_path = str_replace($site_url, '', $primary_url);
 	$networks = get_networks();
+	$other_urls = [];
 	foreach ( $networks as $network ) {
-		switch_to_blog( $network->blog_id );
-		$profile_url = get_profile_url( $user );
+		$base_url = get_network_base_url( $network->id );
+		$profile_url = $base_url . $profile_url_path;
 		if ( $profile_url != $primary_url ) {
 			$other_urls[] = $profile_url;
 		}
-		restore_current_blog();
 	}
 	return $other_urls;
+}
+
+function get_network_base_url( int $network_id ): string {
+	$base_url = wp_cache_get( __NAMESPACE__ . '_network_base_url_' . $network_id );
+	if ( $base_url ) {
+		return $base_url;
+	}
+	$network = get_network( $network_id );
+	$base_url = 'https://' . $network->domain;
+	wp_cache_set( __NAMESPACE__ . '_network_base_url_' . $network_id, $base_url, '', 60 * 60 );
+	return $base_url;
 }
 
 function get_network_nodes(): array {

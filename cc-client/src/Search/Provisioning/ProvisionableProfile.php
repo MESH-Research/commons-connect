@@ -94,6 +94,9 @@ class ProvisionableProfile implements ProvisionableInterface {
 			}
 			$provisionable_profiles[] = $provisionable_profile;
 		}
+		if ( $show_progress && class_exists( 'WP_CLI' ) ) {
+			echo "\n";
+		}
 
 		return $provisionable_profiles;
 	}
@@ -104,8 +107,16 @@ class ProvisionableProfile implements ProvisionableInterface {
 		if ( $show_progress && class_exists( 'WP_CLI' ) ) {
 			\WP_CLI::line( 'Converting ' . count( $provisionable_profiles ) . ' profiles to documents...' );
 		}
+		$document_counter = 0;
 		foreach ( $provisionable_profiles as $provisionable_profile ) {
+			$document_counter++;
+			if ( $show_progress && class_exists( 'WP_CLI' ) && $document_counter % (count( $provisionable_profiles ) / 10) === 0 ) {
+				echo '.';
+			}
 			$documents[] = $provisionable_profile->toDocument();
+		}
+		if ( $show_progress && class_exists( 'WP_CLI' ) ) {
+			echo "\n";
 		}
 		return $documents;
 	}
