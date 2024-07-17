@@ -327,6 +327,18 @@ func TestExactMatchSearch(t *testing.T) {
 	if len(response.Hits) != 2 {
 		t.Fatalf("Expected 2 results, got %d", len(response.Hits))
 	}
+
+	req, _ = http.NewRequest("GET", "/v1/search?title=On+Open+Scholarship", nil)
+	w = httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	assert.Equal(t, 200, w.Code)
+	err = json.NewDecoder(w.Body).Decode(&response)
+	if err != nil {
+		t.Fatalf("Error decoding search response: %v", err)
+	}
+	if len(response.Hits) != 1 {
+		t.Fatalf("Expected 1 result, got %d", len(response.Hits))
+	}
 }
 
 func TestFilteredSearch(t *testing.T) {
