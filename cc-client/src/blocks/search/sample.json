@@ -1,0 +1,35 @@
+{
+    "total": 200,
+    "page": 0,
+    "per_page": 20,
+    "request_id": "",
+    "hits": [
+        {
+            "_internal_id": "74",
+            "title": "About the Author",
+            "description": "Kathleen Fitzpatrick is Director of Digital Humanities and Professor of English at Michigan State University. Prior to assuming this role in 2017, she served as Associate Executive Director and Director of Scholarly Communication of the Modern Language Association, where she was Managing Editor of PMLA and other MLA publications, as well as overseeing the development [&hellip;]",
+            "owner": {
+                "name": "Kathleen Fitzpatrick",
+                "username": "kfitz",
+                "url": "https://generousthinking.commons-wordpress.lndo.site/members/kfitz",
+                "role": "author",
+                "network_node": "hc"
+            },
+            "contributors": [
+                {
+                    "name": "Kathleen Fitzpatrick",
+                    "username": "kfitz",
+                    "url": "https://generousthinking.commons-wordpress.lndo.site/members/kfitz",
+                    "role": "author",
+                    "network_node": "hc"
+                }
+            ],
+            "primary_url": "https://generousthinking.commons-wordpress.lndo.site/about-the-author/",
+            "content": "Kathleen Fitzpatrick is Director of Digital Humanities and Professor of English at Michigan State University. Prior to assuming this role in 2017, she served as Associate Executive Director and Director of Scholarly Communication of the Modern Language Association, where she was Managing Editor of PMLA and other MLA publications, as well as overseeing the development of the MLA Handbook. During that time, she also held an appointment as Visiting Research Professor of English at NYU  and Visiting Professor of Media Studies at Coventry University. Before joining the MLA staff in 2011, she was Professor of Media Studies at Pomona College, where she had been a member of the faculty since 1998.\r\n\r\nFitzpatrick is author of Planned Obsolescence:  Publishing, Technology, and the Future of the Academy (NYU Press, 2011) and of The Anxiety of Obsolescence: The American Novel in the Age of Television (Vanderbilt University Press, 2006). She is project director of Humanities Commons, an open-access, open-source network serving more than 12,500 scholars and practitioners in the humanities. She is also co-founder of the digital scholarly network MediaCommons, where she led a number of experiments in open peer review and other innovations in scholarly publishing. She serves on the editorial or advisory boards of publications and projects including the Open Library of the Humanities, Luminos, and thresholds. She currently serves as the chair of the board of trustees of the Council on Library and Information Resources.",
+            "publication_date": "2018-02-07",
+            "modified_date": "2019-02-17",
+            "content_type": "post",
+            "network_node": "hc"
+        }
+    ]
+}

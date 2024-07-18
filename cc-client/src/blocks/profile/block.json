@@ -1,0 +1,32 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "cc-client/profile",
+    "version": "0.1.0",
+    "title": "Commons Profile",
+    "category": "widgets",
+    "icon": "smiley",
+    "description": "Commons profile block",
+    "supports": {
+        "html": false
+    },
+    "attributes": {
+        "cc_server_url": {
+            "type": "string",
+            "default": ""
+        },
+        "cc_server_rest_base": {
+            "type": "string",
+            "default": "/api/"
+        },
+        "username": {
+            "type": "string",
+            "default": ""
+        }
+    },
+    "textdomain": "cc-client",
+    "editorScript": "file:./index.js",
+    "viewScript": "file:./front.js",
+    "editorStyle": "file:./index.css",
+    "style": "file:./style-index.css"
+}

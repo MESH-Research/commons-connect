@@ -1,0 +1,52 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "checkJs": true,
+        "allowSyntheticDefaultImports": true,
+        "jsx": "preserve",
+        "target": "esnext",
+        "module": "esnext",
+        "lib": ["dom", "esnext"],
+        "declaration": true,
+        "declarationMap": true,
+        "composite": true,
+        "emitDeclarationOnly": true,
+        "isolatedModules": true,
+
+        /* Strict Type-Checking Options */
+        "strict": false,
+
+        /* Additional Checks */
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+
+        /* Module Resolution Options */
+        "moduleResolution": "node",
+
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+
+        "typeRoots": ["./typings", "./node_modules/@types"],
+        "types": []
+    },
+    "exclude": [
+        "**/*.android.js",
+        "**/*.ios.js",
+        "**/*.native.js",
+        "**/benchmark",
+        "packages/*/build-*/**",
+        "packages/*/build/**",
+        "**/test/**",
+        "packages/**/react-native-*/**"
+    ],
+    "include": [
+        "admin/**/*",
+        "blocks/**/*",
+        "components/**/*",
+        "context/**/*",
+        "blocks/**/*.json",
+        "context/cc-options-context.tsx"
+    ]
+}
