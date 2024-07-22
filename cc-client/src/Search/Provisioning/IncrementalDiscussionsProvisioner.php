@@ -9,20 +9,37 @@ namespace MeshResearch\CCClient\Search\Provisioning;
 
 use MeshResearch\CCClient\Search\SearchAPI;
 
-class IncrementalDiscussionsProvisioner extends IncrementalPostsProvisioner {
+class IncrementalDiscussionsProvisioner implements IncrementalProvisionerInterface {
 	public function __construct(
+		private IncrementalPostsProvisioner $incremental_posts_provisioner,
 		private SearchAPI $search_api,
-		private bool $enabled = true,
-		public array $post_types = [ 'topic', 'reply' ]
 	) {
 		$this->registerHooks();
+		$this->incremental_posts_provisioner->post_types = [ 'topic', 'reply' ];
+	}
+
+	public function registerHooks() : void {
+		add_action( 'save_post', [ $this, 'provisionNewOrUpdatedPost' ], 10, 3 );
+		add_action( 'before_delete_post', [ $this->incremental_posts_provisioner, 'provisionDeletedPost' ], 10, 2 );
+	}
+
+	public function isEnabled() : bool {
+		return $this->incremental_posts_provisioner->isEnabled();
+	}
+
+	public function enable() : void {
+		$this->incremental_posts_provisioner->enable();
+	}
+
+	public function disable() : void {
+		$this->incremental_posts_provisioner->disable();
 	}
 
 	public function ProvisionNewOrUpdatedPost( int $post_id, \WP_Post $post, bool $update ) {
-		if ( ! $this->enabled ) {
+		if ( ! $this->isEnabled() ) {
 			return;
 		}
-		if ( ! in_array( $post->post_type, $this->post_types ) ) {
+		if ( ! in_array( $post->post_type, $this->incremental_posts_provisioner->post_types ) ) {
 			return;
 		}
 		$provisionable_discussion = new ProvisionableDiscussion( $post );
