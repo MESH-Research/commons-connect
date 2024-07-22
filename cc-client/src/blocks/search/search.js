@@ -235,8 +235,9 @@ function processResults(data) {
 }
 function getContentTypeLabel(type) {
     const labels = {
-        deposit: "Work/Deposit",
-        work: "Work/Deposit",
+        all: "All",
+        deposit: "Work",
+        work: "Work",
         post: "Post",
         user: "Profile",
         profile: "Profile",
@@ -403,9 +404,34 @@ function getPageNumberFromUrl() {
     const param = urlParams.get("s_page");
     return param !== null ? parseInt(param) : 1;
 }
-function getDefaultEndDate() {
-    return moment().format("YYYY-MM-DD");
+function getSearchTypeFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get("content_type") ?? "all";
+
 }
+function getSortByFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get("sort_by") ?? "";
+}
+function getThisCommonsFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get("this_commons") === "1" ? true : false;
+}
+function getDateRangeFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return (urlParams.get("end_date") !== null || urlParams.get("start_date") !== null)
+        ? "custom"
+        : "anytime";
+}
+function getStartDateFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return moment(urlParams.get("start_date")).format("YYYY-MM-DD") ?? moment().format("YYYY-MM-DD")
+}
+function getEndDateFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return moment(urlParams.get("end_date")).format("YYYY-MM-DD") ?? moment().format("YYYY-MM-DD")
+}
+
 function calculateTotalPages(total, per_page) {
     return Math.floor(total / per_page);
 }
@@ -470,14 +496,14 @@ export default function CCSearch() {
     const [perPage] = useState(20);
     const [searchPerformed, setSearchPerformed] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
-    const [thisCommonsOnly, setThisCommonsOnly] = useState(false);
+    const [thisCommonsOnly, setThisCommonsOnly] = useState(getThisCommonsFromUrl());
     const [totalPages, setTotalPages] = useState(1);
-    const dateRange = useFormInput("anytime");
-    const endDate = useFormInput(getDefaultEndDate());
+    const dateRange = useFormInput(getDateRangeFromUrl());
+    const endDate = useFormInput(getEndDateFromUrl());
     const searchTerm = useFormInput(getSearchTermFromUrl());
-    const searchType = useFormInput("");
-    const sortBy = useFormInput("");
-    const startDate = useFormInput("");
+    const searchType = useFormInput(getSearchTypeFromUrl());
+    const sortBy = useFormInput(getSortByFromUrl());
+    const startDate = useFormInput(getStartDateFromUrl());
 
     async function performSearch(event) {
         adjustPaginatorFocus(currentPage);
@@ -495,7 +521,7 @@ export default function CCSearch() {
             sort_by: sortBy.value,
             this_commons: thisCommonsOnly ? 1 : 0,
         };
-        if (searchType.value !== "") {
+        if (searchType.value !== "all") {
             params.content_type = searchType.value;
         }
         if (dateRange.value === "custom") {
@@ -583,10 +609,11 @@ export default function CCSearch() {
                                     <span className="ccs-label">Type</span>
                                     <br />
                                     <select {...searchType} disabled={isBusy}>
-                                        <option value="">All Types</option>
+                                        <option value="all">All Types</option>
                                         <option value="work">
-                                            Deposit/Work
+                                            Work
                                         </option>
+                                        <option value="works-collection">Works  Collection</option>
                                         <option value="post">Post</option>
                                         <option value="profile">Profile</option>
                                         <option value="group">Group</option>
@@ -660,7 +687,7 @@ export default function CCSearch() {
                     </form>
                 </search>
                 <aside className="ccs-aside">
-                    <p>Want a more refined search for deposits/works?</p>
+                    <p>Want a more refined search for works?</p>
                     <a href="#">KC Works</a>
                 </aside>
             </article>
