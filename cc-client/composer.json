@@ -40,15 +40,7 @@
         "wpackagist-plugin/bbpress": "^2.6"
     },
     "scripts": {
-        "phpunit": "phpunit",
-        "post-install-cmd": [
-            "npm install",
-            "npm run build"
-        ],
-        "post-update-cmd": [
-            "npm install",
-            "npm run build"
-        ]
+        "phpunit": "phpunit"
     },
     "require": {
         "guzzlehttp/guzzle": "^7.0"
