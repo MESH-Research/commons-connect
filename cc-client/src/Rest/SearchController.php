@@ -5,7 +5,7 @@
  * @package MeshResearch\CCClient
  */
 
-namespace MeshResearch\CCClient;
+namespace MeshResearch\CCClient\Rest;
 
 use WP_REST_Controller;
 use WP_REST_Response;
