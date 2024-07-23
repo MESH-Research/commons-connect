@@ -235,7 +235,6 @@ function processResults(data) {
 }
 function getContentTypeLabel(type) {
     const labels = {
-        all: "All",
         deposit: "Work",
         work: "Work",
         post: "Post",
@@ -406,7 +405,7 @@ function getPageNumberFromUrl() {
 }
 function getSearchTypeFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get("content_type") ?? "all";
+    return urlParams.get("content_type") ?? "";
 
 }
 function getSortByFromUrl() {
@@ -421,15 +420,23 @@ function getDateRangeFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     return (urlParams.get("end_date") !== null || urlParams.get("start_date") !== null)
         ? "custom"
-        : "anytime";
+        : "";
 }
 function getStartDateFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
-    return moment(urlParams.get("start_date")).format("YYYY-MM-DD") ?? moment().format("YYYY-MM-DD")
+    return (urlParams.get("start_date") !== null)
+        ? moment(urlParams.get("start_date")).format("YYYY-MM-DD")
+        : moment().format("YYYY-MM-DD")
 }
 function getEndDateFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
-    return moment(urlParams.get("end_date")).format("YYYY-MM-DD") ?? moment().format("YYYY-MM-DD")
+    return (urlParams.get("end_date") !== null)
+        ? moment(urlParams.get("end_date")).format("YYYY-MM-DD")
+        : moment().format("YYYY-MM-DD")
+}
+function getPerPageFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get("per_page") ?? 20;
 }
 
 function calculateTotalPages(total, per_page) {
@@ -493,7 +500,7 @@ export default function CCSearch() {
     const [currentPage, setCurrentPage] = useState(getPageNumberFromUrl());
     const [isBusy, setIsBusy] = useState(false);
     const [lastSearchParams, setLastSearchParams] = useState(null);
-    const [perPage] = useState(20);
+    const [perPage] = useState(getPerPageFromUrl());
     const [searchPerformed, setSearchPerformed] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
     const [thisCommonsOnly, setThisCommonsOnly] = useState(getThisCommonsFromUrl());
@@ -521,7 +528,7 @@ export default function CCSearch() {
             sort_by: sortBy.value,
             this_commons: thisCommonsOnly ? 1 : 0,
         };
-        if (searchType.value !== "all") {
+        if (searchType.value !== "") {
             params.content_type = searchType.value;
         }
         if (dateRange.value === "custom") {
@@ -609,7 +616,7 @@ export default function CCSearch() {
                                     <span className="ccs-label">Type</span>
                                     <br />
                                     <select {...searchType} disabled={isBusy}>
-                                        <option value="all">All Types</option>
+                                        <option value="">All Types</option>
                                         <option value="work">
                                             Work
                                         </option>
@@ -646,7 +653,7 @@ export default function CCSearch() {
                                     </span>
                                     <br />
                                     <select {...dateRange} disabled={isBusy}>
-                                        <option value="anytime">Anytime</option>
+                                        <option value="">Anytime</option>
                                         <option value="week">Past Week</option>
                                         <option value="month">
                                             Past Month
