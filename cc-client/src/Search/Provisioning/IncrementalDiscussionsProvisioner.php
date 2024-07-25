@@ -10,10 +10,12 @@ namespace MeshResearch\CCClient\Search\Provisioning;
 use MeshResearch\CCClient\Search\SearchAPI;
 
 class IncrementalDiscussionsProvisioner implements IncrementalProvisionerInterface {
+	private IncrementalPostsProvisioner $incremental_posts_provisioner;
+	
 	public function __construct(
-		private IncrementalPostsProvisioner $incremental_posts_provisioner,
 		private SearchAPI $search_api,
 	) {
+		$this->incremental_posts_provisioner = new IncrementalPostsProvisioner( $search_api );
 		$this->registerHooks();
 		$this->incremental_posts_provisioner->post_types = [ 'topic', 'reply' ];
 	}
