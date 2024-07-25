@@ -63,7 +63,7 @@ add_action( 'enqueue_block_assets', __NAMESPACE__ . '\enqueue_client_block_asset
 require_once( CC_CLIENT_BASE_DIR . 'vendor/autoload.php' );
 
 require_once( CC_CLIENT_BASE_DIR . 'src/admin/admin-settings.php' );
-require_once( CC_CLIENT_BASE_DIR . 'src/rest/rest.php' );
+require_once( CC_CLIENT_BASE_DIR . 'src/Rest/rest.php' );
 require_once( CC_CLIENT_BASE_DIR . 'src/blocks/blocks.php' );
 require_once( CC_CLIENT_BASE_DIR . 'src/functions.php' );
 

@@ -36,7 +36,7 @@ class IncrementalPostsProvisioner implements IncrementalProvisionerInterface {
 	}
 
 	public function provisionNewOrUpdatedPost( int $post_id, \WP_Post $post, bool $update ) {
-		if ( ! $this->enabled ) {
+		if ( ! $this->isEnabled() ) {
 			return;
 		}
 		if ( ! in_array( $post->post_type, $this->post_types ) ) {
@@ -56,7 +56,7 @@ class IncrementalPostsProvisioner implements IncrementalProvisionerInterface {
 	}
 
 	public function provisionDeletedPost( int $post_id, \WP_Post $post ) {
-		if ( ! $this->enabled ) {
+		if ( ! $this->isEnabled() ) {
 			return;
 		}
 		if ( ! in_array( $post->post_type, $this->post_types ) ) {
