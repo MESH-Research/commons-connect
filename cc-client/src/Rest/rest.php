@@ -5,7 +5,7 @@
  * @package MeshResearch\CCClient
  */
 
- namespace MeshResearch\CCClient\Rest;
+namespace MeshResearch\CCClient\Rest;
 
 require_once( plugin_dir_path( __FILE__ ) . 'OptionsController.php' );
 require_once( plugin_dir_path( __FILE__ ) . 'SearchController.php' );

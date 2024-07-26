@@ -406,7 +406,6 @@ function getPageNumberFromUrl() {
 function getSearchTypeFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get("content_type") ?? "";
-
 }
 function getSortByFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -418,43 +417,43 @@ function getThisCommonsFromUrl() {
 }
 function getDateRangeFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
-    return (urlParams.get("end_date") !== null || urlParams.get("start_date") !== null)
+    return urlParams.get("end_date") !== null ||
+        urlParams.get("start_date") !== null
         ? "custom"
         : "";
 }
 function getStartDateFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
-    return (urlParams.get("start_date") !== null)
+    return urlParams.get("start_date") !== null
         ? moment(urlParams.get("start_date")).format("YYYY-MM-DD")
-        : moment().format("YYYY-MM-DD")
+        : moment().format("YYYY-MM-DD");
 }
 function getEndDateFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
-    return (urlParams.get("end_date") !== null)
+    return urlParams.get("end_date") !== null
         ? moment(urlParams.get("end_date")).format("YYYY-MM-DD")
-        : moment().format("YYYY-MM-DD")
+        : moment().format("YYYY-MM-DD");
 }
 function getPerPageFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get("per_page") ?? 20;
 }
-
 function calculateTotalPages(total, per_page) {
     return Math.floor(total / per_page);
 }
 function setUrl(params) {
     const url = new URL(window.location.href);
-    url.searchParams.delete("search");
+    const params_arr = [];
     Object.keys(params).forEach((key) => {
-        if (params[key] === "") {
-            return url.searchParams.delete(key);
-        } else if (key === "page") {
-            return url.searchParams.set("s_page", params[key]);
+        if (key === "page") {
+            return params_arr.push(["s_page", params[key]]);
         } else {
-            return url.searchParams.set(key, params[key]);
+            return params_arr.push([key, params[key]]);
         }
     });
-    window.history.pushState({}, "", url);
+    const new_params = new URLSearchParams(params_arr).toString();
+    const new_url = new URL(`${url.origin}${url.pathname}?${new_params}`);
+    window.history.pushState({}, "", new_url);
 }
 /**
  * Compare two objects for equality
@@ -503,7 +502,9 @@ export default function CCSearch() {
     const [perPage] = useState(getPerPageFromUrl());
     const [searchPerformed, setSearchPerformed] = useState(false);
     const [searchResults, setSearchResults] = useState([]);
-    const [thisCommonsOnly, setThisCommonsOnly] = useState(getThisCommonsFromUrl());
+    const [thisCommonsOnly, setThisCommonsOnly] = useState(
+        getThisCommonsFromUrl(),
+    );
     const [totalPages, setTotalPages] = useState(1);
     const dateRange = useFormInput(getDateRangeFromUrl());
     const endDate = useFormInput(getEndDateFromUrl());
@@ -531,12 +532,13 @@ export default function CCSearch() {
         if (searchType.value !== "") {
             params.content_type = searchType.value;
         }
+        console.log(dateRange.value, dateRange.value !== "");
         if (dateRange.value === "custom") {
             if (startDate.value !== "") {
                 params.start_date = startDate.value;
                 params.end_date = endDate.value;
             }
-        } else if (dateRange.value !== "anytime") {
+        } else if (dateRange.value !== "") {
             params.start_date = moment()
                 .subtract(1, dateRange.value)
                 .format("YYYY-MM-DD");
@@ -617,10 +619,10 @@ export default function CCSearch() {
                                     <br />
                                     <select {...searchType} disabled={isBusy}>
                                         <option value="">All Types</option>
-                                        <option value="work">
-                                            Work
+                                        <option value="work">Work</option>
+                                        <option value="works-collection">
+                                            Works Collection
                                         </option>
-                                        <option value="works-collection">Works  Collection</option>
                                         <option value="post">Post</option>
                                         <option value="profile">Profile</option>
                                         <option value="group">Group</option>

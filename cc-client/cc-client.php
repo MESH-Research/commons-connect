@@ -22,7 +22,7 @@ if ( ! defined( 'CC_CLIENT_DOING_TESTING') ) {
 define( 'CC_CLIENT_BASE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'CC_CLIENT_BASE_URL', plugin_dir_url( __FILE__ ) );
 
-const CC_CLIENT_REST_NAMESPACE = 'cc-client/v1';
+define('CC_CLIENT_REST_NAMESPACE', 'cc-client/v1');
 
 /**
  * Feature Flags

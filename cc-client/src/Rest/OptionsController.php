@@ -54,7 +54,7 @@ class OptionsController extends WP_REST_Controller {
 
 	public function get_options( WP_REST_Request $request ) : WP_REST_Response {
 		$options = get_option( 'cc_client_options' );
-		
+
 		$sanitized_options = $this->validate_and_sanitize_options( $options );
 		if ( $sanitized_options instanceof WP_REST_Response ) {
 			return $sanitized_options;
