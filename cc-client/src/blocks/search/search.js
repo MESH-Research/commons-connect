@@ -547,12 +547,6 @@ export default function CCSearch() {
             params.end_date = moment().format("YYYY-MM-DD");
         }
 
-        // setSearchPerformed(true);
-        // setSearchResults(processResults(sampleJson.hits));
-        // setTotalPages(
-        //     calculateTotalPages(sampleJson.total, sampleJson.per_page) || 1,
-        // );
-
         const url = new URL(
             "/wp-json/cc-client/v1/search",
             window.location.origin,
