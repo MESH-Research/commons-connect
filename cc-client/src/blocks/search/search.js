@@ -487,9 +487,11 @@ function adjustPaginatorFocus(currentPage) {
         pageButtonNumber !== currentPage
     ) {
         if (pageButtonNumber < currentPage) {
+            // @ts-ignore
             document.activeElement.nextElementSibling.focus();
         }
         if (pageButtonNumber > currentPage) {
+            // @ts-ignore
             document.activeElement.previousElementSibling.focus();
         }
     }
