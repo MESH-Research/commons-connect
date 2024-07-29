@@ -51,13 +51,17 @@ class IncrementalProfilesProvisioner implements IncrementalProvisionerInterface 
 			intval( $user->spam ) === 1 && 
 			! empty( $provisionable_user->search_id ) 
 		) {
-			$this->search_api->delete( $provisionable_user->search_id );
-			$provisionable_user->setSearchID( '' );
+			$success = $this->search_api->delete( $provisionable_user->search_id );
+			if ( $success ) {
+				$provisionable_user->setSearchID( '' );
+			}
 			return;
 		}
 
 		$indexed_document = $this->search_api->index_or_update( $provisionable_user->toDocument() );
-		$provisionable_user->setSearchID( $indexed_document->_id );
+		if ( $indexed_document ) {
+			$provisionable_user->setSearchID( $indexed_document->_id );
+		}
 	}
 
 	public function provisionDeletedUser( $user_id ) {
@@ -70,7 +74,9 @@ class IncrementalProfilesProvisioner implements IncrementalProvisionerInterface 
 		if ( empty( $search_id ) ) {
 			return;
 		}
-		$this->search_api->delete( $search_id );
-		$provisionable_user->setSearchID( '' );
+		$success = $this->search_api->delete( $search_id );
+		if ( $success ) {
+			$provisionable_user->setSearchID( '' );
+		}
 	}
 }

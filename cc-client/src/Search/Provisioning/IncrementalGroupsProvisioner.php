@@ -49,9 +49,10 @@ class IncrementalGroupsProvisioner implements IncrementalProvisionerInterface {
 
 		// If the group isn't public, delete the document if it exists.
 		if ( ! empty( $provisionable_group->getSearchID() ) ) {
-			$this->search_api->delete( $provisionable_group->getSearchID() );
-			$provisionable_group->setSearchID( '' );
-			return;
+			$success = $this->search_api->delete( $provisionable_group->getSearchID() );
+			if ( $success ) {
+				$provisionable_group->setSearchID( '' );
+			}
 		}
 	}
 
@@ -63,7 +64,9 @@ class IncrementalGroupsProvisioner implements IncrementalProvisionerInterface {
 			return;
 		}
 
-		$this->search_api->delete( $search_id );
-		$provisionable_group->setSearchID( '' );
+		$success = $this->search_api->delete( $search_id );
+		if ( $success ) {
+			$provisionable_group->setSearchID( '' );
+		}
 	}
 }
