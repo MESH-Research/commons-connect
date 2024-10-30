@@ -693,7 +693,7 @@ export default function CCSearch() {
                 </search>
                 <aside className="ccs-aside">
                     <p>Want a more refined search for works?</p>
-                    <a href="https://works.hcommons.org">KC Works</a>
+                    <a href="https://works.hcommons.org">KCWorks</a>
                 </aside>
             </article>
             <article role="region" aria-live="polite">
