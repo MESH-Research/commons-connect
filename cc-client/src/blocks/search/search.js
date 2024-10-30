@@ -307,7 +307,6 @@ function SearchResult({ data }) {
             />
         );
     }
-
     return (
         <section className="ccs-result">
             <header className="ccs-row ccs-result-header">
@@ -318,7 +317,7 @@ function SearchResult({ data }) {
                 )}
                 {thumbnail}
                 <a href={data.primary_url} className="ccs-result-title">
-                    {decodeHTMLElement(data.title)}
+                    {decodeHTMLElement(data.title) || "(Untitled)"}
                 </a>
             </header>
             <header className="ccs-row ccs-result-header">
