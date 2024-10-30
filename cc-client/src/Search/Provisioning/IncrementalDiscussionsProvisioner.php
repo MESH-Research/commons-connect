@@ -48,18 +48,24 @@ class IncrementalDiscussionsProvisioner implements IncrementalProvisionerInterfa
 		$provisionable_discussion->getSearchID();
 
 		if ( $post->post_status !== 'publish' && ! empty( $provisionable_discussion->search_id ) ) {
-			$this->search_api->delete( $provisionable_discussion->search_id );
-			$provisionable_discussion->setSearchID( '' );
+			$success = $this->search_api->delete( $provisionable_discussion->search_id );
+			if ( $success ) {
+				$provisionable_discussion->setSearchID( '' );
+			}
 			return;
 		}
 
 		if ( ! $provisionable_discussion->is_public() && ! empty( $provisionable_discussion->search_id ) ) {
-			$this->search_api->delete( $provisionable_discussion->search_id );
-			$provisionable_discussion->setSearchID( '' );
+			$success = $this->search_api->delete( $provisionable_discussion->search_id );
+			if ( $success ) {
+				$provisionable_discussion->setSearchID( '' );
+			}
 			return;
 		}
 
 		$document = $this->search_api->index_or_update( $provisionable_discussion->toDocument() );
-		$provisionable_discussion->setSearchID( $document->_id );
+		if ( $document ) {
+			$provisionable_discussion->setSearchID( $document->_id );
+		}
 	}
 }

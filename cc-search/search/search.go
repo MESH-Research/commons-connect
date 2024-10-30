@@ -80,6 +80,7 @@ func Search(searcher types.Searcher, params types.SearchParams) (types.SearchRes
 	if err != nil {
 		return types.SearchResponse{}, err
 	}
+
 	return searchResultToResponse(&searchResult, params), nil
 }
 
@@ -135,8 +136,9 @@ type queryData struct {
 
 type multiMatchQuery struct {
 	MultiMatch struct {
-		Query  string   `json:"query,omitempty"`
-		Fields []string `json:"fields,omitempty"`
+		Query     string   `json:"query,omitempty"`
+		Fields    []string `json:"fields,omitempty"`
+		Fuzziness string   `json:"fuzziness,omitempty"`
 	} `json:"multi_match,omitempty"`
 }
 
@@ -163,6 +165,7 @@ func buildQuery(params types.SearchParams) string {
 	if params.Query != "" {
 		baseQuery := multiMatchQuery{}
 		baseQuery.MultiMatch.Query = params.Query
+		baseQuery.MultiMatch.Fuzziness = "AUTO"
 		queryData.Query.Bool.Must = append(
 			queryData.Query.Bool.Must,
 			baseQuery,
@@ -225,12 +228,16 @@ func searchResultToDocuments(searchResult *types.SearchResult) []types.Document 
 
 func searchResultToResponse(searchResult *types.SearchResult, searchParams types.SearchParams) types.SearchResponse {
 	documents := make([]types.Document, 0)
+
 	for _, hit := range searchResult.Hits.Hits {
 		if len(searchParams.ReturnFields) > 0 {
 			hit.Source.FilterByJSON(searchParams.ReturnFields)
 		}
-		documents = append(documents, hit.Source)
+		newDocument := hit.Source
+		newDocument.ID = hit.ID
+		documents = append(documents, newDocument)
 	}
+
 	return types.SearchResponse{
 		Total:     searchResult.Hits.Total.Value,
 		Page:      searchParams.Page,

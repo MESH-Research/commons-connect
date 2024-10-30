@@ -59,8 +59,14 @@ add_action( 'enqueue_block_assets', __NAMESPACE__ . '\enqueue_client_block_asset
 
 /**
  * Composer autoload.
+ * 
+ * When cc-client is installed as a conmposer dependency, the vendor directory
+ * will be in the root of the project and the autoload.php will already be
+ * included at the project level, so the vendor directory will not exist.
  */
-require_once( CC_CLIENT_BASE_DIR . 'vendor/autoload.php' );
+if ( file_exists( CC_CLIENT_BASE_DIR . 'vendor/autoload.php' ) ) {
+    require_once( CC_CLIENT_BASE_DIR . 'vendor/autoload.php' );
+}
 
 require_once( CC_CLIENT_BASE_DIR . 'src/admin/admin-settings.php' );
 require_once( CC_CLIENT_BASE_DIR . 'src/Rest/rest.php' );

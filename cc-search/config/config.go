@@ -17,6 +17,7 @@ func Init() error {
 	config.AddConfigPath("/app")
 	config.AddConfigPath(".")
 	config.AddConfigPath("..")
+	config.AddConfigPath("../../")
 
 	config.SetEnvPrefix("cc")
 	config.AutomaticEnv()

@@ -43,7 +43,9 @@ class IncrementalSitesProvisioner implements IncrementalProvisionerInterface {
 		}
 		$provisionable_site = new ProvisionableSite( $site );
 		$indexed_document = $this->search_api->index( $provisionable_site->toDocument() );
-		$provisionable_site->setSearchID( $indexed_document->_id );
+		if ( $indexed_document ) {
+			$provisionable_site->setSearchID( $indexed_document->_id );
+		}
 	}
 	
 	public function provisionUpdatedSite( \WP_Site $site ) {
@@ -53,7 +55,9 @@ class IncrementalSitesProvisioner implements IncrementalProvisionerInterface {
 		$provisionable_site = new ProvisionableSite( $site );
 		$provisionable_site->getSearchID();
 		$indexed_document = $this->search_api->index_or_update( $provisionable_site->toDocument() );
-		$provisionable_site->setSearchID( $indexed_document->_id );
+		if ( $indexed_document ) {
+			$provisionable_site->setSearchID( $indexed_document->_id );
+		}
 	}
 	
 	public function provisionUpdatedSiteOnOptionChange( $old_value, $new_value, $option ) {
@@ -101,10 +105,14 @@ class IncrementalSitesProvisioner implements IncrementalProvisionerInterface {
 	
 		if ( $new_visibility > 0 ) {
 			$indexed_document = $this->search_api->index_or_update( $provisionable_site->toDocument() );
-			$provisionable_site->setSearchID( $indexed_document->_id );
+			if ( $indexed_document ) {
+				$provisionable_site->setSearchID( $indexed_document->_id );
+			}
 		} elseif ( ! empty( $provisionable_site->search_id ) ) {
-			$this->search_api->delete( $provisionable_site->search_id );
-			$provisionable_site->setSearchID( '' );
+			$success = $this->search_api->delete( $provisionable_site->search_id );
+			if ( $success ) {
+				$provisionable_site->setSearchID( '' );
+			}
 		}
 	}
 }

@@ -54,7 +54,7 @@ class SearchAPI {
 	public function ping(): bool {
 		try {
 			$response = $this->client->request('GET', $this->api_url . '/ping');
-		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+		} catch ( Exception $e ) {
 			return false;
 		}
 		return $response->getStatusCode() == 200;
@@ -71,7 +71,7 @@ class SearchAPI {
 					'Content-Type' => 'application/json'
 				],
 			]);
-		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+		} catch ( Exception $e ) {
 			return false;
 		}
 		return $response->getStatusCode() == 200;
@@ -88,7 +88,7 @@ class SearchAPI {
 					'Content-Type' => 'application/json'
 				],
 			]);
-		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+		} catch ( Exception $e ) {
 			return false;
 		}
 		return $response->getStatusCode() == 200;
@@ -106,7 +106,7 @@ class SearchAPI {
 				],
 				'body' => $document->toJSON()
 			]);
-		} catch ( \GuzzleHttp\Exception\ClientException $e ) {
+		} catch ( Exception $e ) {
 			return false;
 		}
 		if ( $response->getStatusCode() != 200 ) {
@@ -190,7 +190,7 @@ class SearchAPI {
 	/**
 	 * Index a document if it doesn't have an _id, otherwise update it
 	 */
-	public function index_or_update(SearchDocument $document): SearchDocument {
+	public function index_or_update(SearchDocument $document): SearchDocument | false {
 		if ( empty($document->_id) ) {
 			return $this->index($document);
 		}

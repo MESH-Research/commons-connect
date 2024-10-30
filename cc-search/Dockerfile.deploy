@@ -1,13 +1,16 @@
 FROM golang:latest as build-stage
 
 WORKDIR /app
-
 COPY . .
 RUN go mod download
 RUN CGO_ENABLED=0 GOOS=linux go build -o /cc-search
 
+WORKDIR /app/cmd/ccs
+RUN CGO_ENABLED=0 GOOS=linux go build -o /ccs
+
 FROM alpine:latest AS release-stage
 WORKDIR /
 COPY --from=build-stage /cc-search /cc-search
+COPY --from=build-stage /ccs /ccs
 EXPOSE 80
 ENTRYPOINT [ "/cc-search" ]

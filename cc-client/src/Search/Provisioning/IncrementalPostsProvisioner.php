@@ -46,13 +46,18 @@ class IncrementalPostsProvisioner implements IncrementalProvisionerInterface {
 		$provisionable_post->getSearchID();
 		
 		if ( $post->post_status !== 'publish' && ! empty( $provisionable_item->search_id ) ) {
-			$this->search_api->delete( $provisionable_item->search_id );
+			$success = $this->search_api->delete( $provisionable_item->search_id );
+			if ( ! $success ) {
+				return;
+			}
 			$provisionable_item->setSearchID( '' );
 			return;
 		}
 
 		$document = $this->search_api->index_or_update( $provisionable_post->toDocument() );
-		$provisionable_post->setSearchID( $document->_id );
+		if ( $document ) {
+			$provisionable_post->setSearchID( $document->_id );
+		}
 	}
 
 	public function provisionDeletedPost( int $post_id, \WP_Post $post ) {
@@ -68,7 +73,9 @@ class IncrementalPostsProvisioner implements IncrementalProvisionerInterface {
 			return;
 		}
 
-		$this->search_api->delete( $search_id );
-		$provisionable_post->setSearchID( '' );
+		$success = $this->search_api->delete( $search_id );
+		if ( $success ) {
+			$provisionable_post->setSearchID( '' );
+		}
 	}
 }
