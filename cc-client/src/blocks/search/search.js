@@ -307,6 +307,7 @@ function SearchResult({ data }) {
             />
         );
     }
+
     return (
         <section className="ccs-result">
             <header className="ccs-row ccs-result-header">
