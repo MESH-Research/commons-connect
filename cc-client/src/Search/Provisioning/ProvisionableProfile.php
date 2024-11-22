@@ -59,15 +59,19 @@ class ProvisionableProfile implements ProvisionableInterface {
 
 	public function getSearchID(): string {
 		$search_id = get_user_meta( $this->user->ID, 'cc_search_id', true );
-		if ( $search_id === false ) {
+		if ( ! $search_id ) {
 			$search_id = '';
 		}
 		$this->search_id = $search_id;
 		return $search_id;
 	}
 
-	public function setSearchID( string $search_id ): void {
-		$success = update_user_meta( $this->user->ID, 'cc_search_id', $search_id );
+	public function setSearchID( ? string $search_id ): void {
+		if ( ! $search_id ) {
+			delete_user_meta( $this->user->ID, 'cc_search_id' );
+		} else {
+			update_user_meta( $this->user->ID, 'cc_search_id', $search_id );
+		}
 		$this->search_id = $search_id;
 	}
 

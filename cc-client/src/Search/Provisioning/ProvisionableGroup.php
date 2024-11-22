@@ -70,15 +70,19 @@ class ProvisionableGroup implements ProvisionableInterface {
 
 	public function getSearchID(): string {
 		$search_id = groups_get_groupmeta( $this->group->id, 'cc_search_id', true );
-		if ( $search_id === false ) {
+		if ( ! $search_id ) {
 			$search_id = '';
 		}
 		$this->search_id = $search_id;
 		return $search_id;
 	}
 
-	public function setSearchID(string $search_id): void {
-		groups_update_groupmeta( $this->group->id, 'cc_search_id', $search_id );
+	public function setSearchID(?string $search_id): void {
+		if ( ! $search_id ) {
+			groups_delete_groupmeta( $this->group->id, 'cc_search_id' );
+		} else {
+			groups_update_groupmeta( $this->group->id, 'cc_search_id', $search_id );
+		}
 		$this->search_id = $search_id;
 	}
 

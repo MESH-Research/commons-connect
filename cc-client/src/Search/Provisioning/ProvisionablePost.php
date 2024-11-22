@@ -70,15 +70,19 @@ class ProvisionablePost implements ProvisionableInterface {
 
 	public function getSearchID(): string {
 		$search_id = get_post_meta( $this->post->ID, 'cc_search_id', true );
-		if ( $search_id === false ) {
-			throw new \Exception( 'Invalid post ID' );
+		if ( ! $search_id ) {
+			$search_id = '';
 		}
 		$this->search_id = $search_id;
 		return $search_id;
 	}
 
-	public function setSearchID( string $search_id ): void {
-		update_post_meta( $this->post->ID, 'cc_search_id', $search_id );
+	public function setSearchID( ? string $search_id ): void {
+		if ( ! $search_id ) {
+			delete_post_meta( $this->post->ID, 'cc_search_id' );
+		} else {
+			update_post_meta( $this->post->ID, 'cc_search_id', $search_id );
+		}
 		$this->search_id = $search_id;
 	}
 
