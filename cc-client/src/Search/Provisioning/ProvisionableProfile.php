@@ -72,7 +72,7 @@ class ProvisionableProfile implements ProvisionableInterface {
 		} else {
 			update_user_meta( $this->user->ID, 'cc_search_id', $search_id );
 		}
-		$this->search_id = $search_id;
+		$this->search_id = $search_id ?? '';
 	}
 
 	public static function getAll( bool $reset = false, bool $show_progress = false ): array {

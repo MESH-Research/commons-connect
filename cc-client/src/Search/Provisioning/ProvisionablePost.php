@@ -83,7 +83,7 @@ class ProvisionablePost implements ProvisionableInterface {
 		} else {
 			update_post_meta( $this->post->ID, 'cc_search_id', $search_id );
 		}
-		$this->search_id = $search_id;
+		$this->search_id = $search_id ?? '';
 	}
 
 	public static function getAll( bool $reset = false, bool $show_progress = false, array $post_types = [ 'post', 'page' ] ): array {

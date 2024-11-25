@@ -75,7 +75,7 @@ class ProvisionableSite implements ProvisionableInterface {
 		} else {
 			update_blog_option( $this->site->blog_id, 'cc_search_id', $search_id );
 		}
-		$this->search_id = $search_id;
+		$this->search_id = $search_id ?? '';
 	}
 
 	public static function getAll( bool $reset = false, bool $show_progress = false ): array {

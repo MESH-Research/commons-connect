@@ -83,7 +83,7 @@ class ProvisionableGroup implements ProvisionableInterface {
 		} else {
 			groups_update_groupmeta( $this->group->id, 'cc_search_id', $search_id );
 		}
-		$this->search_id = $search_id;
+		$this->search_id = $search_id ?? '';
 	}
 
 	public static function getAll( bool $reset = false, bool $show_progress = false ): array {
