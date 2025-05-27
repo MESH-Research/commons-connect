@@ -50,7 +50,13 @@ func GetConfig() types.Config {
 			value = config.Get(tag)
 		}
 
-		fieldValue.Set(reflect.ValueOf(value))
+		// Only set the value if it's not nil and the types are compatible
+		if value != nil {
+			valueReflect := reflect.ValueOf(value)
+			if valueReflect.Type().ConvertibleTo(fieldValue.Type()) {
+				fieldValue.Set(valueReflect.Convert(fieldValue.Type()))
+			}
+		}
 	}
 
 	return conf

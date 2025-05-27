@@ -17,6 +17,11 @@ services:
       environment:
         CC_OS_ENDPOINT: http://opensearch:9200
         CC_OS_CLIENT_MODE: noauth
+        CC_OS_USER: dev-search
+        CC_OS_PASSWORD: password
+        CC_OS_INDEX: dev-search
+        CC_API_KEY: 12345
+        CC_ADMIN_API_KEY: 12345
   opensearch:
     api: 3
     type: lando

@@ -1,7 +1,7 @@
 <?php
 /**
  * Tests for incremental provisioning.
- * 
+ *
  * These test cases do not explicitly call provisioning functions, but instead
  * expect that provisioning will occur as a side effect of creating, updating,
  * or deleting items, through WordPress hooks.
@@ -12,13 +12,13 @@ namespace MeshResearch\CCClient\Tests;
 use MeshResearch\CCClient\Search\SearchParams;
 use MeshResearch\CCClient\Search\Provisioning\ProvisionablePost;
 use MeshResearch\CCClient\Search\Provisioning\ProvisionableSite;
-use MeshResearch\CCClient\Search\Provisioning\ProvisionableUser;
+use MeshResearch\CCClient\Search\Provisioning\ProvisionableProfile;
 use MeshResearch\CCClient\Search\Provisioning\IncrementalPostsProvisioner;
 use MeshResearch\CCClient\Search\Provisioning\IncrementalSitesProvisioner;
-use MeshResearch\CCClient\Search\Provisioning\IncrementalUsersProvisioner;
+use MeshResearch\CCClient\Search\Provisioning\IncrementalProfilesProvisioner;
 
-class IncrementalProvisioningTest extends CCCIncrementalProvisioningTestCase {	
-	
+class IncrementalProvisioningTest extends CCCIncrementalProvisioningTestCase {
+
 	/**
 	 * POSTS
 	 */
@@ -38,7 +38,7 @@ class IncrementalProvisioningTest extends CCCIncrementalProvisioningTestCase {
 			if ( intval($hit->_internal_id) === $post->ID ) {
 				$found = true;
 				break;
-			}	
+			}
 		}
 		$this->assertTrue( $found, 'Post not found in search results' );
 	}
@@ -50,7 +50,7 @@ class IncrementalProvisioningTest extends CCCIncrementalProvisioningTestCase {
 			'post_author' => $post_author->ID,
 		] );
 		sleep(1);
-		
+
 		$search_params = new SearchParams(query: $post->post_title );
 		$search_results = $this->search_api->search($search_params);
 		$found = false;
@@ -58,7 +58,7 @@ class IncrementalProvisioningTest extends CCCIncrementalProvisioningTestCase {
 			if ( intval($hit->_internal_id) === $post->ID ) {
 				$found = true;
 				break;
-			}	
+			}
 		}
 		$this->assertTrue( $found, 'Initial post not found in search results' );
 
@@ -78,7 +78,7 @@ class IncrementalProvisioningTest extends CCCIncrementalProvisioningTestCase {
 				$found = true;
 				$hit_title = $hit->title;
 				$internal_id_count++;
-			}	
+			}
 		}
 		$this->assertTrue( $found, 'Updated post not found in search results' );
 		$this->assertEquals( $post->post_title, $hit_title );
@@ -98,12 +98,8 @@ class IncrementalProvisioningTest extends CCCIncrementalProvisioningTestCase {
 
 		\wp_delete_post( $post->ID, true );
 		sleep(1);
-		try {
-			$deleted_document = $this->search_api->get_document( $search_id );
-		} catch ( \Exception $e ) {
-			$deleted_document = null;
-		}
-		$this->assertNull( $deleted_document, 'Deleted post found in search results' );
+		$deleted_document = $this->search_api->get_document( $search_id );
+		$this->assertFalse( $deleted_document, 'Deleted post found in search results' );
 	}
 
 	/**
@@ -206,20 +202,20 @@ class IncrementalProvisioningTest extends CCCIncrementalProvisioningTestCase {
 	 */
 
 	public function test_provision_new_user() {
-		$user_provisioner = new IncrementalUsersProvisioner($this->search_api);
+		$user_provisioner = new IncrementalProfilesProvisioner($this->search_api);
 		$user = $this->factory->user->create_and_get();
 		sleep(1);
-		$provisionable_user = new ProvisionableUser( $user );
+		$provisionable_user = new ProvisionableProfile( $user );
 		$this->assertNotEmpty( $provisionable_user->search_id, 'Search ID not set' );
 		$indexed_document = $this->search_api->get_document( $provisionable_user->search_id );
 		$this->assertNotEmpty( $indexed_document, 'User not indexed' );
 	}
 
 	public function test_provision_updated_user() {
-		$user_provisioner = new IncrementalUsersProvisioner($this->search_api);
+		$user_provisioner = new IncrementalProfilesProvisioner($this->search_api);
 		$user = $this->factory->user->create_and_get();
 		sleep(1);
-		$provisionable_user = new ProvisionableUser( $user );
+		$provisionable_user = new ProvisionableProfile( $user );
 		$this->assertNotEmpty( $provisionable_user->search_id, 'Search ID not set' );
 		$indexed_document = $this->search_api->get_document( $provisionable_user->search_id );
 		$this->assertNotEmpty( $indexed_document, 'User not indexed' );
@@ -232,10 +228,10 @@ class IncrementalProvisioningTest extends CCCIncrementalProvisioningTestCase {
 	}
 
 	public function test_provision_deleted_user() {
-		$user_provisioner = new IncrementalUsersProvisioner($this->search_api);
+		$user_provisioner = new IncrementalProfilesProvisioner($this->search_api);
 		$user = $this->factory->user->create_and_get();
 		sleep(1);
-		$provisionable_user = new ProvisionableUser( $user );
+		$provisionable_user = new ProvisionableProfile( $user );
 		$this->assertNotEmpty( $provisionable_user->search_id, 'Search ID not set' );
 		$indexed_document = $this->search_api->get_document( $provisionable_user->search_id );
 		$this->assertNotEmpty( $indexed_document, 'User not indexed' );
