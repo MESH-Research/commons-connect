@@ -34,7 +34,7 @@ You can test against a different server configuration by overriding environment 
 
 ## Pushing to Composer
 
-[Composer](https://getcomposer.org/) is used to distribute the plugin, including for use on Knowledge Commons.
+[Packagist](https://packagist.org/) is used to distribute the plugin, including for use on Knowledge Commons.
 
 To push changes to Compose:
 
