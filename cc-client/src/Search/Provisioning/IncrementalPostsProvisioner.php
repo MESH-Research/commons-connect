@@ -21,12 +21,15 @@ class IncrementalPostsProvisioner implements IncrementalProvisionerInterface {
 	public function registerHooks() : void {
 		add_action( 'save_post', [ $this, 'provisionNewOrUpdatedPost' ], 10, 3 );
 		add_action( 'before_delete_post', [ $this, 'provisionDeletedPost' ], 10, 2 );
+		add_action('wp_delete_site', [ $this, 'provisionPostsFromDeletedSite' ], 10, 2 );
+		add_action('make_spam_blog', [ $this, 'provisionPostsFromSpammedSite' ], 10, 1);
+		add_action('make_ham_blog', [ $this, 'provisionPostsFromUnspammedSite' ], 10, 1);
 	}
 
 	public function isEnabled() : bool {
 		return $this->enabled;
 	}
-	
+
 	public function enable() : void {
 		$this->enabled = true;
 	}
@@ -44,13 +47,13 @@ class IncrementalPostsProvisioner implements IncrementalProvisionerInterface {
 		}
 		$provisionable_post = new ProvisionablePost( $post );
 		$provisionable_post->getSearchID();
-		
-		if ( $post->post_status !== 'publish' && ! empty( $provisionable_item->search_id ) ) {
-			$success = $this->search_api->delete( $provisionable_item->search_id );
+
+		if ( $post->post_status !== 'publish' && ! empty( $provisionable_post->search_id ) ) {
+			$success = $this->search_api->delete( $provisionable_post->search_id );
 			if ( ! $success ) {
 				return;
 			}
-			$provisionable_item->setSearchID( '' );
+			$provisionable_post->setSearchID( '' );
 			return;
 		}
 
@@ -77,5 +80,45 @@ class IncrementalPostsProvisioner implements IncrementalProvisionerInterface {
 		if ( $success ) {
 			$provisionable_post->setSearchID( '' );
 		}
+	}
+
+	public function provisionPostsFromDeletedSite(\WP_Site $deletedSite) {
+	    $posts = get_posts([
+	        'post_type' => $this->post_types,
+	        'post_status' => 'any',
+	        'posts_per_page' => -1,
+	        'suppress_filters' => true,
+	        'site_id' => $deletedSite->blog_id,
+	    ]);
+
+	    foreach ($posts as $post) {
+	        $this->provisionDeletedPost($post->ID, $post, true);
+	    }
+	}
+
+	public function provisionPostsFromSpammedSite(int $site_id) {
+	    $site = get_site($site_id);
+	    if (!$site) {
+	        return;
+		}
+		$this->provisionPostsFromDeletedSite($site);
+	}
+
+	public function provisionPostsFromUnspammedSite(int $site_id) {
+	    $site = get_site($site_id);
+	    if (!$site) {
+	        return;
+		}
+		$posts = get_posts([
+	        'post_type' => $this->post_types,
+	        'post_status' => 'any',
+	        'posts_per_page' => -1,
+	        'suppress_filters' => true,
+	        'site_id' => $site->blog_id,
+	    ]);
+
+	    foreach ($posts as $post) {
+			$this->provisionNewOrUpdatedPost($post->ID, $post, true);
+	    }
 	}
 }

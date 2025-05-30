@@ -11,7 +11,7 @@ use MeshResearch\CCClient\Search\SearchAPI;
 
 class IncrementalDiscussionsProvisioner implements IncrementalProvisionerInterface {
 	private IncrementalPostsProvisioner $incremental_posts_provisioner;
-	
+
 	public function __construct(
 		private SearchAPI $search_api,
 	) {
@@ -23,6 +23,9 @@ class IncrementalDiscussionsProvisioner implements IncrementalProvisionerInterfa
 	public function registerHooks() : void {
 		add_action( 'save_post', [ $this, 'provisionNewOrUpdatedPost' ], 10, 3 );
 		add_action( 'before_delete_post', [ $this->incremental_posts_provisioner, 'provisionDeletedPost' ], 10, 2 );
+		add_action( 'wp_delete_site', [ $this->incremental_posts_provisioner, 'provisionDeletedSite' ], 10, 2 );
+		add_action('make_spam_blog', [ $this->incremental_posts_provisioner, 'provisionPostsFromSpammedSite' ], 10, 1);
+		add_action('make_ham_blog', [ $this->incremental_posts_provisioner, 'provisionPostsFromUnspammedSite' ], 10, 1);
 	}
 
 	public function isEnabled() : bool {

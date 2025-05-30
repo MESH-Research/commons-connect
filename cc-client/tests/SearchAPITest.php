@@ -1,9 +1,9 @@
 <?php
 /**
  * Class SearchAPITest
- * 
+ *
  * Tests of the SearchAPI class.
- * 
+ *
  * @package MeshResearch\CCClient
  */
 
@@ -57,7 +57,10 @@ class SearchAPITest extends CCCTestCase
 		$document_json = file_get_contents(__DIR__ . '/test-data/single_test_doc.json');
 		$document = SearchDocument::fromJSON( $document_json );
 		$indexed_document = $this->search_api->index($document);
+		$id = $indexed_document->_id;
 		$this->assertTrue($this->search_api->delete($indexed_document->_id));
+		$deleted_document = $this->search_api->get_document($id);
+		$this->assertFalse($deleted_document);
 	}
 
 	public function test_get_document(): void {
