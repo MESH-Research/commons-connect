@@ -10,7 +10,7 @@ This plugin provides WordPress blocks that interface with the Commons Connect AP
 4. Open the test site at <https://commons-connect-client.lndo.site/>.
 5. You can login to the WordPress admin at <https://commons-connect-client.lndo.site/wp-admin/> with the username `admin` and password `admin`.
 
-### Interacting with the Search API
+## Interacting with the Search API
 
 The Search block requires a running CommonsConnect search service:
 
@@ -31,3 +31,12 @@ Tests are located in the `tests` directory.
 4. Run `lando phpunit` or `lando phpunit-debug`. To run a specific test run `lando phpunit --filter <test-name>`.
 
 You can test against a different server configuration by overriding environment variables, as in `dev-search-lando-override.lando.yml`.
+
+## Pushing to Composer
+
+[Composer](https://getcomposer.org/) is used to distribute the plugin, including for use on Knowledge Commons.
+
+To push changes to Compose:
+
+1. Change to the root commons-connect directory.
+2. Run `./cc-client-subtree-push.sh`
