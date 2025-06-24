@@ -16,6 +16,8 @@ use MeshResearch\CCClient\Search\Provisioning\ProvisionableProfile;
 use MeshResearch\CCClient\Search\Provisioning\IncrementalPostsProvisioner;
 use MeshResearch\CCClient\Search\Provisioning\IncrementalSitesProvisioner;
 use MeshResearch\CCClient\Search\Provisioning\IncrementalProfilesProvisioner;
+use MeshResearch\CCClient\Search\Provisioning\IncrementalDiscussionsProvisioner;
+use MeshResearch\CCClient\Search\Provisioning\ProvisionableDiscussion;
 
 class IncrementalProvisioningTest extends CCCIncrementalProvisioningTestCase {
 
@@ -247,6 +249,10 @@ class IncrementalProvisioningTest extends CCCIncrementalProvisioningTestCase {
 		$this->assertFalse( $deleted_document, 'Deleted user found in search results' );
 	}
 
+	/**
+	* SITES
+	*/
+
 	public function test_provision_spam_blog() {
 		$site_provisioner = new IncrementalSitesProvisioner($this->search_api);
 		$post_provisioner = new IncrementalPostsProvisioner($this->search_api);
@@ -408,5 +414,255 @@ class IncrementalProvisioningTest extends CCCIncrementalProvisioningTestCase {
 			$deleted_post = null;
 		}
 		$this->assertFalse( $deleted_post, 'Post from deleted site found in search results' );
+	}
+
+	/**
+	 * DISCUSSIONS (bbPress topics and replies)
+	 */
+
+	public function test_provision_spam_blog_with_discussions() {
+		$site_provisioner = new IncrementalSitesProvisioner($this->search_api);
+		$discussions_provisioner = new IncrementalDiscussionsProvisioner($this->search_api);
+
+		// Create a site with forum, topic, and reply
+		$site = $this->factory->blog->create_and_get();
+		sleep(1);
+
+		// Switch to the new site to create bbPress content
+		switch_to_blog( $site->blog_id );
+
+		// Create a forum (parent for topics)
+		$forum = $this->factory->post->create_and_get( [
+			'post_type' => 'forum',
+			'post_status' => 'publish',
+		] );
+
+		// Create a topic
+		$topic = $this->factory->post->create_and_get( [
+			'post_type' => 'topic',
+			'post_status' => 'publish',
+			'post_parent' => $forum->ID,
+		] );
+
+		// Create a reply
+		$reply = $this->factory->post->create_and_get( [
+			'post_type' => 'reply',
+			'post_status' => 'publish',
+			'post_parent' => $topic->ID,
+		] );
+
+		restore_current_blog();
+		sleep(1);
+
+		// Verify site, topic, and reply are indexed
+		$provisionable_site = new ProvisionableSite( $site );
+		$this->assertNotEmpty( $provisionable_site->search_id, 'Site search ID not set' );
+
+		switch_to_blog( $site->blog_id );
+		$provisionable_topic = new ProvisionableDiscussion( $topic );
+		$provisionable_reply = new ProvisionableDiscussion( $reply );
+		$this->assertNotEmpty( $provisionable_topic->getSearchID(), 'Topic search ID not set' );
+		$this->assertNotEmpty( $provisionable_reply->getSearchID(), 'Reply search ID not set' );
+		restore_current_blog();
+
+		$indexed_site = $this->search_api->get_document( $provisionable_site->search_id );
+		$this->assertNotEmpty( $indexed_site, 'Site not indexed' );
+
+		switch_to_blog( $site->blog_id );
+		$indexed_topic = $this->search_api->get_document( $provisionable_topic->getSearchID() );
+		$indexed_reply = $this->search_api->get_document( $provisionable_reply->getSearchID() );
+		$this->assertNotEmpty( $indexed_topic, 'Topic not indexed' );
+		$this->assertNotEmpty( $indexed_reply, 'Reply not indexed' );
+		restore_current_blog();
+
+		// Mark site as spam
+		update_blog_status( $site->blog_id, 'spam', 1 );
+		sleep(1);
+
+		// Verify site, topic, and reply are removed from index
+		try {
+			$spammed_site = $this->search_api->get_document( $provisionable_site->search_id );
+		} catch ( \Exception $e ) {
+			$spammed_site = null;
+		}
+		$this->assertFalse( $spammed_site, 'Spammed site found in search results' );
+
+		try {
+			$spammed_topic = $this->search_api->get_document( $provisionable_topic->getSearchID() );
+		} catch ( \Exception $e ) {
+			$spammed_topic = null;
+		}
+		$this->assertFalse( $spammed_topic, 'Topic from spammed site found in search results' );
+
+		try {
+			$spammed_reply = $this->search_api->get_document( $provisionable_reply->getSearchID() );
+		} catch ( \Exception $e ) {
+			$spammed_reply = null;
+		}
+		$this->assertFalse( $spammed_reply, 'Reply from spammed site found in search results' );
+	}
+
+	public function test_provision_ham_blog_with_discussions() {
+		$site_provisioner = new IncrementalSitesProvisioner($this->search_api);
+		$discussions_provisioner = new IncrementalDiscussionsProvisioner($this->search_api);
+
+		// Create a site and mark it as spam initially
+		$site = $this->factory->blog->create_and_get();
+		sleep(1);
+
+		// Switch to the site to create bbPress content
+		switch_to_blog( $site->blog_id );
+
+		// Create a forum (parent for topics)
+		$forum = $this->factory->post->create_and_get( [
+			'post_type' => 'forum',
+			'post_status' => 'publish',
+		] );
+
+		// Create a topic
+		$topic = $this->factory->post->create_and_get( [
+			'post_type' => 'topic',
+			'post_status' => 'publish',
+			'post_parent' => $forum->ID,
+		] );
+
+		// Create a reply
+		$reply = $this->factory->post->create_and_get( [
+			'post_type' => 'reply',
+			'post_status' => 'publish',
+			'post_parent' => $topic->ID,
+		] );
+
+		restore_current_blog();
+		sleep(1);
+
+		$provisionable_site = new ProvisionableSite( $site );
+		update_blog_status( $site->blog_id, 'spam', 1 );
+		sleep(2);
+
+		// Verify neither site nor discussions are indexed while spammed
+		try {
+			$spammed_site = $this->search_api->get_document( $provisionable_site->search_id );
+		} catch ( \Exception $e ) {
+			$spammed_site = null;
+		}
+		$this->assertFalse( $spammed_site, 'Spammed site should not be indexed' );
+
+		switch_to_blog( $site->blog_id );
+		$provisionable_topic = new ProvisionableDiscussion( $topic );
+		$provisionable_reply = new ProvisionableDiscussion( $reply );
+
+		try {
+			$spammed_topic = $this->search_api->get_document( $provisionable_topic->getSearchID() );
+		} catch ( \Exception $e ) {
+			$spammed_topic = null;
+		}
+		$this->assertFalse( $spammed_topic, 'Spammed topic should not be indexed' );
+
+		try {
+			$spammed_reply = $this->search_api->get_document( $provisionable_reply->getSearchID() );
+		} catch ( \Exception $e ) {
+			$spammed_reply = null;
+		}
+		$this->assertFalse( $spammed_reply, 'Spammed reply should not be indexed' );
+		restore_current_blog();
+
+		// Unspam the site
+		update_blog_status( $site->blog_id, 'spam', 0 );
+		sleep(1);
+
+		// Verify site, topic, and reply are now indexed
+		$provisionable_site = new ProvisionableSite( $site );
+		$indexed_site = $this->search_api->get_document( $provisionable_site->search_id );
+		$this->assertNotEmpty( $indexed_site, 'Unspammed site not indexed' );
+
+		switch_to_blog($site->blog_id);
+		$indexed_topic = $this->search_api->get_document( $provisionable_topic->getSearchID() );
+		$indexed_reply = $this->search_api->get_document( $provisionable_reply->getSearchID() );
+		$this->assertNotEmpty( $indexed_topic, 'Topic from unspammed site not indexed' );
+		$this->assertNotEmpty( $indexed_reply, 'Reply from unspammed site not indexed' );
+		restore_current_blog();
+	}
+
+	public function test_provision_deleted_site_with_discussions() {
+		$site_provisioner = new IncrementalSitesProvisioner($this->search_api);
+		$discussions_provisioner = new IncrementalDiscussionsProvisioner($this->search_api);
+
+		// Create a site with forum, topic, and reply
+		$site = $this->factory->blog->create_and_get();
+		sleep(1);
+
+		// Switch to the new site to create bbPress content
+		switch_to_blog( $site->blog_id );
+
+		// Create a forum (parent for topics)
+		$forum = $this->factory->post->create_and_get( [
+			'post_type' => 'forum',
+			'post_status' => 'publish',
+		] );
+
+		// Create a topic
+		$topic = $this->factory->post->create_and_get( [
+			'post_type' => 'topic',
+			'post_status' => 'publish',
+			'post_parent' => $forum->ID,
+		] );
+
+		// Create a reply
+		$reply = $this->factory->post->create_and_get( [
+			'post_type' => 'reply',
+			'post_status' => 'publish',
+			'post_parent' => $topic->ID,
+		] );
+
+		restore_current_blog();
+		sleep(1);
+
+		// Verify site, topic, and reply are indexed
+		$provisionable_site = new ProvisionableSite( $site );
+		$this->assertNotEmpty( $provisionable_site->search_id, 'Site search ID not set' );
+
+		switch_to_blog( $site->blog_id );
+		$provisionable_topic = new ProvisionableDiscussion( $topic );
+		$provisionable_reply = new ProvisionableDiscussion( $reply );
+		$this->assertNotEmpty( $provisionable_topic->getSearchID(), 'Topic search ID not set' );
+		$this->assertNotEmpty( $provisionable_reply->getSearchID(), 'Reply search ID not set' );
+		restore_current_blog();
+
+		$indexed_site = $this->search_api->get_document( $provisionable_site->search_id );
+		$this->assertNotEmpty( $indexed_site, 'Site not indexed' );
+
+		switch_to_blog( $site->blog_id );
+		$indexed_topic = $this->search_api->get_document( $provisionable_topic->getSearchID() );
+		$indexed_reply = $this->search_api->get_document( $provisionable_reply->getSearchID() );
+		$this->assertNotEmpty( $indexed_topic, 'Topic not indexed' );
+		$this->assertNotEmpty( $indexed_reply, 'Reply not indexed' );
+		restore_current_blog();
+
+		// Delete the site
+		wp_delete_site( $site->blog_id );
+		sleep(1);
+
+		// Verify site, topic, and reply are removed from index
+		try {
+			$deleted_site = $this->search_api->get_document( $provisionable_site->search_id );
+		} catch ( \Exception $e ) {
+			$deleted_site = null;
+		}
+		$this->assertFalse( $deleted_site, 'Deleted site found in search results' );
+
+		try {
+			$deleted_topic = $this->search_api->get_document( $provisionable_topic->getSearchID() );
+		} catch ( \Exception $e ) {
+			$deleted_topic = null;
+		}
+		$this->assertFalse( $deleted_topic, 'Topic from deleted site found in search results' );
+
+		try {
+			$deleted_reply = $this->search_api->get_document( $provisionable_reply->getSearchID() );
+		} catch ( \Exception $e ) {
+			$deleted_reply = null;
+		}
+		$this->assertFalse( $deleted_reply, 'Reply from deleted site found in search results' );
 	}
 }

@@ -22,10 +22,10 @@ class IncrementalDiscussionsProvisioner implements IncrementalProvisionerInterfa
 
 	public function registerHooks() : void {
 		add_action( 'save_post', [ $this, 'provisionNewOrUpdatedPost' ], 10, 3 );
-		add_action( 'before_delete_post', [ $this->incremental_posts_provisioner, 'provisionDeletedPost' ], 10, 2 );
-		add_action( 'wp_delete_site', [ $this->incremental_posts_provisioner, 'provisionDeletedSite' ], 10, 2 );
-		add_action('make_spam_blog', [ $this->incremental_posts_provisioner, 'provisionPostsFromSpammedSite' ], 10, 1);
-		add_action('make_ham_blog', [ $this->incremental_posts_provisioner, 'provisionPostsFromUnspammedSite' ], 10, 1);
+		add_action( 'before_delete_post', [ $this, 'provisionDeletedPost' ], 10, 2 );
+		add_action( 'wp_validate_site_deletion', [ $this, 'provisionPostsFromDeletedSite' ], 10, 2 );
+		add_action('make_spam_blog', [ $this, 'provisionPostsFromSpammedSite' ], 10, 1);
+		add_action('make_ham_blog', [ $this, 'provisionPostsFromUnspammedSite' ], 10, 1);
 	}
 
 	public function isEnabled() : bool {
@@ -40,17 +40,17 @@ class IncrementalDiscussionsProvisioner implements IncrementalProvisionerInterfa
 		$this->incremental_posts_provisioner->disable();
 	}
 
-	public function ProvisionNewOrUpdatedPost( int $post_id, \WP_Post $post, bool $update ) {
+	public function provisionNewOrUpdatedPost( int $post_id, \WP_Post $post, bool $update ) {
 		if ( ! $this->isEnabled() ) {
 			return;
 		}
 		if ( ! in_array( $post->post_type, $this->incremental_posts_provisioner->post_types ) ) {
 			return;
 		}
+
+		// Check if discussion is public before delegating to posts provisioner
 		$provisionable_discussion = new ProvisionableDiscussion( $post );
-		$provisionable_discussion->getSearchID();
-
-		if ( $post->post_status !== 'publish' && ! empty( $provisionable_discussion->search_id ) ) {
+		if ( ! $provisionable_discussion->is_public() && ! empty( $provisionable_discussion->getSearchID() ) ) {
 			$success = $this->search_api->delete( $provisionable_discussion->search_id );
 			if ( $success ) {
 				$provisionable_discussion->setSearchID( '' );
@@ -58,17 +58,25 @@ class IncrementalDiscussionsProvisioner implements IncrementalProvisionerInterfa
 			return;
 		}
 
-		if ( ! $provisionable_discussion->is_public() && ! empty( $provisionable_discussion->search_id ) ) {
-			$success = $this->search_api->delete( $provisionable_discussion->search_id );
-			if ( $success ) {
-				$provisionable_discussion->setSearchID( '' );
-			}
-			return;
+		// If discussion is public or doesn't have a search ID, delegate to posts provisioner
+		if ( $provisionable_discussion->is_public() ) {
+			$this->incremental_posts_provisioner->provisionNewOrUpdatedPost( $post_id, $post, $update );
 		}
+	}
 
-		$document = $this->search_api->index_or_update( $provisionable_discussion->toDocument() );
-		if ( $document ) {
-			$provisionable_discussion->setSearchID( $document->_id );
-		}
+	public function provisionDeletedPost( int $post_id, \WP_Post $post ) {
+		$this->incremental_posts_provisioner->provisionDeletedPost( $post_id, $post );
+	}
+
+	public function provisionPostsFromDeletedSite(\WP_Error $errors, \WP_Site $deletedSite) {
+		$this->incremental_posts_provisioner->provisionPostsFromDeletedSite( $errors, $deletedSite );
+	}
+
+	public function provisionPostsFromSpammedSite(int $site_id) {
+		$this->incremental_posts_provisioner->provisionPostsFromSpammedSite( $site_id );
+	}
+
+	public function provisionPostsFromUnspammedSite(int $site_id) {
+		$this->incremental_posts_provisioner->provisionPostsFromUnspammedSite( $site_id );
 	}
 }
