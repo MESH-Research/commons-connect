@@ -51,18 +51,27 @@ class IncrementalPostsProvisioner implements IncrementalProvisionerInterface {
 		$provisionable_post = new ProvisionablePost( $post );
 		$provisionable_post->getSearchID();
 
+		$action = $update ? 'UPDATE' : 'ADD';
+		error_log( sprintf( '[CC-Client] Post provisioning %s - Post ID: %d, Type: %s, Title: %s', $action, $post_id, $post->post_type, $post->post_title ) );
+
 		if ( $post->post_status !== 'publish' && ! empty( $provisionable_post->search_id ) ) {
+			error_log( sprintf( '[CC-Client] Post provisioning DELETE (unpublished) - Post ID: %d, Search ID: %s', $post_id, $provisionable_post->search_id ) );
 			$success = $this->search_api->delete( $provisionable_post->search_id );
 			if ( ! $success ) {
+				error_log( sprintf( '[CC-Client] Post provisioning DELETE FAILED - Post ID: %d, Search ID: %s', $post_id, $provisionable_post->search_id ) );
 				return;
 			}
 			$provisionable_post->setSearchID( '' );
+			error_log( sprintf( '[CC-Client] Post provisioning DELETE SUCCESS - Post ID: %d, Search ID: %s', $post_id, $provisionable_post->search_id ) );
 			return;
 		}
 
 		$document = $this->search_api->index_or_update( $provisionable_post->toDocument() );
 		if ( $document ) {
 			$provisionable_post->setSearchID( $document->_id );
+			error_log( sprintf( '[CC-Client] Post provisioning %s SUCCESS - Post ID: %d, Search ID: %s', $action, $post_id, $document->_id ) );
+		} else {
+			error_log( sprintf( '[CC-Client] Post provisioning %s FAILED - Post ID: %d', $action, $post_id ) );
 		}
 	}
 
@@ -76,12 +85,18 @@ class IncrementalPostsProvisioner implements IncrementalProvisionerInterface {
 		$provisionable_post = new ProvisionablePost( $post );
 		$search_id = $provisionable_post->getSearchID();
 		if ( empty( $search_id ) ) {
+			error_log( sprintf( '[CC-Client] Post provisioning DELETE skipped (no search ID) - Post ID: %d, Type: %s, Title: %s', $post_id, $post->post_type, $post->post_title ) );
 			return;
 		}
+
+		error_log( sprintf( '[CC-Client] Post provisioning DELETE - Post ID: %d, Search ID: %s, Type: %s, Title: %s', $post_id, $search_id, $post->post_type, $post->post_title ) );
 
 		$success = $this->search_api->delete( $search_id );
 		if ( $success ) {
 			$provisionable_post->setSearchID( '' );
+			error_log( sprintf( '[CC-Client] Post provisioning DELETE SUCCESS - Post ID: %d, Search ID: %s', $post_id, $search_id ) );
+		} else {
+			error_log( sprintf( '[CC-Client] Post provisioning DELETE FAILED - Post ID: %d, Search ID: %s', $post_id, $search_id ) );
 		}
 	}
 
@@ -100,6 +115,8 @@ class IncrementalPostsProvisioner implements IncrementalProvisionerInterface {
 			return;
 		}
 
+		error_log( sprintf( '[CC-Client] Post provisioning DELETE ALL from site - Site ID: %d, Domain: %s', $site->blog_id, $site->domain ) );
+
 	    // Switch to the site context to query its posts
 	    switch_to_blog($site->blog_id);
 
@@ -109,6 +126,9 @@ class IncrementalPostsProvisioner implements IncrementalProvisionerInterface {
 	        'posts_per_page' => -1,
 	        'suppress_filters' => true,
 	    ]);
+
+	    $post_count = count($posts);
+	    error_log( sprintf( '[CC-Client] Post provisioning DELETE ALL from site - Found %d posts to delete from Site ID: %d', $post_count, $site->blog_id ) );
 
 	    foreach ($posts as $post) {
 	        $this->provisionDeletedPost($post->ID, $post);
@@ -125,8 +145,11 @@ class IncrementalPostsProvisioner implements IncrementalProvisionerInterface {
 
 	    $site = get_site($site_id);
 	    if (!$site) {
+	        error_log( sprintf( '[CC-Client] Post provisioning DELETE ALL from spammed site FAILED - Site not found, Site ID: %d', $site_id ) );
 	        return;
 		}
+
+		error_log( sprintf( '[CC-Client] Post provisioning DELETE ALL from spammed site - Site ID: %d, Domain: %s', $site_id, $site->domain ) );
 
 		// Create a dummy WP_Error object for compatibility with provisionPostsFromDeletedSite
 		$errors = new \WP_Error();
@@ -140,8 +163,11 @@ class IncrementalPostsProvisioner implements IncrementalProvisionerInterface {
 
 	    $site = get_site($site_id);
 	    if (!$site) {
+	        error_log( sprintf( '[CC-Client] Post provisioning RE-ADD from unspammed site FAILED - Site not found, Site ID: %d', $site_id ) );
 	        return;
 		}
+
+		error_log( sprintf( '[CC-Client] Post provisioning RE-ADD from unspammed site - Site ID: %d, Domain: %s', $site_id, $site->domain ) );
 
 		// Switch to the site context to query its posts
 		switch_to_blog($site->blog_id);
@@ -152,6 +178,9 @@ class IncrementalPostsProvisioner implements IncrementalProvisionerInterface {
 	        'posts_per_page' => -1,
 	        'suppress_filters' => true,
 	    ]);
+
+	    $post_count = count($posts);
+	    error_log( sprintf( '[CC-Client] Post provisioning RE-ADD from unspammed site - Found %d posts to re-add from Site ID: %d', $post_count, $site_id ) );
 
 	    foreach ($posts as $post) {
 			$this->provisionNewOrUpdatedPost($post->ID, $post, true);

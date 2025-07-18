@@ -620,6 +620,7 @@ class IncrementalProvisioningTest extends CCCIncrementalProvisioningTestCase {
 
 		// Verify site, topic, and reply are indexed
 		$provisionable_site = new ProvisionableSite( $site );
+        sleep(1);
 		$this->assertNotEmpty( $provisionable_site->search_id, 'Site search ID not set' );
 
 		switch_to_blog( $site->blog_id );

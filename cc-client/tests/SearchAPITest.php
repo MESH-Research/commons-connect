@@ -47,6 +47,7 @@ class SearchAPITest extends CCCTestCase
 		$document_json = file_get_contents(__DIR__ . '/test-data/single_test_doc.json');
 		$document = SearchDocument::fromJSON( $document_json );
 		$indexed_document = $this->search_api->index($document);
+		$this->assertNotEmpty($indexed_document->_id);
 		$indexed_document->title = 'On Open Scholarship, Revised';
 		$this->assertTrue($this->search_api->update($indexed_document));
 		$revised_document = $this->search_api->get_document($indexed_document->_id);
