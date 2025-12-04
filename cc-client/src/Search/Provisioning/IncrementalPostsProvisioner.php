@@ -54,15 +54,19 @@ class IncrementalPostsProvisioner implements IncrementalProvisionerInterface {
 		$action = $update ? 'UPDATE' : 'ADD';
 		error_log( sprintf( '[CC-Client] Post provisioning %s - Post ID: %d, Type: %s, Title: %s', $action, $post_id, $post->post_type, $post->post_title ) );
 
-		if ( $post->post_status !== 'publish' && ! empty( $provisionable_post->search_id ) ) {
-			error_log( sprintf( '[CC-Client] Post provisioning DELETE (unpublished) - Post ID: %d, Search ID: %s', $post_id, $provisionable_post->search_id ) );
-			$success = $this->search_api->delete( $provisionable_post->search_id );
-			if ( ! $success ) {
-				error_log( sprintf( '[CC-Client] Post provisioning DELETE FAILED - Post ID: %d, Search ID: %s', $post_id, $provisionable_post->search_id ) );
-				return;
+		if ( $post->post_status !== 'publish' ) {
+			if ( ! empty( $provisionable_post->search_id ) ) {
+				error_log( sprintf( '[CC-Client] Post provisioning DELETE (unpublished) - Post ID: %d, Search ID: %s', $post_id, $provisionable_post->search_id ) );
+				$success = $this->search_api->delete( $provisionable_post->search_id );
+				if ( ! $success ) {
+					error_log( sprintf( '[CC-Client] Post provisioning DELETE FAILED - Post ID: %d, Search ID: %s', $post_id, $provisionable_post->search_id ) );
+					return;
+				}
+				$provisionable_post->setSearchID( '' );
+				error_log( sprintf( '[CC-Client] Post provisioning DELETE SUCCESS - Post ID: %d', $post_id ) );
+			} else {
+				error_log( sprintf( '[CC-Client] Post provisioning SKIPPED (not published) - Post ID: %d, Status: %s', $post_id, $post->post_status ) );
 			}
-			$provisionable_post->setSearchID( '' );
-			error_log( sprintf( '[CC-Client] Post provisioning DELETE SUCCESS - Post ID: %d, Search ID: %s', $post_id, $provisionable_post->search_id ) );
 			return;
 		}
 

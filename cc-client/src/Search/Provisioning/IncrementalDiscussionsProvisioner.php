@@ -53,25 +53,25 @@ class IncrementalDiscussionsProvisioner implements IncrementalProvisionerInterfa
 
 		// Check if discussion is public before delegating to posts provisioner
 		$provisionable_discussion = new ProvisionableDiscussion( $post );
-		if ( ! $provisionable_discussion->is_public() && ! empty( $provisionable_discussion->getSearchID() ) ) {
-			error_log( sprintf( '[CC-Client] Discussion provisioning DELETE (non-public) - Post ID: %d, Search ID: %s', $post_id, $provisionable_discussion->search_id ) );
-			$success = $this->search_api->delete( $provisionable_discussion->search_id );
-			if ( $success ) {
-				$provisionable_discussion->setSearchID( '' );
-				error_log( sprintf( '[CC-Client] Discussion provisioning DELETE SUCCESS (non-public) - Post ID: %d', $post_id ) );
+		if ( ! $provisionable_discussion->is_public() ) {
+			if ( ! empty( $provisionable_discussion->getSearchID() ) ) {
+				error_log( sprintf( '[CC-Client] Discussion provisioning DELETE (non-public) - Post ID: %d, Search ID: %s', $post_id, $provisionable_discussion->search_id ) );
+				$success = $this->search_api->delete( $provisionable_discussion->search_id );
+				if ( $success ) {
+					$provisionable_discussion->setSearchID( '' );
+					error_log( sprintf( '[CC-Client] Discussion provisioning DELETE SUCCESS (non-public) - Post ID: %d', $post_id ) );
+				} else {
+					error_log( sprintf( '[CC-Client] Discussion provisioning DELETE FAILED (non-public) - Post ID: %d', $post_id ) );
+				}
 			} else {
-				error_log( sprintf( '[CC-Client] Discussion provisioning DELETE FAILED (non-public) - Post ID: %d', $post_id ) );
+				error_log( sprintf( '[CC-Client] Discussion provisioning SKIPPED (non-public) - Post ID: %d', $post_id ) );
 			}
 			return;
 		}
 
-		// If discussion is public or doesn't have a search ID, delegate to posts provisioner
-		if ( $provisionable_discussion->is_public() ) {
-			error_log( sprintf( '[CC-Client] Discussion provisioning %s (public) - Delegating to posts provisioner for Post ID: %d', $action, $post_id ) );
-			$this->incremental_posts_provisioner->provisionNewOrUpdatedPost( $post_id, $post, $update );
-		} else {
-			error_log( sprintf( '[CC-Client] Discussion provisioning %s skipped (non-public, no search ID) - Post ID: %d', $action, $post_id ) );
-		}
+		// Discussion is public, delegate to posts provisioner
+		error_log( sprintf( '[CC-Client] Discussion provisioning %s (public) - Delegating to posts provisioner for Post ID: %d', $action, $post_id ) );
+		$this->incremental_posts_provisioner->provisionNewOrUpdatedPost( $post_id, $post, $update );
 	}
 
 	public function provisionDeletedPost( int $post_id, \WP_Post $post ) {
