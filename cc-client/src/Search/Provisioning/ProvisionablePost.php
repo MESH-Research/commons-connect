@@ -69,19 +69,24 @@ class ProvisionablePost implements ProvisionableInterface {
 	}
 
 	public function getSearchID(): string {
+		$blog_id = get_current_blog_id();
 		$search_id = get_post_meta( $this->post->ID, 'cc_search_id', true );
 		if ( ! $search_id ) {
 			$search_id = '';
 		}
+		error_log( sprintf( '[CC-Client] getSearchID - Post ID: %d, Blog ID: %d, Search ID: %s', $this->post->ID, $blog_id, $search_id ?: '(none)' ) );
 		$this->search_id = $search_id;
 		return $search_id;
 	}
 
 	public function setSearchID( ? string $search_id ): void {
+		$blog_id = get_current_blog_id();
 		if ( ! $search_id ) {
 			delete_post_meta( $this->post->ID, 'cc_search_id' );
+			error_log( sprintf( '[CC-Client] setSearchID DELETE - Post ID: %d, Blog ID: %d', $this->post->ID, $blog_id ) );
 		} else {
-			update_post_meta( $this->post->ID, 'cc_search_id', $search_id );
+			$result = update_post_meta( $this->post->ID, 'cc_search_id', $search_id );
+			error_log( sprintf( '[CC-Client] setSearchID UPDATE - Post ID: %d, Blog ID: %d, Search ID: %s, Result: %s', $this->post->ID, $blog_id, $search_id, var_export( $result, true ) ) );
 		}
 		$this->search_id = $search_id ?? '';
 	}

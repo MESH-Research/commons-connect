@@ -49,10 +49,10 @@ class IncrementalPostsProvisioner implements IncrementalProvisionerInterface {
 			return;
 		}
 		$provisionable_post = new ProvisionablePost( $post );
-		$provisionable_post->getSearchID();
+		$existing_search_id = $provisionable_post->getSearchID();
 
 		$action = $update ? 'UPDATE' : 'ADD';
-		error_log( sprintf( '[CC-Client] Post provisioning %s - Post ID: %d, Type: %s, Title: %s', $action, $post_id, $post->post_type, $post->post_title ) );
+		error_log( sprintf( '[CC-Client] Post provisioning %s - Post ID: %d, Blog ID: %d, Type: %s, Title: %s, Existing Search ID: %s', $action, $post_id, get_current_blog_id(), $post->post_type, $post->post_title, $existing_search_id ?: '(none)' ) );
 
 		if ( $post->post_status !== 'publish' ) {
 			if ( ! empty( $provisionable_post->search_id ) ) {
@@ -70,7 +70,10 @@ class IncrementalPostsProvisioner implements IncrementalProvisionerInterface {
 			return;
 		}
 
-		$document = $this->search_api->index_or_update( $provisionable_post->toDocument() );
+		$document_to_send = $provisionable_post->toDocument();
+		error_log( sprintf( '[CC-Client] Post provisioning SENDING - Post ID: %d, Document _id: %s, Document _internal_id: %s', $post_id, $document_to_send->_id ?: '(none)', $document_to_send->_internal_id ) );
+		
+		$document = $this->search_api->index_or_update( $document_to_send );
 		if ( $document ) {
 			$provisionable_post->setSearchID( $document->_id );
 			error_log( sprintf( '[CC-Client] Post provisioning %s SUCCESS - Post ID: %d, Search ID: %s', $action, $post_id, $document->_id ) );
